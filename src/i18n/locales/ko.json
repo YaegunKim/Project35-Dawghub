@@ -1,0 +1,149 @@
+{
+  "nav": {
+    "community": "커뮤니티",
+    "schedule": "시간표",
+    "map": "지도",
+    "dining": "학식",
+    "settings": "설정",
+    "signOut": "로그아웃"
+  },
+  "settings": {
+    "account": "계정",
+    "email": "이메일",
+    "preferences": "환경설정",
+    "language": "언어",
+    "languageKorean": "한국어",
+    "languageEnglish": "English",
+    "theme": "테마",
+    "themeSystem": "시스템",
+    "themeLight": "라이트",
+    "themeDark": "다크",
+    "about": "앱 정보",
+    "version": "버전 {{version}}"
+  },
+  "community": {
+    "boards": {
+      "general": "자유게시판",
+      "housing": "주거",
+      "classes": "수업",
+      "buySell": "중고거래",
+      "events": "이벤트"
+    },
+    "back": "게시판 목록으로",
+    "titlePlaceholder": "제목",
+    "bodyPlaceholder": "무슨 얘기를 나눠볼까요?",
+    "post": "게시하기",
+    "empty": "아직 게시글이 없어요. 첫 글을 남겨보세요!",
+    "comments": "댓글",
+    "commentPlaceholder": "댓글을 남겨보세요...",
+    "commentSubmit": "댓글 작성",
+    "noComments": "아직 댓글이 없어요."
+  },
+  "schedule": {
+    "courseCode": "과목 코드 (예: CSCI 4300)",
+    "title": "과목명 (선택)",
+    "location": "장소 (선택)",
+    "add": "수업 추가",
+    "addBySearch": "수업 추가하기",
+    "addManually": "직접 추가하기",
+    "searchPlaceholder": "과목 코드 또는 과목명 검색 (예: CSCI 4300)",
+    "search": "검색",
+    "searching": "검색 중...",
+    "searchEmpty": "검색 결과가 없어요.",
+    "addSection": "추가",
+    "sectionLabel": "분반 {{section}}",
+    "ratingMeta": "난이도 {{difficulty}} · 리뷰 {{count}}개",
+    "ratingRetake": " · 재수강 의향 {{percent}}%",
+    "reviewsLoading": "리뷰 불러오는 중...",
+    "reviewsEmpty": "작성된 리뷰가 없어요.",
+    "save": "저장",
+    "cancel": "취소",
+    "close": "닫기",
+    "loading": "시간표 불러오는 중...",
+    "empty": "아직 등록된 수업이 없어요. 첫 수업을 추가해보세요!",
+    "delete": "수업 삭제",
+    "days": {
+      "MON": "월요일",
+      "TUE": "화요일",
+      "WED": "수요일",
+      "THU": "목요일",
+      "FRI": "금요일",
+      "SAT": "토요일",
+      "SUN": "일요일"
+    }
+  },
+  "map": {
+    "placeholder": "UGA 버스 실시간 위치",
+    "hoursToday": "오늘 운영시간: {{hours}}",
+    "viewMenu": "메뉴 보기",
+    "locate": "내 위치",
+    "setMyDorm": "내 기숙사로 설정",
+    "myDormSet": "내 기숙사 해제",
+    "noClassesHere": "여기서 하는 수업이 없어요.",
+    "layers": "지도 표시 항목",
+    "legend": {
+      "bus": "버스",
+      "library": "도서관",
+      "dining": "학식당",
+      "gym": "체육관",
+      "housing": "기숙사",
+      "academics": "강의동"
+    },
+    "showLayer": "이 레이어 표시",
+    "showAll": "전체 표시 중",
+    "notSet": "설정 안 함",
+    "selectedCount": "{{count}}개 선택됨",
+    "noAcademicCandidates": "아직 시간표와 매칭된 건물이 없어요.",
+    "noRoutesYet": "아직 노선을 불러오는 중이에요.",
+    "myDorm": "내 기숙사",
+    "myDormPlaceholder": "내 기숙사 건물 검색",
+    "busMode": {
+      "title": "어떤 노선을 표시할지",
+      "running": "운행 중인 노선만",
+      "all": "전체 노선",
+      "custom": "선택한 노선만",
+      "selectRoutes": "노선 선택"
+    }
+  },
+  "dining": {
+    "halls": {
+      "bolton": "볼튼 다이닝 커먼스",
+      "hillside": "힐사이드 다이닝 커먼스",
+      "oglethorpe": "오글소프 다이닝 커먼스",
+      "snelling": "스넬링 다이닝 커먼스",
+      "niche": "더 니치",
+      "villageSummit": "더 빌리지 서밋"
+    },
+    "mealTypes": {
+      "breakfast": "아침",
+      "lunch": "점심",
+      "dinner": "저녁"
+    },
+    "hoursToday": "오늘 운영시간: {{hours}}",
+    "loading": "메뉴 불러오는 중...",
+    "empty": "오늘 등록된 메뉴가 없어요.",
+    "backToList": "학식당 목록으로",
+    "favoriteAdd": "즐겨찾기에 추가",
+    "favoriteRemove": "즐겨찾기에서 삭제",
+    "otherItems": "기타",
+    "moreItems": "+{{count}}개 더",
+    "dietary": {
+      "vegan": "비건",
+      "vegetarian": "채식",
+      "glutenFriendly": "글루텐프리",
+      "heartHealthy": "저지방·저염",
+      "halal": "할랄"
+    },
+    "allergens": {
+      "milk": "우유",
+      "eggs": "계란",
+      "wheat": "밀",
+      "sesame": "참깨",
+      "soy": "대두",
+      "fish": "생선",
+      "shellfish": "갑각류",
+      "treeNuts": "견과류",
+      "peanuts": "땅콩"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#BA0C2F"/>
+  <rect x="0" y="558" width="1200" height="72" fill="#171008"/>
+
+  <g transform="translate(90,145) scale(0.664)">
+    <ellipse cx="184" cy="198" rx="42" ry="60" transform="rotate(-30 184 198)" fill="#ffffff" stroke="#171008" stroke-width="10"/>
+    <ellipse cx="328" cy="198" rx="42" ry="60" transform="rotate(30 328 198)" fill="#ffffff" stroke="#171008" stroke-width="10"/>
+    <ellipse cx="256" cy="302" rx="158" ry="118" fill="#ffffff" stroke="#171008" stroke-width="11"/>
+    <path d="M192,235 Q256,213 320,235" fill="none" stroke="#171008" stroke-width="7" stroke-linecap="round"/>
+    <path d="M202,256 Q256,240 310,256" fill="none" stroke="#171008" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="201" cy="282" r="15" fill="#171008"/>
+    <circle cx="311" cy="282" r="15" fill="#171008"/>
+    <ellipse cx="256" cy="360" rx="108" ry="58" fill="#ffffff" stroke="#171008" stroke-width="10"/>
+    <ellipse cx="256" cy="342" rx="26" ry="19" fill="#171008"/>
+    <path d="M232,354 Q206,378 180,384" fill="none" stroke="#171008" stroke-width="7" stroke-linecap="round"/>
+    <path d="M280,354 Q306,378 332,384" fill="none" stroke="#171008" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <text x="522" y="345" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="118" fill="#ffffff">DawgHub</text>
+  <text x="524" y="400" font-family="Arial, Helvetica, sans-serif" font-weight="600" font-size="32" fill="#F7C9D0">Community &#183; Schedule &#183; Map &#183; Dining</text>
+  <text x="524" y="608" font-family="Arial, Helvetica, sans-serif" font-weight="600" font-size="26" fill="#ffffff" opacity="0.85">For UGA students, by UGA students</text>
+</svg>

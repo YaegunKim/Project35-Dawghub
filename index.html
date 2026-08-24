@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/brand/logo.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700;800&display=swap" rel="stylesheet" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#ba0c2f" />
+    <meta name="description" content="DawgHub — UGA student community, schedule, map, and dining in one app." />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="DawgHub" />
+    <meta property="og:description" content="DawgHub — UGA student community, schedule, map, and dining in one app." />
+    <!-- og:image is a root-relative path; add an absolute og:url once a production domain is finalized. -->
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DawgHub" />
+    <meta name="twitter:description" content="DawgHub — UGA student community, schedule, map, and dining in one app." />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <title>DawgHub</title>
+
+    <style>
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #ba0c2f;
+        transition: opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      #splash img {
+        width: 84px;
+        height: 84px;
+        animation: splash-pulse 1.1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      }
+      #splash.splash-hide {
+        opacity: 0;
+        pointer-events: none;
+      }
+      @keyframes splash-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(0.92);
+          opacity: 0.85;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="splash"><img src="/brand/logo.svg" alt="" /></div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,149 @@
+{
+  "nav": {
+    "community": "Community",
+    "schedule": "Schedule",
+    "map": "Map",
+    "dining": "Dining",
+    "settings": "Settings",
+    "signOut": "Sign out"
+  },
+  "settings": {
+    "account": "Account",
+    "email": "Email",
+    "preferences": "Preferences",
+    "language": "Language",
+    "languageKorean": "한국어",
+    "languageEnglish": "English",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "about": "About",
+    "version": "Version {{version}}"
+  },
+  "community": {
+    "boards": {
+      "general": "General",
+      "housing": "Housing",
+      "classes": "Classes",
+      "buySell": "Buy & Sell",
+      "events": "Events"
+    },
+    "back": "Back to boards",
+    "titlePlaceholder": "Title",
+    "bodyPlaceholder": "What's on your mind?",
+    "post": "Post",
+    "empty": "No posts yet. Be the first to post!",
+    "comments": "Comments",
+    "commentPlaceholder": "Write a comment...",
+    "commentSubmit": "Comment",
+    "noComments": "No comments yet."
+  },
+  "schedule": {
+    "courseCode": "Course code (e.g. CSCI 4300)",
+    "title": "Course title (optional)",
+    "location": "Location (optional)",
+    "add": "Add class",
+    "addBySearch": "Search for a class",
+    "addManually": "Add manually",
+    "searchPlaceholder": "Search by course code or title (e.g. CSCI 4300)",
+    "search": "Search",
+    "searching": "Searching...",
+    "searchEmpty": "No matching classes found.",
+    "addSection": "Add",
+    "sectionLabel": "Section {{section}}",
+    "ratingMeta": "Difficulty {{difficulty}} · {{count}} ratings",
+    "ratingRetake": " · {{percent}}% would retake",
+    "reviewsLoading": "Loading reviews...",
+    "reviewsEmpty": "No reviews written yet.",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "loading": "Loading schedule...",
+    "empty": "No classes yet. Add your first one!",
+    "delete": "Remove class",
+    "days": {
+      "MON": "Monday",
+      "TUE": "Tuesday",
+      "WED": "Wednesday",
+      "THU": "Thursday",
+      "FRI": "Friday",
+      "SAT": "Saturday",
+      "SUN": "Sunday"
+    }
+  },
+  "map": {
+    "placeholder": "Live UGA bus locations",
+    "hoursToday": "Today's hours: {{hours}}",
+    "viewMenu": "View menu",
+    "locate": "My location",
+    "setMyDorm": "Set as my dorm",
+    "myDormSet": "Unset my dorm",
+    "noClassesHere": "No classes of yours meet here.",
+    "layers": "Map layers",
+    "legend": {
+      "bus": "Bus",
+      "library": "Library",
+      "dining": "Dining hall",
+      "gym": "Gym",
+      "housing": "Housing",
+      "academics": "Academic buildings"
+    },
+    "showLayer": "Show this layer",
+    "showAll": "Showing all",
+    "notSet": "Not set",
+    "selectedCount": "{{count}} selected",
+    "noAcademicCandidates": "None of your classes are matched to a building yet.",
+    "noRoutesYet": "No routes loaded yet.",
+    "myDorm": "My dorm",
+    "myDormPlaceholder": "Search your dorm building",
+    "busMode": {
+      "title": "Which routes to show",
+      "running": "Currently running only",
+      "all": "All routes",
+      "custom": "Only selected routes",
+      "selectRoutes": "Select routes"
+    }
+  },
+  "dining": {
+    "halls": {
+      "bolton": "Bolton Dining Commons",
+      "hillside": "Hillside Dining Commons",
+      "oglethorpe": "Oglethorpe Dining Commons",
+      "snelling": "Snelling Dining Commons",
+      "niche": "The Niche",
+      "villageSummit": "The Village Summit"
+    },
+    "mealTypes": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner"
+    },
+    "hoursToday": "Today's hours: {{hours}}",
+    "loading": "Loading menu...",
+    "empty": "No menu items found for today.",
+    "backToList": "Back to dining halls",
+    "favoriteAdd": "Add to favorites",
+    "favoriteRemove": "Remove from favorites",
+    "otherItems": "Other",
+    "moreItems": "+{{count}} more",
+    "dietary": {
+      "vegan": "Vegan",
+      "vegetarian": "Vegetarian",
+      "glutenFriendly": "Gluten-Friendly",
+      "heartHealthy": "Heart Healthy",
+      "halal": "Halal"
+    },
+    "allergens": {
+      "milk": "Milk",
+      "eggs": "Eggs",
+      "wheat": "Wheat",
+      "sesame": "Sesame",
+      "soy": "Soy",
+      "fish": "Fish",
+      "shellfish": "Shellfish",
+      "treeNuts": "Tree Nuts",
+      "peanuts": "Peanuts"
+    }
+  }
+}
