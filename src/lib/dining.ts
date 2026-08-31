@@ -1,4 +1,4 @@
-import type { DiningHall } from './diningHours'
+import type { DiningHall, NextOpen } from './diningHours'
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner'
 
@@ -67,4 +67,18 @@ export function filterItemsByTagState<T extends { dietary: string[]; allergens: 
     const itemTags = [...item.dietary, ...item.allergens]
     return !hiddenTags.some((tag) => itemTags.includes(tag))
   })
+}
+
+const WEEKDAY_I18N_KEYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+
+// Reuses the weekday names already translated for the Schedule page (schedule.days.*) instead of
+// introducing a second set of day-name strings just for this.
+export function formatNextOpenLabel(t: (key: string, options?: Record<string, unknown>) => string, next: NextOpen) {
+  if (next.dayOffset === 0) return t('dining.opensToday', { time: next.time })
+  if (next.dayOffset === 1) return t('dining.opensTomorrow', { time: next.time })
+
+  const targetDate = new Date()
+  targetDate.setDate(targetDate.getDate() + next.dayOffset)
+  const day = t(`schedule.days.${WEEKDAY_I18N_KEYS[targetDate.getDay()]}`)
+  return t('dining.opensOnDay', { day, time: next.time })
 }

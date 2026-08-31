@@ -134,6 +134,9 @@
     "allergenSection": "Allergens",
     "resetFilters": "Reset",
     "noMatch": "No menu items match your filters.",
+    "opensToday": "Opens today at {{time}}",
+    "opensTomorrow": "Opens tomorrow at {{time}}",
+    "opensOnDay": "Opens {{day}} at {{time}}",
     "tagFilter": {
       "show": "Show",
       "hide": "Hide"

@@ -9,11 +9,19 @@ import { EmptyState } from '../../design-system/EmptyState/EmptyState'
 import { Page, PageTitle } from '../../design-system/Page/Page'
 import { Skeleton } from '../../design-system/Skeleton/Skeleton'
 import { client } from '../../lib/amplifyClient'
-import { getDiningHoursToday, getDiningMealHoursToday, splitHoursNote, type DiningHall } from '../../lib/diningHours'
+import {
+  getDiningHoursToday,
+  getDiningMealHoursToday,
+  getNextDiningOpen,
+  isDiningHallOpenNow,
+  splitHoursNote,
+  type DiningHall,
+} from '../../lib/diningHours'
 import {
   MEAL_TYPES,
   PINNED_SECTIONS_KEY,
   filterItemsByTagState,
+  formatNextOpenLabel,
   getCurrentMealType,
   groupMenuItemsBySection,
   sortSectionsByPinned,
@@ -84,6 +92,8 @@ export function DiningHallDetailPage() {
   }
 
   const todayHours = splitHoursNote(getDiningHoursToday(hall))
+  const openNow = isDiningHallOpenNow(hall)
+  const nextOpen = openNow ? null : getNextDiningOpen(hall)
 
   return (
     <Page>
@@ -92,6 +102,7 @@ export function DiningHallDetailPage() {
         <PageTitle>{t(`dining.halls.${hall}`)}</PageTitle>
         <S.HoursToday>{t('dining.hoursToday', { hours: todayHours.hours })}</S.HoursToday>
         {todayHours.note && <S.HoursNote>{todayHours.note}</S.HoursNote>}
+        {nextOpen && <S.HoursNote>{formatNextOpenLabel(t, nextOpen)}</S.HoursNote>}
       </S.Header>
 
       <S.MealTabs role="tablist">

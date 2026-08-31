@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useSyncExternalStore } from 'react'
 
 // Per-tag menu filter, layered on top of the plain dietary/allergen tags (see dietaryIcons.ts).
 // 'show' is the implicit default and is never persisted — only 'hide' overrides are stored, so
@@ -23,26 +23,43 @@ function readTagFilters(): Record<string, 'hide'> {
   }
 }
 
-export function useTagFilters() {
-  const [filters, setFilters] = useState<Record<string, 'hide'>>(readTagFilters)
+// Module-level store shared by every useTagFilters() call site, so toggling a filter in the
+// settings modal is reflected immediately in every already-mounted DiningHallCard/detail page —
+// a plain useState per component would each read localStorage once at mount and never learn
+// about a sibling's change until it happened to remount.
+let cachedFilters = readTagFilters()
+const listeners = new Set<() => void>()
 
-  useEffect(() => {
-    localStorage.setItem(TAG_FILTER_KEY, JSON.stringify(filters))
-  }, [filters])
+function writeFilters(next: Record<string, 'hide'>) {
+  cachedFilters = next
+  localStorage.setItem(TAG_FILTER_KEY, JSON.stringify(next))
+  listeners.forEach((listener) => listener())
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener)
+  return () => listeners.delete(listener)
+}
+
+function getSnapshot() {
+  return cachedFilters
+}
+
+export function useTagFilters() {
+  const filters = useSyncExternalStore(subscribe, getSnapshot)
 
   const getState = useCallback((tag: string): TagFilterState => filters[tag] ?? 'show', [filters])
 
   const setState = useCallback((tag: string, next: TagFilterState) => {
-    setFilters((prev) => {
-      if (next === 'show') {
-        const { [tag]: _removed, ...rest } = prev
-        return rest
-      }
-      return { ...prev, [tag]: next }
-    })
+    if (next === 'show') {
+      const { [tag]: _removed, ...rest } = cachedFilters
+      writeFilters(rest)
+    } else {
+      writeFilters({ ...cachedFilters, [tag]: next })
+    }
   }, [])
 
-  const reset = useCallback(() => setFilters({}), [])
+  const reset = useCallback(() => writeFilters({}), [])
 
   return { filters, getState, setState, reset }
 }

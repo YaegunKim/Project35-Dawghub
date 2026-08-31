@@ -133,6 +133,9 @@
     "allergenSection": "알레르기 유발 성분",
     "resetFilters": "초기화",
     "noMatch": "필터 조건에 맞는 메뉴가 없어요.",
+    "opensToday": "오늘 {{time}}에 열어요",
+    "opensTomorrow": "내일 {{time}}에 열어요",
+    "opensOnDay": "{{day}} {{time}}에 열어요",
     "tagFilter": {
       "show": "표시",
       "hide": "숨김"

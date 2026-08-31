@@ -5,10 +5,18 @@ import { useQuery } from '@tanstack/react-query'
 import { IconButton } from '../../design-system/IconButton/IconButton'
 import { Skeleton } from '../../design-system/Skeleton/Skeleton'
 import { client } from '../../lib/amplifyClient'
-import { getDiningHoursToday, getDiningMealHoursToday, splitHoursNote, type DiningHall } from '../../lib/diningHours'
+import {
+  getDiningHoursToday,
+  getDiningMealHoursToday,
+  getNextDiningOpen,
+  isDiningHallOpenNow,
+  splitHoursNote,
+  type DiningHall,
+} from '../../lib/diningHours'
 import {
   PINNED_SECTIONS_KEY,
   filterItemsByTagState,
+  formatNextOpenLabel,
   groupMenuItemsBySection,
   sortSectionsByPinned,
   type MealType,
@@ -52,6 +60,9 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
   const { favorites: pinnedSections } = useFavorites(PINNED_SECTIONS_KEY)
   const { filters: tagFilters } = useTagFilters()
 
+  const openNow = isDiningHallOpenNow(hall)
+  const nextOpen = openNow ? null : getNextDiningOpen(hall)
+
   const filteredItems = useMemo(
     () => (items ? filterItemsByTagState(items, tagFilters) : []),
     [items, tagFilters],
@@ -80,6 +91,7 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
         <S.HeaderText>
           <S.HallName>{t(`dining.halls.${hall}`)}</S.HallName>
           <S.Hours>{t('dining.hoursToday', { hours: getDiningHoursToday(hall) })}</S.Hours>
+          {nextOpen && <S.NextOpen>{formatNextOpenLabel(t, nextOpen)}</S.NextOpen>}
         </S.HeaderText>
         <IconButton
           aria-label={t(isFavorite ? 'dining.favoriteRemove' : 'dining.favoriteAdd')}

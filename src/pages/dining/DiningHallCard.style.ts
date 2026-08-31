@@ -39,6 +39,11 @@ export const S = {
     font-size: 12px;
     color: var(--text-muted);
   `,
+  NextOpen: styled.span`
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+  `,
   MenuRow: styled.div`
     display: flex;
     align-items: baseline;
