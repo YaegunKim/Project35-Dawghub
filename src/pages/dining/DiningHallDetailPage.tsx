@@ -28,12 +28,14 @@ import {
   type MealType,
 } from '../../lib/dining'
 import { useFavorites } from '../../lib/useFavorites'
+import { useTransitionFlash } from '../../lib/useTransitionFlash'
 import { DietaryTags } from './DietaryTags'
 import { useTagFilters } from './tagFilters'
 import { S } from './DiningHallDetailPage.style'
 
 const VALID_HALLS: DiningHall[] = ['bolton', 'hillside', 'oglethorpe', 'snelling', 'niche', 'villageSummit']
 const DINING_MENU_STALE_TIME = 5 * 60_000
+const FILTER_TRANSITION_MS = 300
 
 function isDiningHall(value: string | undefined): value is DiningHall {
   return !!value && (VALID_HALLS as string[]).includes(value)
@@ -68,6 +70,7 @@ export function DiningHallDetailPage() {
     PINNED_SECTIONS_KEY,
   )
   const { filters: tagFilters } = useTagFilters()
+  const isFilterTransitioning = useTransitionFlash(tagFilters, FILTER_TRANSITION_MS)
 
   const filteredItems = useMemo(
     () => (items ? filterItemsByTagState(items, tagFilters) : []),
@@ -125,7 +128,7 @@ export function DiningHallDetailPage() {
         })}
       </S.MealTabs>
 
-      {isLoading ? (
+      {isLoading || isFilterTransitioning ? (
         <S.Sections>
           {[0, 1].map((section) => (
             <S.Section key={section}>

@@ -22,6 +22,7 @@ import {
   type MealType,
 } from '../../lib/dining'
 import { useFavorites } from '../../lib/useFavorites'
+import { useTransitionFlash } from '../../lib/useTransitionFlash'
 import { DietaryTags } from './DietaryTags'
 import { useTagFilters } from './tagFilters'
 import { S } from './DiningHallCard.style'
@@ -30,6 +31,7 @@ type MenuItem = { name: string; section: string; dietary: string[]; allergens: s
 
 const MAX_PREVIEW_ITEMS = 4
 const DINING_MENU_STALE_TIME = 5 * 60_000
+const FILTER_TRANSITION_MS = 300
 
 type DiningHallCardProps = {
   hall: DiningHall
@@ -59,6 +61,7 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
 
   const { favorites: pinnedSections } = useFavorites(PINNED_SECTIONS_KEY)
   const { filters: tagFilters } = useTagFilters()
+  const isFilterTransitioning = useTransitionFlash(tagFilters, FILTER_TRANSITION_MS)
 
   const openNow = isDiningHallOpenNow(hall)
   const nextOpen = openNow ? null : getNextDiningOpen(hall)
@@ -107,7 +110,7 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
         <S.MenuTime>{splitHoursNote(getDiningMealHoursToday(hall, mealType)).hours}</S.MenuTime>
       </S.MenuRow>
 
-      {isLoading ? (
+      {isLoading || isFilterTransitioning ? (
         <S.Sections>
           <S.Section>
             <Skeleton height="11px" width="35%" />
