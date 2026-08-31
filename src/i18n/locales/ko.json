@@ -125,6 +125,8 @@
     "backToList": "학식당 목록으로",
     "favoriteAdd": "즐겨찾기에 추가",
     "favoriteRemove": "즐겨찾기에서 삭제",
+    "pinSection": "섹션 고정",
+    "unpinSection": "섹션 고정 해제",
     "otherItems": "기타",
     "moreItems": "+{{count}}개 더",
     "dietary": {

@@ -39,10 +39,19 @@ export const S = {
     font-size: 12px;
     color: var(--text-muted);
   `,
+  MenuRow: styled.div`
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  `,
   MenuLabel: styled.span`
     font-size: 12px;
     font-weight: 600;
     color: var(--accent);
+  `,
+  MenuTime: styled.span`
+    font-size: 11px;
+    color: var(--text-muted);
   `,
   MenuHint: styled.span`
     font-size: 13px;

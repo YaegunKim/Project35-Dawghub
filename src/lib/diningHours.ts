@@ -65,6 +65,84 @@ export function getDiningHoursToday(hall: DiningHall, date: Date = new Date()): 
   return DINING_HOURS[hall][date.getDay()]
 }
 
+// Some entries above/below carry a trailing "(...)" caveat (e.g. Niche's "HSC residents only")
+// that reads awkwardly crammed onto the same line as the time range — this splits it out so the
+// UI can render it as its own row instead.
+export function splitHoursNote(hours: string): { hours: string; note: string | null } {
+  const match = hours.match(/^(.*?)\s*\(([^)]+)\)\s*$/)
+  return match ? { hours: match[1], note: match[2] } : { hours, note: null }
+}
+
+// Per-meal-period breakdown, transcribed from each hall's own page (dining.uga.edu/location/<hall>/) —
+// the combined /locations/dining-commons/ listing only has the merged open-close ranges above. Cross-checked
+// that every entry here sums back to the matching DINING_HOURS range for the same hall/day.
+type MealPeriodHours = { breakfast: string; lunch: string; dinner: string }
+
+const DINING_MEAL_HOURS: Record<DiningHall, Record<number, MealPeriodHours>> = {
+  bolton: {
+    0: { breakfast: 'Closed', lunch: 'Closed', dinner: 'Closed' },
+    1: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–10:00pm' },
+    2: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–10:00pm' },
+    3: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–10:00pm' },
+    4: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–10:00pm' },
+    5: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–10:00pm' },
+    6: { breakfast: '8:30am–11:30am', lunch: '11:30am–4:00pm', dinner: '4:00pm–10:00pm' },
+  },
+  hillside: {
+    0: { breakfast: '8:30am–11:30am', lunch: '11:30am–4:00pm', dinner: '4:00pm–10:00pm' },
+    1: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–10:00pm' },
+    2: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–10:00pm' },
+    3: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–10:00pm' },
+    4: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–10:00pm' },
+    5: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–9:00pm' },
+    6: { breakfast: 'Closed', lunch: 'Closed', dinner: 'Closed' },
+  },
+  oglethorpe: {
+    0: { breakfast: 'Closed', lunch: 'Closed', dinner: '4:00pm–9:00pm' },
+    1: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–9:00pm' },
+    2: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–9:00pm' },
+    3: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–9:00pm' },
+    4: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–9:00pm' },
+    5: { breakfast: '7:00am–10:30am', lunch: '10:30am–2:30pm', dinner: 'Closed' },
+    6: { breakfast: 'Closed', lunch: 'Closed', dinner: 'Closed' },
+  },
+  snelling: {
+    0: { breakfast: 'Closed', lunch: 'Closed', dinner: 'Closed' },
+    1: { breakfast: '7:00am–10:30am', lunch: '10:30am–3:00pm', dinner: 'Closed' },
+    2: { breakfast: '7:00am–10:30am', lunch: '10:30am–3:00pm', dinner: 'Closed' },
+    3: { breakfast: '7:00am–10:30am', lunch: '10:30am–3:00pm', dinner: 'Closed' },
+    4: { breakfast: '7:00am–10:30am', lunch: '10:30am–3:00pm', dinner: 'Closed' },
+    5: { breakfast: '7:00am–10:30am', lunch: '10:30am–3:00pm', dinner: 'Closed' },
+    6: { breakfast: 'Closed', lunch: 'Closed', dinner: 'Closed' },
+  },
+  niche: {
+    0: { breakfast: 'Closed', lunch: 'Closed', dinner: 'Closed' },
+    1: { breakfast: '7:00am–10:00am', lunch: '10:00am–2:30pm', dinner: '5:00pm–7:00pm (HSC residents only)' },
+    2: { breakfast: '7:00am–10:00am', lunch: '10:00am–2:30pm', dinner: '5:00pm–7:00pm (HSC residents only)' },
+    3: { breakfast: '7:00am–10:00am', lunch: '10:00am–2:30pm', dinner: '5:00pm–7:00pm (HSC residents only)' },
+    4: { breakfast: '7:00am–10:00am', lunch: '10:00am–2:30pm', dinner: '5:00pm–7:00pm (HSC residents only)' },
+    5: { breakfast: '7:00am–10:00am', lunch: '10:00am–2:30pm', dinner: '5:00pm–7:00pm (HSC residents only)' },
+    6: { breakfast: 'Closed', lunch: 'Closed', dinner: 'Closed' },
+  },
+  villageSummit: {
+    0: { breakfast: '8:30am–11:30am', lunch: '11:30am–4:00pm', dinner: '4:00pm–9:00pm' },
+    1: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–9:00pm' },
+    2: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–9:00pm' },
+    3: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–9:00pm' },
+    4: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–9:00pm' },
+    5: { breakfast: '7:00am–10:30am', lunch: '10:30am–4:00pm', dinner: '4:00pm–9:00pm' },
+    6: { breakfast: '8:30am–11:30am', lunch: '11:30am–4:00pm', dinner: '4:00pm–9:00pm' },
+  },
+}
+
+export function getDiningMealHoursToday(
+  hall: DiningHall,
+  meal: 'breakfast' | 'lunch' | 'dinner',
+  date: Date = new Date(),
+): string {
+  return DINING_MEAL_HOURS[hall][date.getDay()][meal]
+}
+
 const DINING_BUILDING_TO_HALL: Record<string, DiningHall> = {
   'Bolton Dining Commons': 'bolton',
   'Oglethorpe Dining Commons': 'oglethorpe',

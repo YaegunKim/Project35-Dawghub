@@ -36,3 +36,17 @@ export function groupMenuItemsBySection<T extends { section: string }>(
   }
   return Array.from(groups.entries())
 }
+
+// Pinned sections float to the top; a section name is pinned globally (not per hall/meal), so
+// e.g. always pinning "Entrees" keeps it first everywhere that section name shows up — including
+// the home tab's per-hall card preview (DiningHallCard), not just the detail page.
+export const PINNED_SECTIONS_KEY = 'dawghub:dining:pinnedSections'
+
+export function sortSectionsByPinned<T>(sections: [string, T][], pinned: string[]): [string, T][] {
+  return [...sections].sort((a, b) => {
+    const aPinned = pinned.includes(a[0])
+    const bPinned = pinned.includes(b[0])
+    if (aPinned === bPinned) return 0
+    return aPinned ? -1 : 1
+  })
+}

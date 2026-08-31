@@ -5,8 +5,9 @@ import { useQuery } from '@tanstack/react-query'
 import { IconButton } from '../../design-system/IconButton/IconButton'
 import { Skeleton } from '../../design-system/Skeleton/Skeleton'
 import { client } from '../../lib/amplifyClient'
-import { getDiningHoursToday, type DiningHall } from '../../lib/diningHours'
-import { groupMenuItemsBySection, type MealType } from '../../lib/dining'
+import { getDiningHoursToday, getDiningMealHoursToday, splitHoursNote, type DiningHall } from '../../lib/diningHours'
+import { PINNED_SECTIONS_KEY, groupMenuItemsBySection, sortSectionsByPinned, type MealType } from '../../lib/dining'
+import { useFavorites } from '../../lib/useFavorites'
 import { DietaryTags } from './DietaryTags'
 import { S } from './DiningHallCard.style'
 
@@ -41,9 +42,11 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
     staleTime: DINING_MENU_STALE_TIME,
   })
 
+  const { favorites: pinnedSections } = useFavorites(PINNED_SECTIONS_KEY)
+
   const groupedSections = useMemo(
-    () => (items ? groupMenuItemsBySection(items, t('dining.otherItems')) : []),
-    [items, t],
+    () => (items ? sortSectionsByPinned(groupMenuItemsBySection(items, t('dining.otherItems')), pinnedSections) : []),
+    [items, t, pinnedSections],
   )
 
   function goToDetail() {
@@ -75,7 +78,10 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
         </IconButton>
       </S.Header>
 
-      <S.MenuLabel>{t(`dining.mealTypes.${mealType}`)}</S.MenuLabel>
+      <S.MenuRow>
+        <S.MenuLabel>{t(`dining.mealTypes.${mealType}`)}</S.MenuLabel>
+        <S.MenuTime>{splitHoursNote(getDiningMealHoursToday(hall, mealType)).hours}</S.MenuTime>
+      </S.MenuRow>
 
       {isLoading ? (
         <S.Sections>

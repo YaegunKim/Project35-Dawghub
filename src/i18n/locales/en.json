@@ -125,6 +125,8 @@
     "backToList": "Back to dining halls",
     "favoriteAdd": "Add to favorites",
     "favoriteRemove": "Remove from favorites",
+    "pinSection": "Pin section",
+    "unpinSection": "Unpin section",
     "otherItems": "Other",
     "moreItems": "+{{count}} more",
     "dietary": {

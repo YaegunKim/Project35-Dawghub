@@ -12,6 +12,12 @@ export const S = {
     font-size: 13px;
     color: var(--text-muted);
   `,
+  HoursNote: styled.p`
+    margin: 0;
+    font-size: 12px;
+    color: var(--text-muted);
+    opacity: 0.8;
+  `,
   MealTabs: styled.div`
     position: sticky;
     top: 0;
@@ -26,11 +32,15 @@ export const S = {
   `,
   MealTab: styled.button<{ $active: boolean }>`
     flex: 1;
-    padding: 9px 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    padding: 8px 4px;
     border: none;
     border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
+    text-align: center;
     cursor: pointer;
     transition:
       background-color 0.15s ease,
@@ -39,6 +49,37 @@ export const S = {
     background: ${({ $active }) => ($active ? 'var(--bg)' : 'transparent')};
     color: ${({ $active }) => ($active ? 'var(--text)' : 'var(--text-muted)')};
     box-shadow: ${({ $active }) => ($active ? '0 1px 3px rgba(0, 0, 0, 0.12)' : 'none')};
+  `,
+  MealTabLabel: styled.span`
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `,
+  MealTabHours: styled.span<{ $active: boolean }>`
+    display: block;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--text-muted);
+    opacity: ${({ $active }) => ($active ? 1 : 0.7)};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  `,
+  MealTabNote: styled.span<{ $active: boolean }>`
+    display: block;
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 1.2;
+    color: var(--text-muted);
+    opacity: ${({ $active }) => ($active ? 0.85 : 0.6)};
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   `,
   Sections: styled.div`
     display: flex;
@@ -50,6 +91,12 @@ export const S = {
     flex-direction: column;
     gap: 6px;
   `,
+  SectionHeader: styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  `,
   SectionTitle: styled.h2`
     margin: 0 2px;
     font-size: 12px;
@@ -57,6 +104,29 @@ export const S = {
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.03em;
+  `,
+  PinButton: styled.button<{ $pinned: boolean }>`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    border: none;
+    background: none;
+    border-radius: 999px;
+    font-size: 12px;
+    color: ${({ $pinned }) => ($pinned ? 'var(--accent)' : 'var(--text-muted)')};
+    opacity: ${({ $pinned }) => ($pinned ? 1 : 0.5)};
+    cursor: pointer;
+    transition:
+      color 0.15s ease,
+      opacity 0.15s ease,
+      transform 0.15s ease;
+
+    &:active {
+      transform: scale(0.9);
+    }
   `,
   ItemList: styled(Card.withComponent('ul'))`
     list-style: none;
