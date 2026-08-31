@@ -116,10 +116,10 @@ export const S = {
     border: 1px solid var(--border);
   `,
   Segment: styled.button<{ $active: boolean; $variant: TagFilterState }>`
-    padding: 6px 8px;
+    padding: 6px 14px;
     border: none;
     border-left: 1px solid var(--border);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     white-space: nowrap;
     cursor: pointer;
@@ -137,14 +137,12 @@ export const S = {
 
     background: ${({ $active, $variant }) => {
       if (!$active) return 'var(--bg-elevated)'
-      if ($variant === 'only') return 'var(--accent)'
-      if ($variant === 'exclude') return state.danger
+      if ($variant === 'hide') return state.danger
       return 'var(--border)'
     }};
     color: ${({ $active, $variant }) => {
       if (!$active) return 'var(--text-muted)'
-      if ($variant === 'only') return 'var(--accent-contrast)'
-      if ($variant === 'exclude') return brand.white
+      if ($variant === 'hide') return brand.white
       return 'var(--text)'
     }};
   `,

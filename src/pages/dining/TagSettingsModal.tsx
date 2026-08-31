@@ -8,7 +8,7 @@ import { S } from './TagSettingsModal.style'
 
 const DIETARY_TAGS = Object.keys(DIETARY_ICON_URLS)
 const ALLERGEN_TAGS = Object.keys(ALLERGEN_ICON_URLS)
-const STATES: TagFilterState[] = ['show', 'only', 'exclude']
+const STATES: TagFilterState[] = ['show', 'hide']
 
 type TagSettingsModalProps = {
   onClose: () => void

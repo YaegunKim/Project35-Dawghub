@@ -51,26 +51,20 @@ export function sortSectionsByPinned<T>(sections: [string, T][], pinned: string[
   })
 }
 
-// "only" tags are AND'd (an item must have every "only" tag to survive), "exclude" tags are
-// OR'd (having any one of them drops the item) — the two combine, so e.g. "vegan: only" +
-// "peanuts: exclude" together means "vegan items that don't contain peanuts".
+// Hidden tags are OR'd — having any one of them drops the item. (An earlier version also had an
+// "only" AND-filter, but it hid items that are safe just because the dining hall never bothered
+// tagging them — e.g. plain orange juice under "halal: only" — which misleadingly implied more
+// completeness than the underlying tagging data actually has. Plain hide doesn't have that
+// problem: it only ever removes items positively tagged with something the user chose to avoid.)
 export function filterItemsByTagState<T extends { dietary: string[]; allergens: string[] }>(
   items: T[],
-  filters: Record<string, 'only' | 'exclude'>,
+  filters: Record<string, 'hide'>,
 ): T[] {
-  const onlyTags = Object.entries(filters)
-    .filter(([, state]) => state === 'only')
-    .map(([tag]) => tag)
-  const excludeTags = Object.entries(filters)
-    .filter(([, state]) => state === 'exclude')
-    .map(([tag]) => tag)
-
-  if (onlyTags.length === 0 && excludeTags.length === 0) return items
+  const hiddenTags = Object.keys(filters)
+  if (hiddenTags.length === 0) return items
 
   return items.filter((item) => {
     const itemTags = [...item.dietary, ...item.allergens]
-    const matchesAllOnly = onlyTags.every((tag) => itemTags.includes(tag))
-    const matchesAnyExclude = excludeTags.some((tag) => itemTags.includes(tag))
-    return matchesAllOnly && !matchesAnyExclude
+    return !hiddenTags.some((tag) => itemTags.includes(tag))
   })
 }

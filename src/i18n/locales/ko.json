@@ -135,8 +135,7 @@
     "noMatch": "필터 조건에 맞는 메뉴가 없어요.",
     "tagFilter": {
       "show": "표시",
-      "only": "이것만",
-      "exclude": "제외"
+      "hide": "숨김"
     },
     "moreItems": "+{{count}}개 더",
     "dietary": {

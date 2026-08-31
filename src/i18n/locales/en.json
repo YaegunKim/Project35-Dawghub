@@ -136,8 +136,7 @@
     "noMatch": "No menu items match your filters.",
     "tagFilter": {
       "show": "Show",
-      "only": "Only",
-      "exclude": "Exclude"
+      "hide": "Hide"
     },
     "dietary": {
       "vegan": "Vegan",
