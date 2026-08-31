@@ -50,3 +50,27 @@ export function sortSectionsByPinned<T>(sections: [string, T][], pinned: string[
     return aPinned ? -1 : 1
   })
 }
+
+// "only" tags are AND'd (an item must have every "only" tag to survive), "exclude" tags are
+// OR'd (having any one of them drops the item) — the two combine, so e.g. "vegan: only" +
+// "peanuts: exclude" together means "vegan items that don't contain peanuts".
+export function filterItemsByTagState<T extends { dietary: string[]; allergens: string[] }>(
+  items: T[],
+  filters: Record<string, 'only' | 'exclude'>,
+): T[] {
+  const onlyTags = Object.entries(filters)
+    .filter(([, state]) => state === 'only')
+    .map(([tag]) => tag)
+  const excludeTags = Object.entries(filters)
+    .filter(([, state]) => state === 'exclude')
+    .map(([tag]) => tag)
+
+  if (onlyTags.length === 0 && excludeTags.length === 0) return items
+
+  return items.filter((item) => {
+    const itemTags = [...item.dietary, ...item.allergens]
+    const matchesAllOnly = onlyTags.every((tag) => itemTags.includes(tag))
+    const matchesAnyExclude = excludeTags.some((tag) => itemTags.includes(tag))
+    return matchesAllOnly && !matchesAnyExclude
+  })
+}

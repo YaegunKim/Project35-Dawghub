@@ -6,9 +6,16 @@ import { IconButton } from '../../design-system/IconButton/IconButton'
 import { Skeleton } from '../../design-system/Skeleton/Skeleton'
 import { client } from '../../lib/amplifyClient'
 import { getDiningHoursToday, getDiningMealHoursToday, splitHoursNote, type DiningHall } from '../../lib/diningHours'
-import { PINNED_SECTIONS_KEY, groupMenuItemsBySection, sortSectionsByPinned, type MealType } from '../../lib/dining'
+import {
+  PINNED_SECTIONS_KEY,
+  filterItemsByTagState,
+  groupMenuItemsBySection,
+  sortSectionsByPinned,
+  type MealType,
+} from '../../lib/dining'
 import { useFavorites } from '../../lib/useFavorites'
 import { DietaryTags } from './DietaryTags'
+import { useTagFilters } from './tagFilters'
 import { S } from './DiningHallCard.style'
 
 type MenuItem = { name: string; section: string; dietary: string[]; allergens: string[] }
@@ -43,10 +50,15 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
   })
 
   const { favorites: pinnedSections } = useFavorites(PINNED_SECTIONS_KEY)
+  const { filters: tagFilters } = useTagFilters()
 
+  const filteredItems = useMemo(
+    () => (items ? filterItemsByTagState(items, tagFilters) : []),
+    [items, tagFilters],
+  )
   const groupedSections = useMemo(
-    () => (items ? sortSectionsByPinned(groupMenuItemsBySection(items, t('dining.otherItems')), pinnedSections) : []),
-    [items, t, pinnedSections],
+    () => sortSectionsByPinned(groupMenuItemsBySection(filteredItems, t('dining.otherItems')), pinnedSections),
+    [filteredItems, t, pinnedSections],
   )
 
   function goToDetail() {
@@ -98,6 +110,8 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
         </S.Sections>
       ) : !items || items.length === 0 ? (
         <S.MenuHint>{t('dining.empty')}</S.MenuHint>
+      ) : filteredItems.length === 0 ? (
+        <S.MenuHint>{t('dining.noMatch')}</S.MenuHint>
       ) : (
         <S.Sections>
           {groupedSections.map(([section, sectionItems]) => {

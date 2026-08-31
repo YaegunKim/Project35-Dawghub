@@ -20,7 +20,3 @@ export const ALLERGEN_ICON_URLS: Record<string, string> = {
   treeNuts: `${ICON_BASE}/Contains-Tree-Nuts.png`,
   peanuts: `${ICON_BASE}/Contains-Peanuts.png`,
 }
-
-// Tags the user has hidden from DietaryTags everywhere it renders (list cards + detail page).
-// Empty by default — nothing hidden, matching every other tag's default-visible behavior.
-export const HIDDEN_TAGS_KEY = 'dawghub:dining:hiddenTags'

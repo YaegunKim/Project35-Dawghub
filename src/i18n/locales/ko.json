@@ -128,9 +128,16 @@
     "pinSection": "섹션 고정",
     "unpinSection": "섹션 고정 해제",
     "otherItems": "기타",
-    "tagSettings": "식단·알레르기 아이콘",
+    "tagSettings": "식단·알레르기 필터",
     "dietarySection": "식단",
     "allergenSection": "알레르기 유발 성분",
+    "resetFilters": "초기화",
+    "noMatch": "필터 조건에 맞는 메뉴가 없어요.",
+    "tagFilter": {
+      "show": "표시",
+      "only": "이것만",
+      "exclude": "제외"
+    },
     "moreItems": "+{{count}}개 더",
     "dietary": {
       "vegan": "비건",

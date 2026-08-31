@@ -129,9 +129,16 @@
     "unpinSection": "Unpin section",
     "otherItems": "Other",
     "moreItems": "+{{count}} more",
-    "tagSettings": "Dietary & allergen icons",
+    "tagSettings": "Dietary & allergen filters",
     "dietarySection": "Dietary",
     "allergenSection": "Allergens",
+    "resetFilters": "Reset",
+    "noMatch": "No menu items match your filters.",
+    "tagFilter": {
+      "show": "Show",
+      "only": "Only",
+      "exclude": "Exclude"
+    },
     "dietary": {
       "vegan": "Vegan",
       "vegetarian": "Vegetarian",

@@ -23,6 +23,7 @@
 - 섹션 정렬: 조미료/음료/디저트/시리얼/샐러드바 등은 `SECONDARY_SECTION_KEYWORDS`에 걸리면 항상 메인 요리 섹션들 뒤로 밀림 (Lambda에서 정렬).
 - **즐겨찾기는 이 페이지에 없음**: 즐겨찾기 추가/삭제 버튼(`dining.favoriteAdd`/`favoriteRemove` 키)은 목록 페이지 `DiningPage`/`DiningHallCard`에만 있고, `localStorage` 키 `dawghub:dining:favorites`(`src/lib/useFavorites.ts`)로 정렬 순서만 바꿈. 상세 페이지는 즐겨찾기 상태를 읽거나 쓰지 않음.
 - **메뉴 섹션 고정(핀)**: 각 섹션 제목 옆 압정 아이콘(`S.PinButton`)으로 섹션을 고정하면 목록 맨 위로 정렬됨(`sortSectionsByPinned`, `src/lib/dining.ts`). 학식당/끼니별이 아니라 **섹션 이름 기준 전역**으로 저장(`useFavorites(PINNED_SECTIONS_KEY)`, `localStorage` 키 `dawghub:dining:pinnedSections`) — 예를 들어 "Entrees"를 한 번 고정하면 어느 학식당·어느 끼니에서 "Entrees" 섹션을 보든 항상 맨 위로 옴. 이 고정 상태는 홈 목록 페이지의 카드 미리보기(`DiningHallCard`)에도 그대로 반영됨(같은 키 공유) — 상세 페이지에만 있는 압정 버튼과 달리 카드 쪽은 순서만 따르고 버튼 UI는 없음.
+- **식단/알레르기 태그 필터도 이 페이지에 적용됨**: 필터 설정 버튼/모달(`TagSettingsModal`)은 `DiningPage`에만 있지만, 필터 상태(`dawghub:dining:tagFilters`, `useTagFilters()`)는 전역이라 이 페이지의 `items`에도 똑같이 적용됨 — `filterItemsByTagState`(`src/lib/dining.ts`)가 `groupMenuItemsBySection` 호출 **이전**에 아이템 배열 자체를 걸러내므로, 필터로 사라진 아이템이 속한 섹션은 자동으로 통째로 안 보임(빈 섹션 헤더가 남는 버그 없음). 핀 정렬(`sortSectionsByPinned`)은 이 필터링 다음 단계라 필터된 결과 안에서만 정렬됨. 자세한 필터 의미론(표시/이것만/제외, AND/OR)은 [[DiningPage]] 참고.
 - 끼니 탭 전환(`mealType` 변경)마다 `useEffect`가 `getDiningMenu`를 다시 호출 — 탭 전환 = 새 네트워크 요청, 클라이언트 캐시 없음.
 - `VALID_HALLS` 배열이 이 파일 안에 로컬로 하드코딩되어 있고 `src/lib/dining.ts`의 `DINING_HALLS`와 별개 상수 — 학식당 추가/삭제 시 두 곳 다 동기화 필요.
 - 메뉴가 없거나 Lambda 호출이 실패하면 둘 다 동일하게 `dining.empty` 빈 상태로 처리됨 (에러와 "오늘 메뉴 없음"을 구분하지 않음).
