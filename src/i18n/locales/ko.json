@@ -128,6 +128,9 @@
     "pinSection": "섹션 고정",
     "unpinSection": "섹션 고정 해제",
     "otherItems": "기타",
+    "tagSettings": "식단·알레르기 아이콘",
+    "dietarySection": "식단",
+    "allergenSection": "알레르기 유발 성분",
     "moreItems": "+{{count}}개 더",
     "dietary": {
       "vegan": "비건",

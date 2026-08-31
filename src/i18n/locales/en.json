@@ -129,6 +129,9 @@
     "unpinSection": "Unpin section",
     "otherItems": "Other",
     "moreItems": "+{{count}} more",
+    "tagSettings": "Dietary & allergen icons",
+    "dietarySection": "Dietary",
+    "allergenSection": "Allergens",
     "dietary": {
       "vegan": "Vegan",
       "vegetarian": "Vegetarian",
