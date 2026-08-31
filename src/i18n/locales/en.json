@@ -127,6 +127,7 @@
     "favoriteRemove": "Remove from favorites",
     "pinSection": "Pin section",
     "unpinSection": "Unpin section",
+    "pinned": "Pinned",
     "otherItems": "Other",
     "moreItems": "+{{count}} more",
     "tagSettings": "Dietary & allergen filters",

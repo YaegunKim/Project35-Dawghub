@@ -95,13 +95,25 @@ export const S = {
       flex: initial;
     }
   `,
-  SectionTitle: styled.h3`
+  SectionHeader: styled.div`
+    display: flex;
+    align-items: center;
+    gap: 5px;
     margin: 0 2px;
+  `,
+  SectionTitle: styled.h3`
+    margin: 0;
     font-size: 11px;
     font-weight: 700;
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.03em;
+  `,
+  PinIndicator: styled.span`
+    display: inline-flex;
+    flex-shrink: 0;
+    font-size: 9px;
+    color: var(--accent);
   `,
   ItemList: styled(Card.withComponent('ul'))`
     list-style: none;

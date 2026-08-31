@@ -2,6 +2,8 @@ import { useMemo, type KeyboardEvent, type MouseEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
+import { faThumbtack } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconButton } from '../../design-system/IconButton/IconButton'
 import { Skeleton } from '../../design-system/Skeleton/Skeleton'
 import { client } from '../../lib/amplifyClient'
@@ -134,7 +136,14 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
             const remaining = sectionItems.length - visibleItems.length
             return (
               <S.Section key={section}>
-                <S.SectionTitle>{section}</S.SectionTitle>
+                <S.SectionHeader>
+                  <S.SectionTitle>{section}</S.SectionTitle>
+                  {pinnedSections.includes(section) && (
+                    <S.PinIndicator title={t('dining.pinned')}>
+                      <FontAwesomeIcon icon={faThumbtack} />
+                    </S.PinIndicator>
+                  )}
+                </S.SectionHeader>
                 <S.ItemList>
                   {visibleItems.map((item, index) => (
                     <S.Item key={`${item.name}-${index}`}>
