@@ -1,6 +1,6 @@
 import styled from '@emotion/styled'
 import { keyframes } from '@emotion/react'
-import { state } from '../../design-system/colors'
+import { brand, state } from '../../design-system/colors'
 import { radius } from '../../design-system/radius'
 import { spacing } from '../../design-system/spacing'
 import { motion } from '../../design-system/motion'
@@ -104,29 +104,48 @@ export const S = {
     color: var(--text);
     flex: 1;
     min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   `,
-  StateButton: styled.button<{ $state: TagFilterState }>`
+  SegmentedGroup: styled.div`
+    display: flex;
     flex-shrink: 0;
-    min-width: 64px;
-    padding: 5px 10px;
     border-radius: ${radius.pill};
-    border: 1px solid
-      ${({ $state }) => ($state === 'exclude' ? state.danger : $state === 'only' ? 'var(--accent)' : 'var(--border)')};
-    background: ${({ $state }) =>
-      $state === 'exclude' ? state.dangerSoft : $state === 'only' ? 'var(--accent)' : 'var(--bg-elevated)'};
-    color: ${({ $state }) =>
-      $state === 'exclude' ? state.danger : $state === 'only' ? 'var(--accent-contrast)' : 'var(--text-muted)'};
-    font-size: 11px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  `,
+  Segment: styled.button<{ $active: boolean; $variant: TagFilterState }>`
+    padding: 6px 8px;
+    border: none;
+    border-left: 1px solid var(--border);
+    font-size: 10px;
     font-weight: 700;
-    text-align: center;
+    white-space: nowrap;
     cursor: pointer;
     transition:
       background-color ${motion.duration.fast} ${motion.easing.standard},
-      color ${motion.duration.fast} ${motion.easing.standard},
-      border-color ${motion.duration.fast} ${motion.easing.standard};
+      color ${motion.duration.fast} ${motion.easing.standard};
+
+    &:first-of-type {
+      border-left: none;
+    }
 
     &:active {
-      transform: scale(0.95);
+      opacity: 0.8;
     }
+
+    background: ${({ $active, $variant }) => {
+      if (!$active) return 'var(--bg-elevated)'
+      if ($variant === 'only') return 'var(--accent)'
+      if ($variant === 'exclude') return state.danger
+      return 'var(--border)'
+    }};
+    color: ${({ $active, $variant }) => {
+      if (!$active) return 'var(--text-muted)'
+      if ($variant === 'only') return 'var(--accent-contrast)'
+      if ($variant === 'exclude') return brand.white
+      return 'var(--text)'
+    }};
   `,
 }

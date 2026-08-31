@@ -25,10 +25,8 @@ export function useTagFilters() {
 
   const getState = useCallback((tag: string): TagFilterState => filters[tag] ?? 'show', [filters])
 
-  const cycleState = useCallback((tag: string) => {
+  const setState = useCallback((tag: string, next: TagFilterState) => {
     setFilters((prev) => {
-      const current = (prev[tag] ?? 'show') as TagFilterState
-      const next: TagFilterState = current === 'show' ? 'only' : current === 'only' ? 'exclude' : 'show'
       if (next === 'show') {
         const { [tag]: _removed, ...rest } = prev
         return rest
@@ -39,5 +37,5 @@ export function useTagFilters() {
 
   const reset = useCallback(() => setFilters({}), [])
 
-  return { filters, getState, cycleState, reset }
+  return { filters, getState, setState, reset }
 }

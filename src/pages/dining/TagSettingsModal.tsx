@@ -3,11 +3,12 @@ import { faXmark } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconButton } from '../../design-system/IconButton/IconButton'
 import { DIETARY_ICON_URLS, ALLERGEN_ICON_URLS } from './dietaryIcons'
-import { useTagFilters } from './tagFilters'
+import { useTagFilters, type TagFilterState } from './tagFilters'
 import { S } from './TagSettingsModal.style'
 
 const DIETARY_TAGS = Object.keys(DIETARY_ICON_URLS)
 const ALLERGEN_TAGS = Object.keys(ALLERGEN_ICON_URLS)
+const STATES: TagFilterState[] = ['show', 'only', 'exclude']
 
 type TagSettingsModalProps = {
   onClose: () => void
@@ -15,8 +16,32 @@ type TagSettingsModalProps = {
 
 export function TagSettingsModal({ onClose }: TagSettingsModalProps) {
   const { t } = useTranslation()
-  const { filters, getState, cycleState, reset } = useTagFilters()
+  const { filters, getState, setState, reset } = useTagFilters()
   const hasActiveFilters = Object.keys(filters).length > 0
+
+  function renderRow(tag: string, icon: string, label: string) {
+    const current = getState(tag)
+    return (
+      <S.Row key={tag}>
+        <S.RowIcon src={icon} alt="" />
+        <S.RowLabel>{label}</S.RowLabel>
+        <S.SegmentedGroup>
+          {STATES.map((option) => (
+            <S.Segment
+              key={option}
+              type="button"
+              $active={current === option}
+              $variant={option}
+              aria-pressed={current === option}
+              onClick={() => setState(tag, option)}
+            >
+              {t(`dining.tagFilter.${option}`)}
+            </S.Segment>
+          ))}
+        </S.SegmentedGroup>
+      </S.Row>
+    )
+  }
 
   return (
     <S.ModalBackdrop onClick={onClose}>
@@ -33,27 +58,11 @@ export function TagSettingsModal({ onClose }: TagSettingsModalProps) {
         <S.ModalBody>
           <S.Section>
             <S.SectionTitle>{t('dining.dietarySection')}</S.SectionTitle>
-            {DIETARY_TAGS.map((tag) => (
-              <S.Row key={tag}>
-                <S.RowIcon src={DIETARY_ICON_URLS[tag]} alt="" />
-                <S.RowLabel>{t(`dining.dietary.${tag}`)}</S.RowLabel>
-                <S.StateButton $state={getState(tag)} onClick={() => cycleState(tag)}>
-                  {t(`dining.tagFilter.${getState(tag)}`)}
-                </S.StateButton>
-              </S.Row>
-            ))}
+            {DIETARY_TAGS.map((tag) => renderRow(tag, DIETARY_ICON_URLS[tag], t(`dining.dietary.${tag}`)))}
           </S.Section>
           <S.Section>
             <S.SectionTitle>{t('dining.allergenSection')}</S.SectionTitle>
-            {ALLERGEN_TAGS.map((tag) => (
-              <S.Row key={tag}>
-                <S.RowIcon src={ALLERGEN_ICON_URLS[tag]} alt="" />
-                <S.RowLabel>{t(`dining.allergens.${tag}`)}</S.RowLabel>
-                <S.StateButton $state={getState(tag)} onClick={() => cycleState(tag)}>
-                  {t(`dining.tagFilter.${getState(tag)}`)}
-                </S.StateButton>
-              </S.Row>
-            ))}
+            {ALLERGEN_TAGS.map((tag) => renderRow(tag, ALLERGEN_ICON_URLS[tag], t(`dining.allergens.${tag}`)))}
           </S.Section>
         </S.ModalBody>
       </S.Modal>
