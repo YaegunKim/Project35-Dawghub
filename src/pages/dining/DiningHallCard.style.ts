@@ -1,6 +1,7 @@
 import styled from '@emotion/styled'
 import { Card } from '../../design-system/Card/Card'
-import { category } from '../../design-system/colors'
+import { category, state } from '../../design-system/colors'
+import { motion } from '../../design-system/motion'
 import { radius } from '../../design-system/radius'
 import { shadow } from '../../design-system/shadow'
 import { spacing } from '../../design-system/spacing'
@@ -36,10 +37,35 @@ export const S = {
     gap: 4px;
     min-width: 0;
   `,
+  HallNameRow: styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  `,
   HallName: styled.span`
     font-size: 16px;
     font-weight: 700;
     line-height: 1.25;
+  `,
+  StatusBadge: styled.span<{ $open: boolean }>`
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    padding: 3px 9px 3px 7px;
+    border-radius: ${radius.pill};
+    background: ${({ $open }) => ($open ? state.successSoft : state.dangerSoft)};
+    color: ${({ $open }) => ($open ? state.success : state.danger)};
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  `,
+  StatusDot: styled.span<{ $open: boolean }>`
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: ${({ $open }) => ($open ? state.success : state.danger)};
   `,
   Hours: styled.span`
     font-size: 12px;
@@ -170,5 +196,40 @@ export const S = {
     font-size: 12px;
     color: var(--text-muted);
     text-align: center;
+  `,
+  ExpandableRegion: styled.div<{ $expanded: boolean }>`
+    display: grid;
+    grid-template-rows: ${({ $expanded }) => ($expanded ? '1fr' : '0fr')};
+    transition: grid-template-rows ${motion.duration.slow} ${motion.easing.standard};
+  `,
+  ExpandableInner: styled.div`
+    min-height: 0;
+    overflow: hidden;
+  `,
+  ToggleRow: styled.button`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 8px;
+    margin-top: -2px;
+    border: none;
+    border-top: 1px solid var(--border);
+    background: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &:active {
+      opacity: 0.7;
+    }
+  `,
+  ToggleChevron: styled.span<{ $expanded: boolean }>`
+    display: inline-flex;
+    font-size: 10px;
+    transform: rotate(${({ $expanded }) => ($expanded ? '180deg' : '0deg')});
+    transition: transform ${motion.duration.fast} ${motion.easing.standard};
   `,
 }
