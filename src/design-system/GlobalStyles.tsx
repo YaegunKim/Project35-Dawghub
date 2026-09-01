@@ -67,6 +67,12 @@ const styles = css`
     height: 100%;
   }
 
+  html {
+    /* Belt-and-suspenders for the viewport meta's user-scalable=no — some browsers (notably
+       iOS Safari) still allow double-tap-to-zoom without this, even with pinch-zoom disabled. */
+    touch-action: manipulation;
+  }
+
   body {
     margin: 0;
     overflow-x: hidden;
