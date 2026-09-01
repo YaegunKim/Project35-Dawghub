@@ -27,6 +27,7 @@ import {
 import { useFavorites } from '../../lib/useFavorites'
 import { useTransitionFlash } from '../../lib/useTransitionFlash'
 import { DietaryTags } from './DietaryTags'
+import { DiningQuickActions } from './DiningQuickActions'
 import { useTagFilters } from './tagFilters'
 import { S } from './DiningHallCard.style'
 
@@ -123,6 +124,8 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
           </IconButton>
         </S.HeaderActions>
       </S.Header>
+
+      <DiningQuickActions hall={hall} />
 
       <S.MenuRow>
         <S.MenuLabel>{t(`dining.mealTypes.${mealType}`)}</S.MenuLabel>

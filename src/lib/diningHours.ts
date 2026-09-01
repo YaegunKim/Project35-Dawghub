@@ -241,3 +241,11 @@ export function getDiningHoursTodayByBuildingName(buildingName: string, date: Da
 export function getDiningHallByBuildingName(buildingName: string): DiningHall | null {
   return DINING_BUILDING_TO_HALL[buildingName] ?? null
 }
+
+const DINING_HALL_TO_BUILDING: Record<DiningHall, string> = Object.fromEntries(
+  Object.entries(DINING_BUILDING_TO_HALL).map(([buildingName, hall]) => [hall, buildingName]),
+) as Record<DiningHall, string>
+
+export function getDiningBuildingName(hall: DiningHall): string {
+  return DINING_HALL_TO_BUILDING[hall]
+}

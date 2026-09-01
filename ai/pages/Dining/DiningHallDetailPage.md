@@ -27,3 +27,4 @@
 - 끼니 탭 전환(`mealType` 변경)마다 `useEffect`가 `getDiningMenu`를 다시 호출 — 탭 전환 = 새 네트워크 요청, 클라이언트 캐시 없음.
 - `VALID_HALLS` 배열이 이 파일 안에 로컬로 하드코딩되어 있고 `src/lib/dining.ts`의 `DINING_HALLS`와 별개 상수 — 학식당 추가/삭제 시 두 곳 다 동기화 필요.
 - 메뉴가 없거나 Lambda 호출이 실패하면 둘 다 동일하게 `dining.empty` 빈 상태로 처리됨 (에러와 "오늘 메뉴 없음"을 구분하지 않음).
+- **"See Location"/"Get Directions" 버튼**: 헤더 바로 아래 `DiningQuickActions`(카드와 공용 컴포넌트) — 동작은 [[DiningPage]]에 정리.

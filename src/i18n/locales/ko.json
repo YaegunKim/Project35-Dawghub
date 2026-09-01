@@ -132,6 +132,8 @@
     "closed": "영업 종료",
     "showMenu": "메뉴 보기",
     "hideMenu": "메뉴 접기",
+    "seeLocation": "위치 보기",
+    "getDirections": "길찾기",
     "otherItems": "기타",
     "tagSettings": "식단·알레르기 필터",
     "dietarySection": "식단",

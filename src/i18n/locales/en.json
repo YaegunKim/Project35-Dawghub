@@ -132,6 +132,8 @@
     "closed": "Closed",
     "showMenu": "Show menu",
     "hideMenu": "Hide menu",
+    "seeLocation": "See Location",
+    "getDirections": "Get Directions",
     "otherItems": "Other",
     "moreItems": "+{{count}} more",
     "tagSettings": "Dietary & allergen filters",

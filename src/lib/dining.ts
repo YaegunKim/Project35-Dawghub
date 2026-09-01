@@ -1,4 +1,6 @@
-import type { DiningHall, NextOpen } from './diningHours'
+import { getDiningBuildingName, type DiningHall, type NextOpen } from './diningHours'
+import { fetchUgaBuildings, findBuildingByName } from './ugaBuildings'
+import type { MapNavigationIntent } from './mapNavigation'
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner'
 
@@ -99,4 +101,18 @@ export function formatTodayLabel(t: (key: string, options?: Record<string, unkno
   const date = new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric' }).format(now)
   const day = t(`schedule.days.${WEEKDAY_I18N_KEYS[now.getDay()]}`)
   return t('dining.todayDate', { date, day })
+}
+
+// Resolves a hall's building coordinates for the "See Location"/"Get Directions" card and
+// detail-page buttons — buildings are the static local dataset (see ugaBuildings.ts), so this
+// resolves instantly without hitting a network endpoint.
+export async function buildDiningMapIntent(
+  hall: DiningHall,
+  type: MapNavigationIntent['type'],
+): Promise<MapNavigationIntent | null> {
+  const buildingName = getDiningBuildingName(hall)
+  const buildings = await fetchUgaBuildings()
+  const building = findBuildingByName(buildings, buildingName)
+  if (!building) return null
+  return { type, lat: building.latitude, lng: building.longitude, label: building.name }
 }
