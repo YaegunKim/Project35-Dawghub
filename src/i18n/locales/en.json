@@ -138,6 +138,7 @@
     "opensToday": "Opens today at {{time}}",
     "opensTomorrow": "Opens tomorrow at {{time}}",
     "opensOnDay": "Opens {{day}} at {{time}}",
+    "todayDate": "{{date}} · {{day}}",
     "tagFilter": {
       "show": "Show",
       "hide": "Hide"

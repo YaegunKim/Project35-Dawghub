@@ -1,14 +1,19 @@
 import styled from '@emotion/styled'
 import { Card } from '../../design-system/Card/Card'
+import { category } from '../../design-system/colors'
+import { radius } from '../../design-system/radius'
+import { shadow } from '../../design-system/shadow'
+import { spacing } from '../../design-system/spacing'
 
 export const S = {
   Card: styled(Card)`
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: ${spacing.md};
     min-width: 0;
+    border-radius: ${radius.lg};
     background: var(--bg-elevated);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    box-shadow: ${shadow.md};
     cursor: pointer;
     transition:
       transform 0.1s ease,
@@ -16,7 +21,7 @@ export const S = {
 
     &:active {
       transform: scale(0.98);
-      box-shadow: none;
+      box-shadow: ${shadow.sm};
     }
   `,
   Header: styled.div`
@@ -28,12 +33,13 @@ export const S = {
   HeaderText: styled.div`
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
     min-width: 0;
   `,
   HallName: styled.span`
     font-size: 16px;
     font-weight: 700;
+    line-height: 1.25;
   `,
   Hours: styled.span`
     font-size: 12px;
@@ -45,13 +51,17 @@ export const S = {
     color: var(--text-muted);
   `,
   MenuRow: styled.div`
-    display: flex;
+    display: inline-flex;
     align-items: baseline;
     gap: 6px;
+    width: fit-content;
+    padding: 4px 10px;
+    border-radius: ${radius.pill};
+    background: var(--bg);
   `,
   MenuLabel: styled.span`
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--accent);
   `,
   MenuTime: styled.span`
@@ -98,8 +108,15 @@ export const S = {
   SectionHeader: styled.div`
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
     margin: 0 2px;
+  `,
+  SectionDot: styled.span`
+    width: 6px;
+    height: 6px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: ${category.dining};
   `,
   SectionTitle: styled.h3`
     margin: 0;
@@ -127,7 +144,7 @@ export const S = {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 9px 12px;
+    padding: 10px 12px;
 
     &:not(:last-child) {
       border-bottom: 1px solid var(--border);

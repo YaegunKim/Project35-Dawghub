@@ -2,7 +2,7 @@ import { useMemo, type KeyboardEvent, type MouseEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { faThumbtack } from '@fortawesome/free-solid-svg-icons'
+import { faStar, faThumbtack } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconButton } from '../../design-system/IconButton/IconButton'
 import { Skeleton } from '../../design-system/Skeleton/Skeleton'
@@ -103,7 +103,7 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
           aria-pressed={isFavorite}
           onClick={handleFavoriteClick}
         >
-          {isFavorite ? '★' : '☆'}
+          <FontAwesomeIcon icon={faStar} />
         </IconButton>
       </S.Header>
 
@@ -137,6 +137,7 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
             return (
               <S.Section key={section}>
                 <S.SectionHeader>
+                  <S.SectionDot />
                   <S.SectionTitle>{section}</S.SectionTitle>
                   {pinnedSections.includes(section) && (
                     <S.PinIndicator title={t('dining.pinned')}>

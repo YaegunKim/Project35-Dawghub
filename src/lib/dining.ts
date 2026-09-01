@@ -69,7 +69,7 @@ export function filterItemsByTagState<T extends { dietary: string[]; allergens: 
   })
 }
 
-const WEEKDAY_I18N_KEYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+export const WEEKDAY_I18N_KEYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
 // Reuses the weekday names already translated for the Schedule page (schedule.days.*) instead of
 // introducing a second set of day-name strings just for this.
@@ -81,4 +81,15 @@ export function formatNextOpenLabel(t: (key: string, options?: Record<string, un
   targetDate.setDate(targetDate.getDate() + next.dayOffset)
   const day = t(`schedule.days.${WEEKDAY_I18N_KEYS[targetDate.getDay()]}`)
   return t('dining.opensOnDay', { day, time: next.time })
+}
+
+// Shown under the Dining tab title — "September 1 · Tuesday" / "9월 1일 화요일". The month/day
+// portion is locale-formatted via Intl so it reads naturally in either language, while the
+// weekday reuses the same schedule.days.* translations as formatNextOpenLabel above.
+export function formatTodayLabel(t: (key: string, options?: Record<string, unknown>) => string, language: string) {
+  const now = new Date()
+  const locale = language.startsWith('ko') ? 'ko-KR' : 'en-US'
+  const date = new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric' }).format(now)
+  const day = t(`schedule.days.${WEEKDAY_I18N_KEYS[now.getDay()]}`)
+  return t('dining.todayDate', { date, day })
 }

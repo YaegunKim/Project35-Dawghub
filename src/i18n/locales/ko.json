@@ -137,6 +137,7 @@
     "opensToday": "오늘 {{time}}에 열어요",
     "opensTomorrow": "내일 {{time}}에 열어요",
     "opensOnDay": "{{day}} {{time}}에 열어요",
+    "todayDate": "{{date}} {{day}}",
     "tagFilter": {
       "show": "표시",
       "hide": "숨김"
