@@ -25,7 +25,10 @@ export function DiningPage() {
       <S.TitleRow>
         <S.TitleGroup>
           <PageTitle>{t('nav.dining')}</PageTitle>
-          <S.TodayDate>{formatTodayLabel(t, i18n.language)}</S.TodayDate>
+          <S.TodayDate>
+            <span aria-hidden="true">📅</span>
+            {formatTodayLabel(t, i18n.language)}
+          </S.TodayDate>
         </S.TitleGroup>
         <IconButton aria-label={t('dining.tagSettings')} onClick={() => setSettingsOpen(true)}>
           <FontAwesomeIcon icon={faGear} />
