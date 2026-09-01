@@ -20,6 +20,7 @@ import {
   filterItemsByTagState,
   formatNextOpenLabel,
   groupMenuItemsBySection,
+  sortSectionsByItemCount,
   sortSectionsByPinned,
   type MealType,
 } from '../../lib/dining'
@@ -74,7 +75,11 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
     [items, tagFilters],
   )
   const groupedSections = useMemo(
-    () => sortSectionsByPinned(groupMenuItemsBySection(filteredItems, t('dining.otherItems')), pinnedSections),
+    () =>
+      sortSectionsByPinned(
+        sortSectionsByItemCount(groupMenuItemsBySection(filteredItems, t('dining.otherItems'))),
+        pinnedSections,
+      ),
     [filteredItems, t, pinnedSections],
   )
 

@@ -51,6 +51,13 @@ export function sortSectionsByPinned<T>(sections: [string, T][], pinned: string[
   })
 }
 
+// Sorts sections by item count, most first — apply this BEFORE sortSectionsByPinned so a pin
+// still wins overall (Array.prototype.sort is stable, so ties within "pinned"/"not pinned" keep
+// this count-based order).
+export function sortSectionsByItemCount<T>(sections: [string, T[]][]): [string, T[]][] {
+  return [...sections].sort((a, b) => b[1].length - a[1].length)
+}
+
 // Hidden tags are OR'd — having any one of them drops the item. (An earlier version also had an
 // "only" AND-filter, but it hid items that are safe just because the dining hall never bothered
 // tagging them — e.g. plain orange juice under "halal: only" — which misleadingly implied more
