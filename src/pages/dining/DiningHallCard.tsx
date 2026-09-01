@@ -105,23 +105,23 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
     <S.Card role="link" tabIndex={0} onClick={goToDetail} onKeyDown={handleKeyDown}>
       <S.Header>
         <S.HeaderText>
-          <S.HallNameRow>
-            <S.HallName>{t(`dining.halls.${hall}`)}</S.HallName>
-            <S.StatusBadge $open={openNow}>
-              <S.StatusDot $open={openNow} />
-              {t(openNow ? 'dining.open' : 'dining.closed')}
-            </S.StatusBadge>
-          </S.HallNameRow>
+          <S.HallName>{t(`dining.halls.${hall}`)}</S.HallName>
           <S.Hours>{t('dining.hoursToday', { hours: getDiningHoursToday(hall) })}</S.Hours>
           {nextOpen && <S.NextOpen>{formatNextOpenLabel(t, nextOpen)}</S.NextOpen>}
         </S.HeaderText>
-        <IconButton
-          aria-label={t(isFavorite ? 'dining.favoriteRemove' : 'dining.favoriteAdd')}
-          aria-pressed={isFavorite}
-          onClick={handleFavoriteClick}
-        >
-          <FontAwesomeIcon icon={faStar} />
-        </IconButton>
+        <S.HeaderActions>
+          <S.StatusBadge $open={openNow}>
+            <S.StatusDot $open={openNow} />
+            {t(openNow ? 'dining.open' : 'dining.closed')}
+          </S.StatusBadge>
+          <IconButton
+            aria-label={t(isFavorite ? 'dining.favoriteRemove' : 'dining.favoriteAdd')}
+            aria-pressed={isFavorite}
+            onClick={handleFavoriteClick}
+          >
+            <FontAwesomeIcon icon={faStar} />
+          </IconButton>
+        </S.HeaderActions>
       </S.Header>
 
       <S.MenuRow>

@@ -37,10 +37,11 @@ export const S = {
     gap: 4px;
     min-width: 0;
   `,
-  HallNameRow: styled.div`
+  HeaderActions: styled.div`
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-shrink: 0;
   `,
   HallName: styled.span`
     font-size: 16px;
