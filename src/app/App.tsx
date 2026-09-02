@@ -14,6 +14,9 @@ const DiningHallDetailPage = lazy(() =>
   import('../pages/dining/DiningHallDetailPage').then((m) => ({ default: m.DiningHallDetailPage })),
 )
 const SettingsPage = lazy(() => import('../pages/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })))
+const FriendSchedulePage = lazy(() =>
+  import('../pages/friends/FriendSchedulePage').then((m) => ({ default: m.FriendSchedulePage })),
+)
 
 const MIN_SPLASH_MS = 500
 
@@ -49,6 +52,7 @@ export function App() {
               <Route path="/community/:boardId" element={<BoardPage />} />
               <Route path="/community/:boardId/:postId" element={<PostDetailPage />} />
               <Route path="/schedule" element={<SchedulePage />} />
+              <Route path="/friends/:friendUserId" element={<FriendSchedulePage />} />
               <Route path="/map" element={<MapPage />} />
               <Route path="/dining" element={<DiningPage />} />
               <Route path="/dining/:hallSlug" element={<DiningHallDetailPage />} />

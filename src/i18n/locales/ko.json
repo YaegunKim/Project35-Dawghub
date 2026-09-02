@@ -43,6 +43,10 @@
     "courseCode": "과목 코드 (예: CSCI 4300)",
     "title": "과목명 (선택)",
     "location": "장소 (선택)",
+    "setLocation": "위치 설정",
+    "locationPickedNote": "지도에 핀을 찍었어요",
+    "pickLocationHint": "탭해서 이 수업의 장소를 선택하세요",
+    "pickLocationLabel": "선택한 위치",
     "add": "수업 추가",
     "addBySearch": "수업 추가하기",
     "addManually": "직접 추가하기",
@@ -50,8 +54,12 @@
     "search": "검색",
     "searching": "검색 중...",
     "searchEmpty": "검색 결과가 없어요.",
+    "filterAllSubjects": "전체 과목",
+    "filterAllLevels": "전체 레벨",
+    "levelLabel": "{{label}}번대",
     "addSection": "추가",
     "sectionLabel": "분반 {{section}}",
+    "courseInfo": "과목 상세정보",
     "ratingMeta": "난이도 {{difficulty}} · 리뷰 {{count}}개",
     "ratingRetake": " · 재수강 의향 {{percent}}%",
     "reviewsLoading": "리뷰 불러오는 중...",
@@ -70,6 +78,15 @@
       "FRI": "금요일",
       "SAT": "토요일",
       "SUN": "일요일"
+    },
+    "daysShort": {
+      "MON": "월",
+      "TUE": "화",
+      "WED": "수",
+      "THU": "목",
+      "FRI": "금",
+      "SAT": "토",
+      "SUN": "일"
     }
   },
   "map": {
@@ -104,6 +121,28 @@
       "custom": "선택한 노선만",
       "selectRoutes": "노선 선택"
     }
+  },
+  "friends": {
+    "label": "친구",
+    "open": "친구 목록 열기",
+    "myFriends": "내 친구",
+    "pending": "받은 요청",
+    "sentRequests": "보낸 요청",
+    "incomingRequest": "친구 요청을 보냈어요",
+    "awaitingResponse": "응답 대기 중",
+    "accept": "수락",
+    "decline": "거절",
+    "empty": "아직 친구가 없어요. 아래에서 이메일로 추가해보세요.",
+    "addPlaceholder": "친구의 @uga.edu 이메일",
+    "addSubmit": "친구 요청 보내기",
+    "alreadyConnected": "이미 이 이메일과 연결되어 있어요.",
+    "notFound": "해당 이메일로 가입된 DawgHub 계정이 없어요.",
+    "addError": "친구 요청을 보내지 못했어요. 다시 시도해주세요.",
+    "backToSchedule": "내 시간표로 돌아가기",
+    "scheduleTitle": "{{email}}님의 시간표",
+    "scheduleTitleGeneric": "친구의 시간표",
+    "scheduleLoading": "시간표 불러오는 중...",
+    "scheduleEmpty": "이 친구는 아직 등록된 수업이 없어요."
   },
   "dining": {
     "halls": {

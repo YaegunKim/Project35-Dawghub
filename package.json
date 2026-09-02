@@ -15,6 +15,9 @@
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.15.5",
+    "@aws-sdk/client-cognito-identity-provider": "^3.1123.0",
+    "@aws-sdk/client-dynamodb": "^3.1123.0",
+    "@aws-sdk/lib-dynamodb": "^3.1123.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@fortawesome/fontawesome-svg-core": "^7.3.1",
