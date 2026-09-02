@@ -1,92 +1,38 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import { createPortal } from 'react-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCircleInfo, faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../../design-system/Button/Button'
 import { Input } from '../../design-system/Input/Input'
 import { Select } from '../../design-system/Select/Select'
 import { IconButton } from '../../design-system/IconButton/IconButton'
 import { EmptyState } from '../../design-system/EmptyState/EmptyState'
+import { Skeleton } from '../../design-system/Skeleton/Skeleton'
 import { PageTitle } from '../../design-system/Page/Page'
-import { category } from '../../design-system/colors'
+import { FriendsDrawer } from '../../app/AppShell/FriendsDrawer'
 import { client } from '../../lib/amplifyClient'
 import { fetchUgaBuildings } from '../../lib/ugaBuildings'
+import { UGA_SUBJECTS } from '../../lib/ugaSubjects'
 import { CLASS_ENTRIES_KEY } from '../../lib/queryKeys'
+import { DAYS, PX_PER_HOUR, DEFAULT_START_HOUR, DEFAULT_END_HOUR, toMinutes, colorForCourse, formatHour, layoutDay } from '../../lib/scheduleGrid'
+import type { Day, LaidOutEntry } from '../../lib/scheduleGrid'
+import type { ScheduleDraft } from '../../lib/scheduleLocationPick'
+import type { MapLocationState, MapPickIntent, MapPickResultState } from '../../lib/mapNavigation'
 import type { Schema } from '../../../amplify/data/resource'
 import { S } from './SchedulePage.style'
 
 type ClassEntry = Schema['ClassEntry']['type']
 
-const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as const
-type Day = (typeof DAYS)[number]
-
-const PX_PER_HOUR = 56
-const DEFAULT_START_HOUR = 8
-const DEFAULT_END_HOUR = 18
-
-const COURSE_COLORS = category.courses
-
-function toMinutes(time: string) {
-  const [h, m] = time.split(':').map(Number)
-  return h * 60 + m
-}
-
-function colorForCourse(code: string) {
-  let hash = 0
-  for (let i = 0; i < code.length; i++) hash = (hash * 31 + code.charCodeAt(i)) >>> 0
-  return COURSE_COLORS[hash % COURSE_COLORS.length]
-}
+const SEARCH_PAGE_SIZE = 20
+const LEVEL_OPTIONS = ['1', '2', '3', '4', '5'] as const
 
 function ratingColor(score: number) {
   const clamped = Math.min(5, Math.max(1, score))
   const hue = ((clamped - 1) / 4) * 120
   return `hsl(${hue.toFixed(0)}, 70%, 42%)`
-}
-
-function formatHour(hour: number) {
-  const normalized = ((hour % 24) + 24) % 24
-  const h12 = normalized % 12 === 0 ? 12 : normalized % 12
-  const suffix = normalized < 12 ? 'a' : 'p'
-  return `${h12}${suffix}`
-}
-
-type LaidOutEntry = ClassEntry & { column: number; columns: number }
-
-function layoutDay(dayEntries: ClassEntry[]): LaidOutEntry[] {
-  const sorted = [...dayEntries].sort((a, b) => toMinutes(a.startTime) - toMinutes(b.startTime))
-  const clusters: ClassEntry[][] = []
-  let current: ClassEntry[] = []
-  let currentEnd = -1
-
-  for (const entry of sorted) {
-    if (current.length === 0 || toMinutes(entry.startTime) < currentEnd) {
-      current.push(entry)
-      currentEnd = Math.max(currentEnd, toMinutes(entry.endTime))
-    } else {
-      clusters.push(current)
-      current = [entry]
-      currentEnd = toMinutes(entry.endTime)
-    }
-  }
-  if (current.length) clusters.push(current)
-
-  const result: LaidOutEntry[] = []
-  for (const cluster of clusters) {
-    const columnEnds: number[] = []
-    for (const entry of cluster) {
-      const start = toMinutes(entry.startTime)
-      let column = columnEnds.findIndex((end) => end <= start)
-      if (column === -1) {
-        column = columnEnds.length
-        columnEnds.push(toMinutes(entry.endTime))
-      } else {
-        columnEnds[column] = toMinutes(entry.endTime)
-      }
-      result.push({ ...entry, column, columns: 0 })
-    }
-    const columns = columnEnds.length
-    for (const entry of result.slice(-cluster.length)) entry.columns = columns
-  }
-  return result
 }
 
 type UgaClassMeeting = NonNullable<Schema['UgaClassMeeting']['type']>
@@ -129,6 +75,12 @@ type SelectedProfessor = {
 
 function professorKey(firstName: string, lastName: string) {
   return `${firstName.trim().toLowerCase()}|${lastName.trim().toLowerCase()}`
+}
+
+// RateMyProfessors reports avgRating as 0 (not null) for professors with zero
+// reviews — treat that the same as "no rating" rather than showing a literal 0.
+function hasRating(rating: ProfessorRating | undefined | null): rating is ProfessorRating & { rating: number } {
+  return typeof rating?.rating === 'number' && (rating.numRatings ?? 0) > 0
 }
 
 function normalizeMeeting(raw: UgaClassMeeting): ClassMeeting | null {
@@ -289,6 +241,8 @@ function groupSections(sections: ClassSection[]): CourseGroup[] {
 export function SchedulePage() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
+  const routerLocation = useLocation()
   const { data: entries = [], isLoading: loading } = useQuery({
     queryKey: CLASS_ENTRIES_KEY,
     queryFn: async () => {
@@ -306,12 +260,24 @@ export function SchedulePage() {
   const [startTime, setStartTime] = useState('')
   const [endTime, setEndTime] = useState('')
   const [location, setLocation] = useState('')
+  const [locationLat, setLocationLat] = useState<number | null>(null)
+  const [locationLng, setLocationLng] = useState<number | null>(null)
   const [buildingNames, setBuildingNames] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [searchLoading, setSearchLoading] = useState(false)
   const [searchResults, setSearchResults] = useState<ClassMeeting[] | null>(null)
+  const [subjectFilter, setSubjectFilter] = useState('')
+  const [levelFilter, setLevelFilter] = useState('')
+  const [openFilterMenu, setOpenFilterMenu] = useState<'subject' | 'level' | null>(null)
+  const [filterMenuPosition, setFilterMenuPosition] = useState<{ top: number; left: number; width: number } | null>(
+    null,
+  )
+  const subjectFilterButtonRef = useRef<HTMLButtonElement>(null)
+  const levelFilterButtonRef = useRef<HTMLButtonElement>(null)
+  const [visibleCount, setVisibleCount] = useState(SEARCH_PAGE_SIZE)
   const [professorRatings, setProfessorRatings] = useState<Record<string, ProfessorRating>>({})
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
+  const [infoGroup, setInfoGroup] = useState<CourseGroup | null>(null)
   const [selectedProfessor, setSelectedProfessor] = useState<SelectedProfessor | null>(null)
   const [professorReviews, setProfessorReviews] = useState<ProfessorReview[] | null>(null)
   const [professorReviewsLoading, setProfessorReviewsLoading] = useState(false)
@@ -325,6 +291,35 @@ export function SchedulePage() {
       cancelled = true
     }
   }, [])
+
+  // Restores the in-progress add-class form after a round trip to /map for location
+  // picking — the modal (and its field state) unmounts on navigation, so MapPage hands
+  // the draft back via router state instead of it surviving in place. See
+  // src/lib/scheduleLocationPick.ts for the shared contract.
+  useEffect(() => {
+    const state = routerLocation.state as MapPickResultState | null
+    if (!state?.draft) return
+    const draft = state.draft as ScheduleDraft
+    setCourseCode(draft.courseCode)
+    setTitle(draft.title)
+    setDay(draft.day)
+    setStartTime(draft.startTime)
+    setEndTime(draft.endTime)
+    if (state.pickedLocation) {
+      setLocation(state.pickedLocation.label)
+      setLocationLat(state.pickedLocation.lat)
+      setLocationLng(state.pickedLocation.lng)
+    } else {
+      setLocation(draft.location)
+      setLocationLat(draft.locationLat)
+      setLocationLng(draft.locationLng)
+    }
+    setShowForm(true)
+    navigate('.', { replace: true, state: null })
+  }, [routerLocation.state, navigate])
+
+
+
 
   const { rangeStartHour, rangeEndHour } = useMemo(() => {
     if (entries.length === 0) return { rangeStartHour: DEFAULT_START_HOUR, rangeEndHour: DEFAULT_END_HOUR }
@@ -340,7 +335,7 @@ export function SchedulePage() {
   const hourMarks = Array.from({ length: totalHours + 1 }, (_, i) => rangeStartHour + i)
 
   const entriesByDay = useMemo(() => {
-    const map = new Map<Day, LaidOutEntry[]>()
+    const map = new Map<Day, LaidOutEntry<ClassEntry>[]>()
     for (const d of DAYS) map.set(d, layoutDay(entries.filter((entry) => entry.day === d)))
     return map
   }, [entries])
@@ -363,6 +358,8 @@ export function SchedulePage() {
       startTime,
       endTime,
       location: location.trim() || undefined,
+      locationLat: locationLat ?? undefined,
+      locationLng: locationLng ?? undefined,
     })
     if (data) {
       queryClient.setQueryData<ClassEntry[]>(CLASS_ENTRIES_KEY, (prev) => [...(prev ?? []), data])
@@ -372,7 +369,21 @@ export function SchedulePage() {
     setStartTime('')
     setEndTime('')
     setLocation('')
+    setLocationLat(null)
+    setLocationLng(null)
     setShowForm(false)
+  }
+
+  function handlePickLocationOnMap() {
+    const draft: ScheduleDraft = { courseCode, title, day, startTime, endTime, location, locationLat, locationLng }
+    const pickIntent: MapPickIntent = {
+      returnTo: '/schedule',
+      hint: t('schedule.pickLocationHint'),
+      cancelLabel: t('schedule.cancel'),
+      pointLabel: t('schedule.pickLocationLabel'),
+      draft,
+    }
+    navigate('/map', { state: { pickIntent } satisfies MapLocationState })
   }
 
   async function handleDelete(courseCode: string) {
@@ -384,27 +395,74 @@ export function SchedulePage() {
     setSelectedId(null)
   }
 
-  async function handleSearch(event: FormEvent) {
-    event.preventDefault()
-    const query = searchQuery.trim()
-    if (!query) return
-
+  async function runSearch() {
     setSearchLoading(true)
     setSearchResults(null)
+    setVisibleCount(SEARCH_PAGE_SIZE)
     try {
-      const { data } = await client.queries.searchUgaClasses({ query })
+      const { data } = await client.queries.searchUgaClasses({
+        query: searchQuery.trim() || undefined,
+        subject: subjectFilter || undefined,
+        level: levelFilter || undefined,
+      })
       const meetings = (data ?? [])
         .filter((meeting): meeting is UgaClassMeeting => meeting !== null)
         .map(normalizeMeeting)
         .filter((meeting): meeting is ClassMeeting => meeting !== null)
       setSearchResults(meetings)
-      fetchProfessorRatings(meetings)
     } catch {
       setSearchResults([])
     } finally {
       setSearchLoading(false)
     }
   }
+
+  async function handleSearch(event: FormEvent) {
+    event.preventDefault()
+    await runSearch()
+  }
+
+  // The filter menu renders in a portal (outside the modal's DOM subtree) so
+  // it isn't clipped by S.SearchPanel's `overflow: hidden` (needed there to
+  // keep the modal's rounded corners) — so its position has to be computed
+  // from the trigger button's actual on-screen position instead of relying
+  // on normal in-flow `position: absolute`.
+  function toggleFilterMenu(which: 'subject' | 'level') {
+    if (openFilterMenu === which) {
+      setOpenFilterMenu(null)
+      return
+    }
+    const buttonEl = which === 'subject' ? subjectFilterButtonRef.current : levelFilterButtonRef.current
+    if (buttonEl) {
+      const rect = buttonEl.getBoundingClientRect()
+      setFilterMenuPosition({ top: rect.bottom + 4, left: rect.left, width: rect.width })
+    }
+    setOpenFilterMenu(which)
+  }
+
+  // Re-runs whenever the search panel opens (default "browse everything" view)
+  // or a filter dropdown changes; free-text query changes only take effect on
+  // explicit submit, matching the search button's existing behavior.
+  useEffect(() => {
+    if (!showSearch) return
+    runSearch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showSearch, subjectFilter, levelFilter])
+
+  // Only fetch ratings for professors teaching the currently visible page of
+  // results — the default browse view can match hundreds of sections, and
+  // rating every one of them up front would fire that many RateMyProfessors
+  // lookups at once instead of the ~20 actually on screen.
+  useEffect(() => {
+    if (!searchResults) return
+    const visibleGroups = sortResultGroups(groupSections(groupByCrn(searchResults))).slice(0, visibleCount)
+    const visibleMeetings = visibleGroups.flatMap((group) => [
+      ...group.commonMeetings,
+      ...group.options.flatMap((option) => option.meetings),
+    ])
+    fetchProfessorRatings(visibleMeetings)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchResults, visibleCount])
 
   function fetchProfessorRatings(meetings: ClassMeeting[]) {
     const instructors = new Map<string, { firstName: string; lastName: string }>()
@@ -508,13 +566,46 @@ export function SchedulePage() {
       .finally(() => setProfessorReviewsLoading(false))
   }
 
+  // Groups with a higher-rated representative professor sort first; groups
+  // with no rating yet (not loaded, or professor not found) sink to the end
+  // rather than jumping around as ratings stream in.
+  function groupRating(group: CourseGroup): number | null {
+    const representative = group.options.length === 1 ? group.options[0] : group.sharedInstructor
+    if (!representative?.instructorFirstName || !representative.instructorLastName) return null
+    const rating = professorRatings[professorKey(representative.instructorFirstName, representative.instructorLastName)]
+    return hasRating(rating) ? rating.rating : null
+  }
+
+  // "CSCI 1301" -> ['CSCI', 1301], compared subject-then-number so course
+  // numbers sort correctly regardless of digit count (e.g. "99" vs "100").
+  function compareCourseCode(a: string, b: string): number {
+    const [subjectA, numberA] = a.split(/\s+/)
+    const [subjectB, numberB] = b.split(/\s+/)
+    if (subjectA !== subjectB) return subjectA.localeCompare(subjectB)
+    return (parseInt(numberA, 10) || 0) - (parseInt(numberB, 10) || 0)
+  }
+
+  function sortResultGroups(groups: CourseGroup[]): CourseGroup[] {
+    return [...groups].sort((a, b) => {
+      const codeCompare = compareCourseCode(a.courseCode, b.courseCode)
+      if (codeCompare !== 0) return codeCompare
+
+      const ratingA = groupRating(a)
+      const ratingB = groupRating(b)
+      if (ratingA === null && ratingB === null) return 0
+      if (ratingA === null) return 1
+      if (ratingB === null) return -1
+      return ratingB - ratingA
+    })
+  }
+
   // For now, the class list only shows the professor's name + score; tapping
   // it opens the full breakdown (difficulty, would-retake, reviews).
   function renderProfessorSummary(firstName: string, lastName: string, name: string) {
     if (!name) return null
     const rating = firstName && lastName ? professorRatings[professorKey(firstName, lastName)] : null
 
-    if (!rating?.found) return <S.DetailSub>{name}</S.DetailSub>
+    if (!rating?.found) return <S.ProfessorName>{name}</S.ProfessorName>
 
     const open = (event: { stopPropagation: () => void }) => {
       event.stopPropagation()
@@ -530,12 +621,24 @@ export function SchedulePage() {
           if (event.key === 'Enter' || event.key === ' ') open(event)
         }}
       >
-        <S.DetailSub>{name}</S.DetailSub>
-        {typeof rating.rating === 'number' && (
-          <S.RatingBadge style={{ background: ratingColor(rating.rating) }}>{rating.rating.toFixed(1)}</S.RatingBadge>
+        <S.ProfessorName>{name}</S.ProfessorName>
+        {hasRating(rating) && (
+          <S.RatingBadgeCompact style={{ background: ratingColor(rating.rating) }}>
+            {rating.rating.toFixed(1)}
+          </S.RatingBadgeCompact>
         )}
       </S.ProfessorButton>
     )
+  }
+
+  // Short day labels vary in length by locale (Korean: single character,
+  // English: "Mon"/"Tue"/...) — only join multi-character labels with a
+  // separator, so Korean stays compact ("월수") while English stays readable
+  // ("Mon/Wed") instead of running together as "MonWed".
+  function formatDays(days: Day[]) {
+    const labels = days.map((d) => t(`schedule.daysShort.${d}`))
+    const separator = labels.some((label) => label.length > 1) ? '/' : ''
+    return labels.join(separator)
   }
 
   function renderMeetingList(meetings: ClassMeeting[]) {
@@ -544,15 +647,15 @@ export function SchedulePage() {
       <S.MeetingList>
         {meetings.map((meeting, index) => (
           <S.MeetingRow key={index}>
-            <S.MeetingTopRow>
-              <S.DayChip>{meeting.days.map((d) => t(`schedule.days.${d}`).slice(0, 1)).join('')}</S.DayChip>
-              {meeting.section && <S.SectionChip>{t('schedule.sectionLabel', { section: meeting.section })}</S.SectionChip>}
-            </S.MeetingTopRow>
+            <S.DayChip>{formatDays(meeting.days)}</S.DayChip>
             <S.MeetingTime>
               {meeting.startTime}–{meeting.endTime}
             </S.MeetingTime>
             {(meeting.building || meeting.room) && (
               <S.MeetingLocationText>{[meeting.building, meeting.room].filter(Boolean).join(' ')}</S.MeetingLocationText>
+            )}
+            {meeting.section && meeting.section !== '0' && (
+              <S.SectionChip>{t('schedule.sectionLabel', { section: meeting.section })}</S.SectionChip>
             )}
           </S.MeetingRow>
         ))}
@@ -563,7 +666,10 @@ export function SchedulePage() {
   return (
     <S.Root>
       <S.Padded>
-        <PageTitle>{t('nav.schedule')}</PageTitle>
+        <S.TitleRow>
+          <PageTitle>{t('nav.schedule')}</PageTitle>
+          <FriendsDrawer />
+        </S.TitleRow>
       </S.Padded>
 
       {showForm && (
@@ -598,12 +704,24 @@ export function SchedulePage() {
                   <Input type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} />
                   <Input type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} />
                 </S.Row>
-                <Input
-                  list="uga-building-names"
-                  placeholder={t('schedule.location')}
-                  value={location}
-                  onChange={(event) => setLocation(event.target.value)}
-                />
+                <S.LocationRow>
+                  <Input
+                    list="uga-building-names"
+                    placeholder={t('schedule.location')}
+                    value={location}
+                    onChange={(event) => {
+                      setLocation(event.target.value)
+                      setLocationLat(null)
+                      setLocationLng(null)
+                    }}
+                  />
+                  <Button type="button" variant="secondary" onClick={handlePickLocationOnMap}>
+                    {t('schedule.setLocation')}
+                  </Button>
+                </S.LocationRow>
+                {locationLat != null && locationLng != null && (
+                  <S.LocationPickedNote>{t('schedule.locationPickedNote')}</S.LocationPickedNote>
+                )}
                 <datalist id="uga-building-names">
                   {buildingNames.map((name) => (
                     <option key={name} value={name} />
@@ -616,66 +734,60 @@ export function SchedulePage() {
         </S.ModalBackdrop>
       )}
 
-      {loading ? (
-        <S.Padded>
-          <EmptyState>{t('schedule.loading')}</EmptyState>
-        </S.Padded>
-      ) : (
-        <S.GridWrap>
-          <S.Grid>
-            <S.CornerCell />
-            {DAYS.map((d) => (
-              <S.DayHeader key={d}>{t(`schedule.days.${d}`).slice(0, 3)}</S.DayHeader>
-            ))}
+      <S.GridWrap>
+        <S.Grid>
+          <S.CornerCell />
+          {DAYS.map((d) => (
+            <S.DayHeader key={d}>{t(`schedule.days.${d}`).slice(0, 3)}</S.DayHeader>
+          ))}
 
-            <S.TimeAxis style={{ height: totalHours * PX_PER_HOUR }}>
+          <S.TimeAxis style={{ height: totalHours * PX_PER_HOUR }}>
+            {hourMarks.map((hour) => (
+              <S.HourLabel key={hour} style={{ top: (hour - rangeStartHour) * PX_PER_HOUR }}>
+                {formatHour(hour)}
+              </S.HourLabel>
+            ))}
+          </S.TimeAxis>
+
+          {DAYS.map((d) => (
+            <S.DayColumn key={d} style={{ height: totalHours * PX_PER_HOUR }}>
               {hourMarks.map((hour) => (
-                <S.HourLabel key={hour} style={{ top: (hour - rangeStartHour) * PX_PER_HOUR }}>
-                  {formatHour(hour)}
-                </S.HourLabel>
+                <S.HourLine key={hour} style={{ top: (hour - rangeStartHour) * PX_PER_HOUR }} />
               ))}
-            </S.TimeAxis>
-
-            {DAYS.map((d) => (
-              <S.DayColumn key={d} style={{ height: totalHours * PX_PER_HOUR }}>
-                {hourMarks.map((hour) => (
-                  <S.HourLine key={hour} style={{ top: (hour - rangeStartHour) * PX_PER_HOUR }} />
-                ))}
-                {(entriesByDay.get(d) ?? []).map((entry) => {
-                  const top = ((toMinutes(entry.startTime) - rangeStartHour * 60) / 60) * PX_PER_HOUR
-                  const height = Math.max(
-                    ((toMinutes(entry.endTime) - toMinutes(entry.startTime)) / 60) * PX_PER_HOUR,
-                    20,
-                  )
-                  const width = 100 / entry.columns
-                  const left = entry.column * width
-                  return (
-                    <S.Block
-                      key={entry.id}
-                      onClick={() => setSelectedId(entry.id)}
-                      style={{
-                        top,
-                        height,
-                        left: `${left}%`,
-                        width: `calc(${width}% - 4px)`,
-                        background: colorForCourse(entry.courseCode),
-                      }}
-                    >
-                      <S.BlockCourse>{entry.courseCode}</S.BlockCourse>
-                      {height > 34 && (
-                        <S.BlockTime>
-                          {entry.startTime}–{entry.endTime}
-                        </S.BlockTime>
-                      )}
-                      {height > 50 && entry.location && <S.BlockLocation>{entry.location}</S.BlockLocation>}
-                    </S.Block>
-                  )
-                })}
-              </S.DayColumn>
-            ))}
-          </S.Grid>
-        </S.GridWrap>
-      )}
+              {(entriesByDay.get(d) ?? []).map((entry) => {
+                const top = ((toMinutes(entry.startTime) - rangeStartHour * 60) / 60) * PX_PER_HOUR
+                const height = Math.max(
+                  ((toMinutes(entry.endTime) - toMinutes(entry.startTime)) / 60) * PX_PER_HOUR,
+                  20,
+                )
+                const width = 100 / entry.columns
+                const left = entry.column * width
+                return (
+                  <S.Block
+                    key={entry.id}
+                    onClick={() => setSelectedId(entry.id)}
+                    style={{
+                      top,
+                      height,
+                      left: `${left}%`,
+                      width: `calc(${width}% - 4px)`,
+                      background: colorForCourse(entry.courseCode),
+                    }}
+                  >
+                    <S.BlockCourse>{entry.courseCode}</S.BlockCourse>
+                    {height > 34 && (
+                      <S.BlockTime>
+                        {entry.startTime}–{entry.endTime}
+                      </S.BlockTime>
+                    )}
+                    {height > 50 && entry.location && <S.BlockLocation>{entry.location}</S.BlockLocation>}
+                  </S.Block>
+                )
+              })}
+            </S.DayColumn>
+          ))}
+        </S.Grid>
+      </S.GridWrap>
 
       {showSearch && (
         <S.SearchBackdrop onClick={() => setShowSearch(false)}>
@@ -695,10 +807,124 @@ export function SchedulePage() {
                 />
                 <Button type="submit">{t('schedule.search')}</Button>
               </S.Row>
+              <S.Row>
+                <S.FilterMenuWrap>
+                  <S.FilterButton
+                    ref={subjectFilterButtonRef}
+                    type="button"
+                    $active={openFilterMenu === 'subject'}
+                    onClick={() => toggleFilterMenu('subject')}
+                  >
+                    <span>{subjectFilter || t('schedule.filterAllSubjects')}</span>
+                    <FontAwesomeIcon icon={faChevronDown} />
+                  </S.FilterButton>
+                </S.FilterMenuWrap>
+                <S.FilterMenuWrap>
+                  <S.FilterButton
+                    ref={levelFilterButtonRef}
+                    type="button"
+                    $active={openFilterMenu === 'level'}
+                    onClick={() => toggleFilterMenu('level')}
+                  >
+                    <span>
+                      {levelFilter
+                        ? t('schedule.levelLabel', { label: levelFilter === '5' ? '5000+' : `${levelFilter}000` })
+                        : t('schedule.filterAllLevels')}
+                    </span>
+                    <FontAwesomeIcon icon={faChevronDown} />
+                  </S.FilterButton>
+                </S.FilterMenuWrap>
+              </S.Row>
             </S.SearchPanelHeader>
 
-            <S.SearchPanelBody>
-              {searchLoading && <EmptyState>{t('schedule.searching')}</EmptyState>}
+            {openFilterMenu &&
+              filterMenuPosition &&
+              createPortal(
+                <>
+                  <S.FilterMenuBackdrop onClick={() => setOpenFilterMenu(null)} />
+                  <S.FilterMenu
+                    style={{
+                      top: filterMenuPosition.top,
+                      left: filterMenuPosition.left,
+                      width: Math.max(filterMenuPosition.width, 220),
+                    }}
+                  >
+                    {openFilterMenu === 'subject' ? (
+                      <>
+                        <S.FilterMenuItem
+                          type="button"
+                          $selected={!subjectFilter}
+                          onClick={() => {
+                            setSubjectFilter('')
+                            setOpenFilterMenu(null)
+                          }}
+                        >
+                          {t('schedule.filterAllSubjects')}
+                        </S.FilterMenuItem>
+                        {UGA_SUBJECTS.map((subject) => (
+                          <S.FilterMenuItem
+                            key={subject.code}
+                            type="button"
+                            $selected={subjectFilter === subject.code}
+                            onClick={() => {
+                              setSubjectFilter(subject.code)
+                              setOpenFilterMenu(null)
+                            }}
+                          >
+                            {subject.description ? `${subject.code} — ${subject.description}` : subject.code}
+                          </S.FilterMenuItem>
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        <S.FilterMenuItem
+                          type="button"
+                          $selected={!levelFilter}
+                          onClick={() => {
+                            setLevelFilter('')
+                            setOpenFilterMenu(null)
+                          }}
+                        >
+                          {t('schedule.filterAllLevels')}
+                        </S.FilterMenuItem>
+                        {LEVEL_OPTIONS.map((level) => (
+                          <S.FilterMenuItem
+                            key={level}
+                            type="button"
+                            $selected={levelFilter === level}
+                            onClick={() => {
+                              setLevelFilter(level)
+                              setOpenFilterMenu(null)
+                            }}
+                          >
+                            {t('schedule.levelLabel', { label: level === '5' ? '5000+' : `${level}000` })}
+                          </S.FilterMenuItem>
+                        ))}
+                      </>
+                    )}
+                  </S.FilterMenu>
+                </>,
+                document.body,
+              )}
+
+            <S.SearchPanelBody
+              onScroll={(event) => {
+                const el = event.currentTarget
+                if (el.scrollTop + el.clientHeight >= el.scrollHeight - 120) {
+                  setVisibleCount((prev) => prev + SEARCH_PAGE_SIZE)
+                }
+              }}
+            >
+              {searchLoading && (
+                <S.SectionList>
+                  {[0, 1, 2].map((i) => (
+                    <S.SectionCard key={i}>
+                      <Skeleton height="16px" width="45%" />
+                      <Skeleton height="28px" width="85%" radius="8px" />
+                    </S.SectionCard>
+                  ))}
+                </S.SectionList>
+              )}
 
               {!searchLoading && searchResults !== null && searchResults.length === 0 && (
                 <EmptyState>{t('schedule.searchEmpty')}</EmptyState>
@@ -706,77 +932,87 @@ export function SchedulePage() {
 
               {!searchLoading && searchResults && searchResults.length > 0 && (
                 <S.SectionList>
-                  {groupSections(groupByCrn(searchResults)).map((group) => {
+                  {sortResultGroups(groupSections(groupByCrn(searchResults)))
+                    .slice(0, visibleCount)
+                    .map((group) => {
                     const singleOption = group.options.length === 1 ? group.options[0] : null
                     const selectedCrn = selectedOptions[group.key]
                     const selectedOption = group.options.find((option) => option.crn === selectedCrn) ?? null
 
                     return (
                       <S.SectionCard key={group.key}>
-                        <S.PanelHeader>
-                          <S.SectionInfo>
-                            <S.DetailCourse>{group.courseCode}</S.DetailCourse>
-                            <S.DetailSub>{group.title}</S.DetailSub>
-                          </S.SectionInfo>
-                          {singleOption && (
-                            <Button
-                              type="button"
-                              onClick={() =>
-                                handleAddSection({
-                                  crn: singleOption.crn,
-                                  courseCode: group.courseCode,
-                                  title: group.title,
-                                  section: '',
-                                  scheduleType: group.scheduleType,
-                                  instructor: singleOption.instructor,
-                                  instructorFirstName: singleOption.instructorFirstName,
-                                  instructorLastName: singleOption.instructorLastName,
-                                  meetings: singleOption.meetings,
-                                })
-                              }
-                            >
-                              {t('schedule.addSection')}
-                            </Button>
-                          )}
-                        </S.PanelHeader>
+                        <S.SectionHeader>
+                          <S.PanelHeader>
+                            <S.CourseCodeRow>
+                              <S.DetailCourse>{group.courseCode}</S.DetailCourse>
+                              <S.InfoButton
+                                type="button"
+                                onClick={() => setInfoGroup(group)}
+                                aria-label={t('schedule.courseInfo')}
+                              >
+                                <FontAwesomeIcon icon={faCircleInfo} />
+                              </S.InfoButton>
+                            </S.CourseCodeRow>
+                            {singleOption && (
+                              <Button
+                                type="button"
+                                onClick={() =>
+                                  handleAddSection({
+                                    crn: singleOption.crn,
+                                    courseCode: group.courseCode,
+                                    title: group.title,
+                                    section: '',
+                                    scheduleType: group.scheduleType,
+                                    instructor: singleOption.instructor,
+                                    instructorFirstName: singleOption.instructorFirstName,
+                                    instructorLastName: singleOption.instructorLastName,
+                                    meetings: singleOption.meetings,
+                                  })
+                                }
+                              >
+                                {t('schedule.addSection')}
+                              </Button>
+                            )}
+                          </S.PanelHeader>
 
-                        {singleOption ? (
-                          <>
-                            {renderProfessorSummary(
+                          {singleOption &&
+                            renderProfessorSummary(
                               singleOption.instructorFirstName,
                               singleOption.instructorLastName,
                               singleOption.instructor,
                             )}
-                            {renderMeetingList(singleOption.meetings)}
-                          </>
+                          {!singleOption &&
+                            group.sharedInstructor &&
+                            renderProfessorSummary(
+                              group.sharedInstructor.instructorFirstName,
+                              group.sharedInstructor.instructorLastName,
+                              group.sharedInstructor.instructor,
+                            )}
+                        </S.SectionHeader>
+
+                        {singleOption ? (
+                          <>{renderMeetingList(singleOption.meetings)}</>
                         ) : (
                           <>
-                            {group.sharedInstructor &&
-                              renderProfessorSummary(
-                                group.sharedInstructor.instructorFirstName,
-                                group.sharedInstructor.instructorLastName,
-                                group.sharedInstructor.instructor,
-                              )}
                             {renderMeetingList(group.commonMeetings)}
                             <S.OptionGroup>
                               {group.options.map((option) => (
-                                <S.OptionBranch key={option.crn}>
-                                  <S.OptionCard
-                                    type="button"
-                                    $selected={option.crn === selectedCrn}
-                                    onClick={() =>
-                                      setSelectedOptions((prev) => ({ ...prev, [group.key]: option.crn }))
-                                    }
-                                  >
-                                    {!group.sharedInstructor &&
-                                      renderProfessorSummary(
-                                        option.instructorFirstName,
-                                        option.instructorLastName,
-                                        option.instructor,
-                                      )}
-                                    {renderMeetingList(option.meetings)}
-                                  </S.OptionCard>
-                                </S.OptionBranch>
+                                <S.OptionCard
+                                  key={option.crn}
+                                  type="button"
+                                  $selected={option.crn === selectedCrn}
+                                  onClick={() =>
+                                    setSelectedOptions((prev) => ({ ...prev, [group.key]: option.crn }))
+                                  }
+                                >
+                                  {!group.sharedInstructor &&
+                                    renderProfessorSummary(
+                                      option.instructorFirstName,
+                                      option.instructorLastName,
+                                      option.instructor,
+                                    )}
+                                  {renderMeetingList(option.meetings)}
+                                </S.OptionCard>
                               ))}
                             </S.OptionGroup>
                             <Button
@@ -798,9 +1034,9 @@ export function SchedulePage() {
         </S.SearchBackdrop>
       )}
 
-      {!loading && entries.length === 0 && (
+      {entries.length === 0 && (
         <S.Padded>
-          <EmptyState>{t('schedule.empty')}</EmptyState>
+          <EmptyState>{loading ? t('schedule.loading') : t('schedule.empty')}</EmptyState>
         </S.Padded>
       )}
 
@@ -831,9 +1067,7 @@ export function SchedulePage() {
               <S.MeetingList>
                 {selectedCourseEntries.map((entry) => (
                   <S.MeetingRow key={entry.id}>
-                    <S.MeetingTopRow>
-                      <S.DayChip>{t(`schedule.days.${entry.day as Day}`).slice(0, 1)}</S.DayChip>
-                    </S.MeetingTopRow>
+                    <S.DayChip>{t(`schedule.daysShort.${entry.day as Day}`)}</S.DayChip>
                     <S.MeetingTime>
                       {entry.startTime}–{entry.endTime}
                     </S.MeetingTime>
@@ -850,10 +1084,27 @@ export function SchedulePage() {
         </S.ModalBackdrop>
       )}
 
+      {infoGroup && (
+        <S.ModalBackdrop onClick={() => setInfoGroup(null)}>
+          <S.Detail onClick={(event) => event.stopPropagation()}>
+            <S.DetailBody>
+              <S.PanelHeader>
+                <S.DetailCourse>{infoGroup.courseCode}</S.DetailCourse>
+                <IconButton onClick={() => setInfoGroup(null)} aria-label={t('schedule.close')}>
+                  ×
+                </IconButton>
+              </S.PanelHeader>
+              <S.DetailSub>{infoGroup.title}</S.DetailSub>
+              {infoGroup.scheduleType && <S.DetailSub>{infoGroup.scheduleType}</S.DetailSub>}
+            </S.DetailBody>
+          </S.Detail>
+        </S.ModalBackdrop>
+      )}
+
       {selectedProfessor && (
         <S.ModalBackdrop onClick={() => setSelectedProfessor(null)}>
           <S.Detail onClick={(event) => event.stopPropagation()}>
-            {typeof selectedProfessor.rating.rating === 'number' && (
+            {hasRating(selectedProfessor.rating) && (
               <S.DetailAccent style={{ background: ratingColor(selectedProfessor.rating.rating) }} />
             )}
             <S.DetailBody>
@@ -865,7 +1116,7 @@ export function SchedulePage() {
               </S.PanelHeader>
 
               <S.RatingRow>
-                {typeof selectedProfessor.rating.rating === 'number' && (
+                {hasRating(selectedProfessor.rating) && (
                   <S.RatingBadge style={{ background: ratingColor(selectedProfessor.rating.rating) }}>
                     {selectedProfessor.rating.rating.toFixed(1)}
                   </S.RatingBadge>

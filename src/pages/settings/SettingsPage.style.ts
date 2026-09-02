@@ -81,6 +81,96 @@ export const S = {
     font-size: 12px;
     color: var(--text-muted);
   `,
+  DebugToggleRow: styled.button`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border: none;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  `,
+  DebugBody: styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 1px solid var(--border);
+  `,
+  DebugEmpty: styled.div`
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+  `,
+  DebugStatGrid: styled.div`
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 16px;
+  `,
+  DebugStat: styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  `,
+  DebugStatValue: styled.span`
+    font-size: 20px;
+    font-weight: 700;
+  `,
+  DebugStatLabel: styled.span`
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+  `,
+  DebugRouteTable: styled.div`
+    display: flex;
+    flex-direction: column;
+    max-height: 240px;
+    overflow-y: auto;
+    border-top: 1px solid var(--border);
+  `,
+  DebugRouteRow: styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 16px;
+    font-size: 13px;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--border);
+    }
+
+    span:last-child {
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+  `,
+  DebugRefreshButton: styled.button`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 12px 16px 16px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: ${radius.md};
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity ${motion.duration.fast} ${motion.easing.standard};
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  `,
   SignOutButton: styled.button`
     align-self: flex-start;
     padding: 14px 16px;

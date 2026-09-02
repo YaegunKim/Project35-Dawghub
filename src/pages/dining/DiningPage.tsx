@@ -4,7 +4,7 @@ import { faGear } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconButton } from '../../design-system/IconButton/IconButton'
 import { Page, PageTitle } from '../../design-system/Page/Page'
-import { DINING_HALLS, getCurrentMealType, sortHallsByFavorite } from '../../lib/dining'
+import { DINING_HALLS, formatTodayLabel, getCurrentMealType, sortHallsByFavorite } from '../../lib/dining'
 import { useFavorites } from '../../lib/useFavorites'
 import { DiningHallCard } from './DiningHallCard'
 import { TagSettingsModal } from './TagSettingsModal'
@@ -13,7 +13,7 @@ import { S } from './DiningPage.style'
 const DINING_FAVORITES_KEY = 'dawghub:dining:favorites'
 
 export function DiningPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { favorites, isFavorite, toggleFavorite } = useFavorites(DINING_FAVORITES_KEY)
   const [mealType] = useState(() => getCurrentMealType())
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -23,7 +23,13 @@ export function DiningPage() {
   return (
     <Page>
       <S.TitleRow>
-        <PageTitle>{t('nav.dining')}</PageTitle>
+        <S.TitleGroup>
+          <PageTitle>{t('nav.dining')}</PageTitle>
+          <S.TodayDate>
+            <span aria-hidden="true">📅</span>
+            {formatTodayLabel(t, i18n.language)}
+          </S.TodayDate>
+        </S.TitleGroup>
         <IconButton aria-label={t('dining.tagSettings')} onClick={() => setSettingsOpen(true)}>
           <FontAwesomeIcon icon={faGear} />
         </IconButton>

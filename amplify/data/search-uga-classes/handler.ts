@@ -11,35 +11,31 @@ const SOC_CSV_URLS: Record<string, string> = {
 
 // Some large gen-ed courses (e.g. ENGL1102, POLS1101, FYOS1001) have hundreds of
 // sections/meeting-rows even for one exact course code — this needs to be high
-// enough that an exact course-code search never gets silently truncated.
+// enough that an exact course-code search never gets silently truncated. Also
+// doubles as the cap on the default "browse everything" view (empty query,
+// no filters) — matches are sorted by course code first, so that view is
+// consistently the first MAX_RESULTS courses alphabetically, not an arbitrary
+// CSV-order slice.
 const MAX_RESULTS = 500
 
-type Args = {
-  query: string
-  term?: string | null
-}
-
-type Meeting = {
-  crn: string
-  courseCode: string
-  title: string
-  section: string
-  scheduleType: string
-  instructor: string
-  instructorFirstName: string
-  instructorLastName: string
-  days: string[]
-  startTime: string
-  endTime: string
-  building: string
-  room: string
-}
+// The CSV is ~7-8MB / ~20k rows and identical for every query in a given term,
+// so re-fetching and re-parsing it per search is pure waste — cache the parsed
+// rows in module scope, keyed by term, and reuse them across invocations that
+// land on the same still-warm Lambda container. Only lasts as long as the
+// container does (cold starts / concurrent containers still get a fresh copy),
+// but that's enough to eliminate the repeat cost during a burst of searches.
+const CACHE_TTL_MS = 15 * 60 * 1000
+let csvCache: { term: string; rows: string[][]; fetchedAt: number } | null = null
 
 function defaultTerm(): string {
   const month = new Date().getUTCMonth() + 1
   if (month >= 8) return 'fall'
   if (month >= 6) return 'summer'
   return 'spring'
+}
+
+function resolveTerm(term?: string | null): string {
+  return term && SOC_CSV_URLS[term] ? term : defaultTerm()
 }
 
 // Minimal RFC4180 parser (quoted fields, doubled-quote escaping) — the CSV has
@@ -92,6 +88,67 @@ function parseCsv(text: string): string[][] {
   return rows
 }
 
+async function getRows(term: string): Promise<string[][]> {
+  if (csvCache && csvCache.term === term && Date.now() - csvCache.fetchedAt < CACHE_TTL_MS) {
+    return csvCache.rows
+  }
+
+  const response = await fetch(SOC_CSV_URLS[term])
+  if (!response.ok) {
+    throw new Error(`UGA schedule-of-classes request failed with status ${response.status}`)
+  }
+  const csvText = await response.text()
+  const rows = parseCsv(csvText)
+
+  csvCache = { term, rows, fetchedAt: Date.now() }
+  return rows
+}
+
+function columnIndexer(header: string[]) {
+  const columnIndex = new Map(header.map((name, index) => [name, index]))
+  return (name: string) => columnIndex.get(name) ?? -1
+}
+
+type Args = {
+  query?: string | null
+  term?: string | null
+  subject?: string | null
+  level?: string | null
+}
+
+type Meeting = {
+  crn: string
+  courseCode: string
+  title: string
+  section: string
+  scheduleType: string
+  instructor: string
+  instructorFirstName: string
+  instructorLastName: string
+  days: string[]
+  startTime: string
+  endTime: string
+  building: string
+  room: string
+}
+
+// "CSCI 1301" -> ['CSCI', 1301], compared subject-then-number so course
+// numbers sort correctly regardless of digit count (e.g. "99" vs "100").
+function compareCourseCode(a: string, b: string): number {
+  const [subjectA, numberA] = a.split(/\s+/)
+  const [subjectB, numberB] = b.split(/\s+/)
+  if (subjectA !== subjectB) return subjectA.localeCompare(subjectB)
+  return (parseInt(numberA, 10) || 0) - (parseInt(numberB, 10) || 0)
+}
+
+// Buckets course numbers into UGA's conventional level tiers: '1'..'4' for
+// 1000s-4000s, '5' for everything 5000 and up (grad/professional/dual-listed).
+function courseLevelBucket(courseNumber: string): string {
+  const num = parseInt(courseNumber, 10)
+  if (!Number.isFinite(num) || num <= 0) return ''
+  return String(Math.min(Math.floor(num / 1000), 5))
+}
+
 const DAY_COLUMNS: { column: string; code: string }[] = [
   { column: 'MEETING_TIME.MONDAY_IND', code: 'MON' },
   { column: 'MEETING_TIME.TUESDAY_IND', code: 'TUE' },
@@ -134,29 +191,17 @@ function parseTimeRange(raw: string): { startTime: string; endTime: string } | n
 }
 
 export const handler: AppSyncResolverHandler<Args, Meeting[]> = async (event) => {
-  const query = (event.arguments.query ?? '').trim()
-  if (!query) return []
-
-  const term = event.arguments.term && SOC_CSV_URLS[event.arguments.term] ? event.arguments.term : defaultTerm()
-  const url = SOC_CSV_URLS[term]
-
-  const response = await fetch(url)
-  if (!response.ok) {
-    throw new Error(`UGA schedule-of-classes request failed with status ${response.status}`)
-  }
-  const csvText = await response.text()
-
-  const rows = parseCsv(csvText)
+  const term = resolveTerm(event.arguments.term)
+  const rows = await getRows(term)
   if (rows.length < 2) return []
 
   const header = rows[0]
-  const columnIndex = new Map(header.map((name, index) => [name, index]))
-  const col = (name: string) => columnIndex.get(name) ?? -1
+  const col = columnIndexer(header)
 
+  const statusIdx = col('SCHEDULE_OFFERING.STATUS')
   const subjectIdx = col('SCHEDULE_OFFERING.SUBJECT')
   const courseNumberIdx = col('SCHEDULE_OFFERING.COURSE_NUMBER')
   const titleIdx = col('SCHEDULE_OFFERING.TITLE_LONG_DESC')
-  const statusIdx = col('SCHEDULE_OFFERING.STATUS')
   const sectionIdx = col('MEETING_TIME.SECTION')
   const crnIdx = col('SCHEDULE_OFFERING.COURSE_REFERENCE_NUMBER')
   const timeIdx = col('Time')
@@ -166,12 +211,14 @@ export const handler: AppSyncResolverHandler<Args, Meeting[]> = async (event) =>
   const lastNameIdx = col('SCHEDULE_OFFERING.PRIMARY_INSTRUCTOR_LAST_NAME')
   const scheduleDescIdx = col('SCHEDULE_OFFERING.SCHEDULE_DESC')
 
-  const queryUpper = query.toUpperCase()
+  const queryUpper = (event.arguments.query ?? '').trim().toUpperCase()
   const queryCompact = queryUpper.replace(/\s+/g, '')
+  const subjectFilter = (event.arguments.subject ?? '').trim().toUpperCase()
+  const levelFilter = (event.arguments.level ?? '').trim()
 
-  const results: Meeting[] = []
+  const matched: Meeting[] = []
 
-  for (let i = 1; i < rows.length && results.length < MAX_RESULTS; i++) {
+  for (let i = 1; i < rows.length; i++) {
     const row = rows[i]
     if (row.length < header.length) continue
     if (row[statusIdx] !== 'A') continue
@@ -181,11 +228,15 @@ export const handler: AppSyncResolverHandler<Args, Meeting[]> = async (event) =>
     const title = row[titleIdx] ?? ''
     const subjectCourseCompact = `${subject}${courseNumber}`.toUpperCase()
 
-    const matches =
+    // Empty query matches everything — that's the "browse all classes" mode.
+    const queryMatches =
+      !queryCompact ||
       subjectCourseCompact.startsWith(queryCompact) ||
       subject.toUpperCase() === queryUpper ||
       title.toUpperCase().includes(queryUpper)
-    if (!matches) continue
+    if (!queryMatches) continue
+    if (subjectFilter && subject.toUpperCase() !== subjectFilter) continue
+    if (levelFilter && courseLevelBucket(courseNumber) !== levelFilter) continue
 
     const timeRange = parseTimeRange(row[timeIdx] ?? '')
     if (!timeRange) continue
@@ -196,7 +247,7 @@ export const handler: AppSyncResolverHandler<Args, Meeting[]> = async (event) =>
     const firstName = row[firstNameIdx] ?? ''
     const lastName = row[lastNameIdx] ?? ''
 
-    results.push({
+    matched.push({
       crn: row[crnIdx] ?? '',
       courseCode: `${subject} ${courseNumber}`.trim(),
       title,
@@ -213,5 +264,6 @@ export const handler: AppSyncResolverHandler<Args, Meeting[]> = async (event) =>
     })
   }
 
-  return results
+  matched.sort((a, b) => compareCourseCode(a.courseCode, b.courseCode))
+  return matched.slice(0, MAX_RESULTS)
 }

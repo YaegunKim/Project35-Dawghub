@@ -30,6 +30,7 @@ import {
 import { useFavorites } from '../../lib/useFavorites'
 import { useTransitionFlash } from '../../lib/useTransitionFlash'
 import { DietaryTags } from './DietaryTags'
+import { DiningQuickActions } from './DiningQuickActions'
 import { useTagFilters } from './tagFilters'
 import { S } from './DiningHallDetailPage.style'
 
@@ -107,6 +108,8 @@ export function DiningHallDetailPage() {
         {todayHours.note && <S.HoursNote>{todayHours.note}</S.HoursNote>}
         {nextOpen && <S.HoursNote>{formatNextOpenLabel(t, nextOpen)}</S.HoursNote>}
       </S.Header>
+
+      <DiningQuickActions hall={hall} />
 
       <S.MealTabs role="tablist">
         {MEAL_TYPES.map((meal) => {

@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Page, PageTitle } from '../../design-system/Page/Page'
 import { Logo } from '../../design-system/Brand/Logo'
 import { useTheme, type Theme } from '../../app/ThemeContext'
+import { BusDataDebugPanel } from './BusDataDebugPanel'
 import { S } from './SettingsPage.style'
 
 type SettingsPageProps = {
@@ -74,6 +75,8 @@ export function SettingsPage({ userEmail, onSignOut }: SettingsPageProps) {
           </S.Row>
         </S.Card>
       </S.Section>
+
+      <BusDataDebugPanel />
 
       <S.Section>
         <S.SectionTitle>{t('settings.about')}</S.SectionTitle>

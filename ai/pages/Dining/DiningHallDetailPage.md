@@ -27,3 +27,4 @@ A detail page showing today's menu for a single dining hall (`hallSlug`), switch
 - Every meal-tab switch (`mealType` change) triggers a `useEffect` that calls `getDiningMenu` again — switching tabs = a new network request, no client cache.
 - The `VALID_HALLS` array is hardcoded locally inside this file and is a separate constant from `DINING_HALLS` in `src/lib/dining.ts` — when adding/removing a dining hall, both places need to be synced.
 - If there is no menu or the Lambda call fails, both are handled identically as the `dining.empty` empty state (it does not distinguish an error from "no menu today").
+- **"See Location"/"Get Directions" buttons**: `DiningQuickActions` (shared with the card) right below the header — behavior is documented in [[DiningPage]].

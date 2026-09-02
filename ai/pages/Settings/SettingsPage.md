@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The app-wide preferences tab. Handles account info / sign-out, language (Korean/English) switching, manual dark-mode switching, and app-version display in one screen. The only one of the 5 tabs (Community/Schedule/Map/Dining/Settings) that does not touch backend data.
+The app-wide preferences tab. Handles account info / sign-out, language (Korean/English) switching, manual dark-mode switching, app-version display, and a bus-data-collection debug view, all in one screen.
 
 ## Data sources
 
@@ -10,6 +10,7 @@ The app-wide preferences tab. Handles account info / sign-out, language (Korean/
 - **Language**: `i18next`. A single call to `i18n.changeLanguage('ko'|'en')` is all there is — `i18next-browser-languagedetector` defaults to `caches: ['localStorage']`, so it persists across refresh with no extra save logic.
 - **Theme**: `useTheme()` from `src/app/ThemeContext.tsx`. Stores `'system'|'light'|'dark'` under the `localStorage` key `dawghub:theme`, applied via the `<html data-theme="...">` attribute. The actual color values come from `src/design-system/GlobalStyles.tsx`, which overrides CSS variables based on the presence/value of the `data-theme` attribute.
 - **Version**: `__APP_VERSION__` — the `define` in `vite.config.ts` injects `package.json`'s `version` field as a string at build time (not a runtime fetch; requires a build to update).
+- **Bus data debug** (`BusDataDebugPanel.tsx`): a dev/debug view of the cumulative state of the `BusStopArrival` table that the `log-bus-arrivals` Lambda logs to every minute (see the Map page doc's "Live bus position / routes / stops") — total rows logged, number of routes/stops seen, earliest/latest sample timestamps, and a per-route row-count table. Collapsed by default and only queried once expanded (`useQuery({enabled: expanded, ...})`, so it doesn't scrape the whole table on every visit given it keeps growing), following `client.models.BusStopArrival.list()`'s `nextToken` all the way through to sum every page.
 
 ## Things to know
 

@@ -1,4 +1,6 @@
-import type { DiningHall, NextOpen } from './diningHours'
+import { getDiningBuildingName, type DiningHall, type NextOpen } from './diningHours'
+import { fetchUgaBuildings, findBuildingByName } from './ugaBuildings'
+import type { MapNavigationIntent } from './mapNavigation'
 
 export type MealType = 'breakfast' | 'lunch' | 'dinner'
 
@@ -51,6 +53,13 @@ export function sortSectionsByPinned<T>(sections: [string, T][], pinned: string[
   })
 }
 
+// Sorts sections by item count, most first — apply this BEFORE sortSectionsByPinned so a pin
+// still wins overall (Array.prototype.sort is stable, so ties within "pinned"/"not pinned" keep
+// this count-based order).
+export function sortSectionsByItemCount<T>(sections: [string, T[]][]): [string, T[]][] {
+  return [...sections].sort((a, b) => b[1].length - a[1].length)
+}
+
 // Hidden tags are OR'd — having any one of them drops the item. (An earlier version also had an
 // "only" AND-filter, but it hid items that are safe just because the dining hall never bothered
 // tagging them — e.g. plain orange juice under "halal: only" — which misleadingly implied more
@@ -69,7 +78,7 @@ export function filterItemsByTagState<T extends { dietary: string[]; allergens: 
   })
 }
 
-const WEEKDAY_I18N_KEYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+export const WEEKDAY_I18N_KEYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
 // Reuses the weekday names already translated for the Schedule page (schedule.days.*) instead of
 // introducing a second set of day-name strings just for this.
@@ -81,4 +90,29 @@ export function formatNextOpenLabel(t: (key: string, options?: Record<string, un
   targetDate.setDate(targetDate.getDate() + next.dayOffset)
   const day = t(`schedule.days.${WEEKDAY_I18N_KEYS[targetDate.getDay()]}`)
   return t('dining.opensOnDay', { day, time: next.time })
+}
+
+// Shown under the Dining tab title — "September 1 · Tuesday" / "9월 1일 화요일". The month/day
+// portion is locale-formatted via Intl so it reads naturally in either language, while the
+// weekday reuses the same schedule.days.* translations as formatNextOpenLabel above.
+export function formatTodayLabel(t: (key: string, options?: Record<string, unknown>) => string, language: string) {
+  const now = new Date()
+  const locale = language.startsWith('ko') ? 'ko-KR' : 'en-US'
+  const date = new Intl.DateTimeFormat(locale, { month: 'long', day: 'numeric' }).format(now)
+  const day = t(`schedule.days.${WEEKDAY_I18N_KEYS[now.getDay()]}`)
+  return t('dining.todayDate', { date, day })
+}
+
+// Resolves a hall's building coordinates for the "See Location"/"Get Directions" card and
+// detail-page buttons — buildings are the static local dataset (see ugaBuildings.ts), so this
+// resolves instantly without hitting a network endpoint.
+export async function buildDiningMapIntent(
+  hall: DiningHall,
+  type: MapNavigationIntent['type'],
+): Promise<MapNavigationIntent | null> {
+  const buildingName = getDiningBuildingName(hall)
+  const buildings = await fetchUgaBuildings()
+  const building = findBuildingByName(buildings, buildingName)
+  if (!building) return null
+  return { type, lat: building.latitude, lng: building.longitude, label: building.name }
 }

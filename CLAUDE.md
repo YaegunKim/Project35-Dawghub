@@ -81,7 +81,7 @@ The data sources and known quirks of a specific page are in `ai/pages/<Tab>/<Pag
 | Tab | Folder |
 |---|---|
 | Community | `ai/pages/Community/` (CommunityPage, BoardPage, PostDetailPage) |
-| Schedule | `ai/pages/Schedule/` (SchedulePage) |
+| Schedule | `ai/pages/Schedule/` (SchedulePage; the friend-schedule view is `FriendSchedulePage`, documented in the same file) |
 | Map | `ai/pages/Map/` (MapPage) |
 | Dining | `ai/pages/Dining/` (DiningPage, DiningHallDetailPage) |
 | Settings | `ai/pages/Settings/` (SettingsPage) |
@@ -128,9 +128,9 @@ An intentional decision: no page uses a fixed header/toolbar that always floats 
 - For pages that read Amplify data, do not call `client.models.X.list()`/`.get()` directly with `useEffect`+`useState`; use **TanStack Query's `useQuery`** (the singleton in `src/lib/queryClient.ts` is already wired with `QueryClientProvider` in `main.tsx`). Reason: on route navigation the page component unmounts/remounts, and the `useEffect` approach refetches every time, causing a loading flicker whenever you switch tabs — `useQuery` solves this by reusing the cache for the `staleTime` duration.
 - **Query key convention**: `[resourceName, ...identifiers]`, like `['posts', boardValue]`, `['comments', postId]`, `['diningMenu', hall, mealType]`. If multiple pages view the same data (e.g. Map also uses Schedule's schedule list), pull the key into `src/lib/queryKeys.ts` as a constant so both files reference exactly the same key — that is what lets one side reuse data the other already fetched.
 - **Refresh after create/delete via `queryClient.setQueryData`** (optimistic), not by refetching with `invalidateQueries` — the response already returns the record the server created, so appending/removing it directly in the cache is faster and matches the existing UX. Follow this pattern when adding a new mutation too.
-- **For imperative, non-hook code like Leaflet** (`MapPage.tsx`), use `queryClient.fetchQuery({ queryKey, queryFn })` (returns a Promise) instead of `useQuery` — the cache-reuse effect is the same.
+- **For imperative, non-hook code like Leaflet** (`MapPage.tsx`), use `queryClient.fetchQuery({ queryKey, queryFn })` (returns a Promise) instead of `useQuery` — the cache-reuse effect is the same. But this pattern only fits data that only needs to be read once (building list, today's library hours, etc. — a snapshot taken when the map mounts is enough); it can't capture data the map needs to react to live as another page changes it (e.g. adding/removing a class on Schedule), since that would only get picked up by unmounting and remounting the map. For that case, do what `MapPage.tsx`'s academic-building markers do: **subscribe reactively with `useQuery` at the top of the component**, then wire a `useEffect` that calls an imperative function exposed on `mapActionsRef.current` (e.g. `applyAcademicMarkers`) whenever that result changes — the imperative Leaflet code itself stays as-is, only "when to redraw" gets triggered reactively from the React side.
 - **Data that must not be cached**: things that must be live (bus position polling `fetchUgaBuses`) or that are intentionally always live (library hours today `fetchLibraryHoursToday` — see the README "if the website changes..." section) should be left as-is.
-- `fetchUgaBuildings()` (`ugaBuildings.ts`) and `fetchMapPreference()` (`mapPreferences.ts`) have had their own module-level Promise cache since before TanStack Query was introduced — this is already solved so it was left untouched; use TanStack Query rather than this pattern for anything new.
+- `fetchUgaBuildings()` (`ugaBuildings.ts`) is no longer a live API call — it just wraps and returns a static JSON snapshot (`src/lib/ugaBuildingsData.json`) fetched ahead of time via `pnpm data:buildings` and committed (see README "External data sources"). `fetchMapPreference()` (`mapPreferences.ts`) still uses the same module-level Promise cache it had before TanStack Query was introduced — this is already solved so it was left untouched; use TanStack Query rather than this pattern for anything new.
 
 ---
 

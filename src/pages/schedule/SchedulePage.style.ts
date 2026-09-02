@@ -3,6 +3,8 @@ import { keyframes } from '@emotion/react'
 import { Card } from '../../design-system/Card/Card'
 import { Button } from '../../design-system/Button/Button'
 import { brand, state } from '../../design-system/colors'
+import { motion } from '../../design-system/motion'
+import { radius } from '../../design-system/radius'
 
 const modalIn = keyframes`
   from {
@@ -54,6 +56,30 @@ export const S = {
     > * {
       flex: 1;
     }
+  `,
+  TitleRow: styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  `,
+  LocationRow: styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    > input {
+      flex: 1;
+      min-width: 0;
+    }
+
+    > button {
+      flex-shrink: 0;
+    }
+  `,
+  LocationPickedNote: styled.div`
+    font-size: 12px;
+    color: var(--text-muted);
   `,
   GridWrap: styled.div`
     width: 100%;
@@ -279,52 +305,51 @@ export const S = {
   MeetingList: styled.div`
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
   `,
   MeetingRow: styled.div`
     display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding: 10px 12px;
-    border-radius: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
     background: var(--bg);
-    font-size: 13px;
+    font-size: 12px;
+    line-height: 1.2;
     color: var(--text);
   `,
-  MeetingTopRow: styled.div`
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  `,
-  MeetingTime: styled.div`
+  MeetingTime: styled.span`
     font-weight: 600;
+    flex-shrink: 0;
   `,
-  MeetingLocationText: styled.div`
+  MeetingLocationText: styled.span`
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 11px;
   `,
   DayChip: styled.span`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 22px;
-    height: 22px;
-    padding: 0 4px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 3px;
     border-radius: 999px;
     background: var(--border);
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 800;
     flex-shrink: 0;
   `,
   SectionChip: styled.span`
     display: inline-flex;
     align-items: center;
-    padding: 2px 8px;
+    margin-left: auto;
+    padding: 1px 6px;
     border-radius: 999px;
     background: var(--border);
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     flex-shrink: 0;
   `,
@@ -350,16 +375,37 @@ export const S = {
     font-weight: 800;
     flex-shrink: 0;
   `,
+  RatingBadgeCompact: styled.span`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 26px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    color: ${brand.white};
+    font-size: 10px;
+    font-weight: 800;
+    flex-shrink: 0;
+  `,
   ProfessorButton: styled.span`
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    align-self: flex-start;
+    gap: 6px;
+    min-width: 0;
     cursor: pointer;
 
     &:hover {
       text-decoration: underline;
     }
+  `,
+  ProfessorName: styled.span`
+    font-size: 13px;
+    color: var(--text-muted);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   `,
   ReviewList: styled.div`
     display: flex;
@@ -390,15 +436,127 @@ export const S = {
   SectionCard: styled(Card)`
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     min-width: 0;
-    padding: 14px 16px;
+    padding: 12px 14px;
     border-radius: 14px;
+  `,
+  SectionHeader: styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
   `,
   SectionInfo: styled.div`
     display: flex;
     flex-direction: column;
     min-width: 0;
+  `,
+  CourseCodeRow: styled.div`
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+  `,
+  InfoButton: styled.button`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: color ${motion.duration.fast} ${motion.easing.standard};
+
+    &:hover {
+      color: var(--accent);
+    }
+  `,
+  FilterMenuWrap: styled.div`
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  `,
+  FilterButton: styled.button<{ $active: boolean }>`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: ${radius.sm};
+    border: 1px solid ${({ $active }) => ($active ? 'var(--accent)' : 'var(--border)')};
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+
+    span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    svg {
+      flex-shrink: 0;
+      width: 10px;
+      height: 10px;
+      color: var(--text-muted);
+      transition: transform ${motion.duration.fast} ${motion.easing.standard};
+      transform: rotate(${({ $active }) => ($active ? '180deg' : '0deg')});
+    }
+  `,
+  FilterMenuBackdrop: styled.div`
+    position: fixed;
+    inset: 0;
+    z-index: 31;
+  `,
+  FilterMenu: styled.div`
+    position: fixed;
+    z-index: 32;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: min(320px, 60vh);
+    overflow-y: auto;
+    padding: 6px;
+    border-radius: ${radius.md};
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  `,
+  FilterMenuItem: styled.button<{ $selected: boolean }>`
+    display: block;
+    width: 100%;
+    min-height: 40px;
+    padding: 10px 12px;
+    border: none;
+    border-radius: ${radius.sm};
+    background: ${({ $selected }) => ($selected ? 'var(--bg)' : 'transparent')};
+    color: ${({ $selected }) => ($selected ? 'var(--accent)' : 'var(--text)')};
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.4;
+    font-weight: ${({ $selected }) => ($selected ? '700' : '500')};
+    text-align: left;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+
+    &:hover {
+      background: var(--bg);
+    }
   `,
   RatingRow: styled.div`
     display: flex;
@@ -410,55 +568,23 @@ export const S = {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding-top: 4px;
+    margin-top: 2px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
 
     @media (min-width: 768px) {
-      flex-direction: row;
-      align-items: stretch;
-      justify-content: center;
-      gap: 20px;
-      padding-top: 20px;
-      position: relative;
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 10%;
-        right: 10%;
-        height: 1px;
-        background: var(--border);
-      }
-    }
-  `,
-  OptionBranch: styled.div`
-    min-width: 0;
-
-    @media (min-width: 768px) {
-      position: relative;
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      padding-top: 20px;
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 50%;
-        width: 1px;
-        height: 20px;
-        background: var(--border);
-      }
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
     }
   `,
   OptionCard: styled.button<{ $selected: boolean }>`
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
     width: 100%;
     min-width: 0;
-    padding: 10px 12px;
+    padding: 8px 10px;
     border-radius: 12px;
     border: 2px solid ${({ $selected }) => ($selected ? 'var(--accent)' : 'var(--border)')};
     background: ${({ $selected }) => ($selected ? 'var(--bg-elevated)' : 'var(--bg)')};
@@ -469,10 +595,6 @@ export const S = {
     transition:
       border-color 0.15s ease,
       background-color 0.15s ease;
-
-    @media (min-width: 768px) {
-      max-width: 220px;
-    }
   `,
   PanelHeader: styled.div`
     display: flex;

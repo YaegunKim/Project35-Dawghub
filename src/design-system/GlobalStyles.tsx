@@ -67,6 +67,12 @@ const styles = css`
     height: 100%;
   }
 
+  html {
+    /* Belt-and-suspenders for the viewport meta's user-scalable=no — some browsers (notably
+       iOS Safari) still allow double-tap-to-zoom without this, even with pinch-zoom disabled. */
+    touch-action: manipulation;
+  }
+
   body {
     margin: 0;
     overflow-x: hidden;
@@ -82,6 +88,42 @@ const styles = css`
   a {
     color: inherit;
     text-decoration: none;
+  }
+
+  /* Map "See Location" ping — plain global CSS (not a styled-component) because the marker
+     is a raw Leaflet divIcon, built from an HTML string rather than rendered by React. */
+  .dawghub-ripple {
+    position: relative;
+    width: 1px;
+    height: 1px;
+  }
+
+  .dawghub-ripple span {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 14px;
+    height: 14px;
+    margin: -7px 0 0 -7px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.65;
+    animation: dawghub-ripple-anim 1.4s ${motion.easing.standard} infinite;
+  }
+
+  .dawghub-ripple span:nth-of-type(2) {
+    animation-delay: 0.45s;
+  }
+
+  @keyframes dawghub-ripple-anim {
+    from {
+      transform: scale(0.4);
+      opacity: 0.65;
+    }
+    to {
+      transform: scale(4.5);
+      opacity: 0;
+    }
   }
 `
 

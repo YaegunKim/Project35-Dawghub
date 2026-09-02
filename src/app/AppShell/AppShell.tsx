@@ -12,7 +12,7 @@ import {
 import { Logo } from '../../design-system/Brand/Logo'
 import { S } from './AppShell.style'
 
-const FULL_BLEED_ROUTES = ['/map', '/schedule']
+const FULL_BLEED_ROUTES = ['/map', '/schedule', '/friends']
 
 const NAV_ITEMS = [
   { to: '/community', icon: faComments, labelKey: 'nav.community' },
