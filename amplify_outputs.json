@@ -28,8 +28,10 @@
   "data": {
     "url": "https://343wvkouzncz5b4c6evaqbzv2e.appsync-api.us-east-1.amazonaws.com/graphql",
     "aws_region": "us-east-1",
+    "api_key": "da2-tkackkxpzbdq5pcojxx23bup3u",
     "default_authorization_type": "AMAZON_COGNITO_USER_POOLS",
     "authorization_types": [
+      "API_KEY",
       "AWS_IAM"
     ],
     "model_introspection": {
@@ -287,6 +289,20 @@
               "isRequired": false,
               "attributes": []
             },
+            "locationLat": {
+              "name": "locationLat",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "locationLng": {
+              "name": "locationLng",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
@@ -411,6 +427,222 @@
             "primaryKeyFieldName": "id",
             "sortKeyFieldNames": []
           }
+        },
+        "Friendship": {
+          "name": "Friendship",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "senderId": {
+              "name": "senderId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "recipientId": {
+              "name": "recipientId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "senderEmail": {
+              "name": "senderEmail",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "recipientEmail": {
+              "name": "recipientEmail",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "status": {
+              "name": "status",
+              "isArray": false,
+              "type": {
+                "enum": "FriendshipStatus"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "Friendships",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "provider": "userPools",
+                    "ownerField": "senderId",
+                    "allow": "owner",
+                    "operations": [
+                      "read",
+                      "create",
+                      "delete"
+                    ],
+                    "identityClaim": "cognito:username"
+                  },
+                  {
+                    "provider": "userPools",
+                    "ownerField": "recipientId",
+                    "allow": "owner",
+                    "operations": [
+                      "read",
+                      "update"
+                    ],
+                    "identityClaim": "cognito:username"
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
+        "BusStopArrival": {
+          "name": "BusStopArrival",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "busId": {
+              "name": "busId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "routeName": {
+              "name": "routeName",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "stopId": {
+              "name": "stopId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "stopName": {
+              "name": "stopName",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "arrivedAt": {
+              "name": "arrivedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": true,
+              "attributes": []
+            },
+            "latitude": {
+              "name": "latitude",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "longitude": {
+              "name": "longitude",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "BusStopArrivals",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "allow": "public",
+                    "provider": "apiKey",
+                    "operations": [
+                      "create"
+                    ]
+                  },
+                  {
+                    "allow": "private",
+                    "operations": [
+                      "read"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
         }
       },
       "enums": {
@@ -422,6 +654,15 @@
             "CLASSES",
             "BUY_SELL",
             "EVENTS"
+          ]
+        },
+        "FriendshipStatus": {
+          "name": "FriendshipStatus",
+          "values": [
+            "PENDING",
+            "ACCEPTED",
+            "DECLINED",
+            "BLOCKED"
           ]
         }
       },
@@ -716,6 +957,155 @@
               "isArrayNullable": true
             }
           }
+        },
+        "WalkingRouteCoordinate": {
+          "name": "WalkingRouteCoordinate",
+          "fields": {
+            "lat": {
+              "name": "lat",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true,
+              "attributes": []
+            },
+            "lng": {
+              "name": "lng",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true,
+              "attributes": []
+            }
+          }
+        },
+        "WalkingRouteResult": {
+          "name": "WalkingRouteResult",
+          "fields": {
+            "distanceMeters": {
+              "name": "distanceMeters",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "durationSeconds": {
+              "name": "durationSeconds",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "coordinates": {
+              "name": "coordinates",
+              "isArray": true,
+              "type": {
+                "nonModel": "WalkingRouteCoordinate"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            }
+          }
+        },
+        "FindUserResult": {
+          "name": "FindUserResult",
+          "fields": {
+            "found": {
+              "name": "found",
+              "isArray": false,
+              "type": "Boolean",
+              "isRequired": false,
+              "attributes": []
+            },
+            "userId": {
+              "name": "userId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "username": {
+              "name": "username",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "email": {
+              "name": "email",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            }
+          }
+        },
+        "FriendClassEntry": {
+          "name": "FriendClassEntry",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "courseCode": {
+              "name": "courseCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "title": {
+              "name": "title",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "day": {
+              "name": "day",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "startTime": {
+              "name": "startTime",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "endTime": {
+              "name": "endTime",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "location": {
+              "name": "location",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "locationLat": {
+              "name": "locationLat",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "locationLng": {
+              "name": "locationLng",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            }
+          }
         }
       },
       "queries": {
@@ -754,10 +1144,22 @@
               "name": "query",
               "isArray": false,
               "type": "String",
-              "isRequired": true
+              "isRequired": false
             },
             "term": {
               "name": "term",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "subject": {
+              "name": "subject",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false
+            },
+            "level": {
+              "name": "level",
               "isArray": false,
               "type": "String",
               "isRequired": false
@@ -802,6 +1204,73 @@
           "arguments": {
             "id": {
               "name": "id",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "getWalkingRoute": {
+          "name": "getWalkingRoute",
+          "isArray": false,
+          "type": {
+            "nonModel": "WalkingRouteResult"
+          },
+          "isRequired": false,
+          "arguments": {
+            "fromLat": {
+              "name": "fromLat",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true
+            },
+            "fromLng": {
+              "name": "fromLng",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true
+            },
+            "toLat": {
+              "name": "toLat",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true
+            },
+            "toLng": {
+              "name": "toLng",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true
+            }
+          }
+        },
+        "findUserByEmail": {
+          "name": "findUserByEmail",
+          "isArray": false,
+          "type": {
+            "nonModel": "FindUserResult"
+          },
+          "isRequired": false,
+          "arguments": {
+            "email": {
+              "name": "email",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "getFriendSchedule": {
+          "name": "getFriendSchedule",
+          "isArray": true,
+          "type": {
+            "nonModel": "FriendClassEntry"
+          },
+          "isRequired": false,
+          "isArrayNullable": true,
+          "arguments": {
+            "friendUserId": {
+              "name": "friendUserId",
               "isArray": false,
               "type": "String",
               "isRequired": true

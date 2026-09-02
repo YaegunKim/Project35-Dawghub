@@ -19,7 +19,17 @@
     "themeLight": "라이트",
     "themeDark": "다크",
     "about": "앱 정보",
-    "version": "버전 {{version}}"
+    "version": "버전 {{version}}",
+    "debugBusData": "디버그",
+    "debugBusDataToggle": "버스 데이터 수집 현황",
+    "debugLoading": "불러오는 중…",
+    "debugError": "버스 데이터 통계를 불러오지 못했어요.",
+    "debugTotalRows": "누적 기록",
+    "debugRoutes": "수집된 노선",
+    "debugStops": "수집된 정류장",
+    "debugEarliest": "가장 이른 기록",
+    "debugLatest": "가장 최근 기록",
+    "debugRefresh": "새로고침"
   },
   "community": {
     "boards": {
@@ -114,12 +124,44 @@
     "noRoutesYet": "아직 노선을 불러오는 중이에요.",
     "myDorm": "내 기숙사",
     "myDormPlaceholder": "내 기숙사 건물 검색",
-    "busMode": {
-      "title": "어떤 노선을 표시할지",
-      "running": "운행 중인 노선만",
-      "all": "전체 노선",
-      "custom": "선택한 노선만",
-      "selectRoutes": "노선 선택"
+    "bus": {
+      "notOperating": "운행 중이 아님",
+      "settings": "버스 설정",
+      "operatingOnly": "운영 중인 노선만 표시",
+      "allOn": "전체 노선 표시",
+      "allOff": "전체 노선 숨기기",
+      "perRoute": "노선별 표시"
+    },
+    "directions": {
+      "button": "경로찾기",
+      "title": "경로찾기",
+      "fromLabel": "출발",
+      "toLabel": "도착",
+      "swap": "출발지와 도착지 바꾸기",
+      "fromPlaceholder": "출발지",
+      "toPlaceholder": "도착지",
+      "useMyLocation": "내 위치 사용",
+      "pickOnMap": "지도에서 선택",
+      "pickHint": "지도 위 지점을 눌러주세요",
+      "cancelPick": "취소",
+      "getDirections": "경로 찾기",
+      "planning": "경로 찾는 중…",
+      "errorGeneric": "두 지점 사이의 경로를 찾지 못했어요.",
+      "walkOnly": "도보만",
+      "walkAndBus": "도보 + 버스",
+      "walkAndBusRoute": "도보 + {{route}}",
+      "noBusOption": "두 지점을 잇는 버스 노선이 없어요.",
+      "busEtaApprox": "버스 구간 시간은 추정치예요",
+      "originGpsLabel": "내 현재 위치",
+      "pickedPointLabel": "지정한 위치",
+      "minutes": "{{count}}분",
+      "go": "출발",
+      "endNavigation": "종료",
+      "arrived": "도착했어요",
+      "navWalkToStop": "{{stop}}까지 도보",
+      "navBoardBus": "{{route}} 탑승 → {{stop}}까지",
+      "navWalkToDestination": "{{destination}}까지 도보",
+      "navTotalRemaining": "총 {{duration}}"
     }
   },
   "friends": {

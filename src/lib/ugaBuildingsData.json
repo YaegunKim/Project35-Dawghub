@@ -1,0 +1,3170 @@
+[
+  {
+    "name": "President's Storage House",
+    "buildingUse": "Support",
+    "longitude": -83.38668059,
+    "latitude": 33.96169107
+  },
+  {
+    "name": "President's Garage",
+    "buildingUse": "Support",
+    "longitude": -83.38679442,
+    "latitude": 33.96166424
+  },
+  {
+    "name": "President's Guest House",
+    "buildingUse": "Housing",
+    "longitude": -83.38635017,
+    "latitude": 33.96164603
+  },
+  {
+    "name": "President's House",
+    "buildingUse": "Housing",
+    "longitude": -83.38657875,
+    "latitude": 33.96143528
+  },
+  {
+    "name": "Chicopee Main Building No.1",
+    "buildingUse": "Support",
+    "longitude": -83.36480076,
+    "latitude": 33.95934284
+  },
+  {
+    "name": "Chicopee No.7",
+    "buildingUse": "Support",
+    "longitude": -83.36310659,
+    "latitude": 33.96059913
+  },
+  {
+    "name": "Chicopee No. 2",
+    "buildingUse": "Support",
+    "longitude": -83.3650681,
+    "latitude": 33.95962427
+  },
+  {
+    "name": "Chicopee No. 3",
+    "buildingUse": "Support",
+    "longitude": -83.36569246,
+    "latitude": 33.95967405
+  },
+  {
+    "name": "Chicopee No.4",
+    "buildingUse": "Support",
+    "longitude": -83.36595334,
+    "latitude": 33.95934701
+  },
+  {
+    "name": "Chicopee No.8",
+    "buildingUse": "Administration",
+    "longitude": -83.36429233,
+    "latitude": 33.95834576
+  },
+  {
+    "name": "Business Services",
+    "buildingUse": "Administration",
+    "longitude": -83.37319154,
+    "latitude": 33.95781976
+  },
+  {
+    "name": "Delta Innovation Hub",
+    "buildingUse": "Support",
+    "longitude": -83.37347599,
+    "latitude": 33.95735514
+  },
+  {
+    "name": "Holmes/Hunter Academic Building",
+    "buildingUse": "Administration",
+    "longitude": -83.3754287,
+    "latitude": 33.95720729
+  },
+  {
+    "name": "Jewelry & Metalwork Art Studios",
+    "buildingUse": "Academics",
+    "longitude": -83.37155863,
+    "latitude": 33.95702129
+  },
+  {
+    "name": "Thomas Street Art Studio",
+    "buildingUse": "Academics",
+    "longitude": -83.37196411,
+    "latitude": 33.95708672
+  },
+  {
+    "name": "Tanner Building",
+    "buildingUse": "Academics",
+    "longitude": -83.37304386,
+    "latitude": 33.95689612
+  },
+  {
+    "name": "Thomas Street South",
+    "buildingUse": "Academics",
+    "longitude": -83.37219841,
+    "latitude": 33.95680759
+  },
+  {
+    "name": "Thomas Street Sculpture",
+    "buildingUse": "Academics",
+    "longitude": -83.37193076,
+    "latitude": 33.95683536
+  },
+  {
+    "name": "Terrell Hall",
+    "buildingUse": "Administration",
+    "longitude": -83.37417688,
+    "latitude": 33.95677504
+  },
+  {
+    "name": "Demosthenian Hall",
+    "buildingUse": "Student Life",
+    "longitude": -83.37519617,
+    "latitude": 33.95688555
+  },
+  {
+    "name": "Human Resources",
+    "buildingUse": "Administration",
+    "longitude": -83.3735331,
+    "latitude": 33.95668984
+  },
+  {
+    "name": "North Campus Deck",
+    "buildingUse": "Parking",
+    "longitude": -83.37257438,
+    "latitude": 33.95615602
+  },
+  {
+    "name": "Sculpture Canopy",
+    "buildingUse": "Academics",
+    "longitude": -83.37162959,
+    "latitude": 33.95672405
+  },
+  {
+    "name": "Chapel",
+    "buildingUse": "Student Life",
+    "longitude": -83.37520216,
+    "latitude": 33.95665922
+  },
+  {
+    "name": "Meigs Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37627927,
+    "latitude": 33.95656661
+  },
+  {
+    "name": "Chapel Bell Tower",
+    "buildingUse": "Not Classified",
+    "longitude": -83.37537965,
+    "latitude": 33.95661319
+  },
+  {
+    "name": "Moore Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37580568,
+    "latitude": 33.95651324
+  },
+  {
+    "name": "Mechanical Building",
+    "buildingUse": "Support",
+    "longitude": -83.38952664,
+    "latitude": 33.95666576
+  },
+  {
+    "name": "Lucy Cobb",
+    "buildingUse": "Not Classified",
+    "longitude": -83.38946811,
+    "latitude": 33.95643991
+  },
+  {
+    "name": "Administration Building",
+    "buildingUse": "Administration",
+    "longitude": -83.37402336,
+    "latitude": 33.95625466
+  },
+  {
+    "name": "Lucy Cobb Washhouse",
+    "buildingUse": "Not Classified",
+    "longitude": -83.38979107,
+    "latitude": 33.95646152
+  },
+  {
+    "name": "New College",
+    "buildingUse": "Administration",
+    "longitude": -83.37493607,
+    "latitude": 33.95616667
+  },
+  {
+    "name": "L.C. Carriage House",
+    "buildingUse": "Not Classified",
+    "longitude": -83.3900235,
+    "latitude": 33.95629489
+  },
+  {
+    "name": "Candler Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37614494,
+    "latitude": 33.95606601
+  },
+  {
+    "name": "Margaret Hall",
+    "buildingUse": "Not Classified",
+    "longitude": -83.38953565,
+    "latitude": 33.95616724
+  },
+  {
+    "name": "Carl Vinson Hall",
+    "buildingUse": "Not Classified",
+    "longitude": -83.38974536,
+    "latitude": 33.95611897
+  },
+  {
+    "name": "Seney-Stovall Chapel",
+    "buildingUse": "Not Classified",
+    "longitude": -83.38921897,
+    "latitude": 33.95609345
+  },
+  {
+    "name": "Bishop House",
+    "buildingUse": "Academics",
+    "longitude": -83.37316974,
+    "latitude": 33.95586197
+  },
+  {
+    "name": "Old College",
+    "buildingUse": "Administration",
+    "longitude": -83.3745085,
+    "latitude": 33.95579243
+  },
+  {
+    "name": "Lustrat House",
+    "buildingUse": "Administration",
+    "longitude": -83.37383344,
+    "latitude": 33.95576169
+  },
+  {
+    "name": "Gilbert Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37606251,
+    "latitude": 33.95551156
+  },
+  {
+    "name": "Wray-Nicholson Prop 240",
+    "buildingUse": "Outreach",
+    "longitude": -83.37821247,
+    "latitude": 33.95563211
+  },
+  {
+    "name": "Jackson Street Building",
+    "buildingUse": "Academics",
+    "longitude": -83.37279925,
+    "latitude": 33.95522775
+  },
+  {
+    "name": "Learning & Development Center",
+    "buildingUse": "Administration",
+    "longitude": -83.37155828,
+    "latitude": 33.9553702
+  },
+  {
+    "name": "Waddel Hall",
+    "buildingUse": "Administration",
+    "longitude": -83.37388569,
+    "latitude": 33.95540649
+  },
+  {
+    "name": "Wray-Nicholson Prop 290",
+    "buildingUse": "Outreach",
+    "longitude": -83.37810741,
+    "latitude": 33.95537823
+  },
+  {
+    "name": "Peabody Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37354682,
+    "latitude": 33.95492364
+  },
+  {
+    "name": "Caldwell Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.375299,
+    "latitude": 33.95489824
+  },
+  {
+    "name": "Wray-Nicholson House",
+    "buildingUse": "Outreach",
+    "longitude": -83.37827,
+    "latitude": 33.95494839
+  },
+  {
+    "name": "Denmark Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37561101,
+    "latitude": 33.95469885
+  },
+  {
+    "name": "Wray-Nicholson Prop 150",
+    "buildingUse": "Outreach",
+    "longitude": -83.37832721,
+    "latitude": 33.95461434
+  },
+  {
+    "name": "Brooks Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37526084,
+    "latitude": 33.9541909
+  },
+  {
+    "name": "Wray-Nicholson Prop 154",
+    "buildingUse": "Outreach",
+    "longitude": -83.3786856,
+    "latitude": 33.95453697
+  },
+  {
+    "name": "Main Library",
+    "buildingUse": "Academics",
+    "longitude": -83.37378624,
+    "latitude": 33.95404106
+  },
+  {
+    "name": "Founders Garden Smokehouse",
+    "buildingUse": "Support",
+    "longitude": -83.37598666,
+    "latitude": 33.95411106
+  },
+  {
+    "name": "Founders Garden Kitchen Bldg.",
+    "buildingUse": "Support",
+    "longitude": -83.37608567,
+    "latitude": 33.95403769
+  },
+  {
+    "name": "Morris Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.37688362,
+    "latitude": 33.95388344
+  },
+  {
+    "name": "Baldwin Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37230889,
+    "latitude": 33.95370945
+  },
+  {
+    "name": "Sanford Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37501321,
+    "latitude": 33.95368383
+  },
+  {
+    "name": "North Campus Chiller Bldg",
+    "buildingUse": "Support",
+    "longitude": -83.37337309,
+    "latitude": 33.95368099
+  },
+  {
+    "name": "Joseph E. Brown Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.3760898,
+    "latitude": 33.95333843
+  },
+  {
+    "name": "LeConte Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37342925,
+    "latitude": 33.95343253
+  },
+  {
+    "name": "Psychology Building",
+    "buildingUse": "Academics",
+    "longitude": -83.37290943,
+    "latitude": 33.95253227
+  },
+  {
+    "name": "Fine Arts Building",
+    "buildingUse": "Academics",
+    "longitude": -83.37587671,
+    "latitude": 33.95250989
+  },
+  {
+    "name": "Military Building Army ROTC",
+    "buildingUse": "Academics",
+    "longitude": -83.37498095,
+    "latitude": 33.95259535
+  },
+  {
+    "name": "Journalism Building",
+    "buildingUse": "Academics",
+    "longitude": -83.3739534,
+    "latitude": 33.95219116
+  },
+  {
+    "name": "Fine Arts Scenery Workshop",
+    "buildingUse": "Academics",
+    "longitude": -83.37562932,
+    "latitude": 33.95224074
+  },
+  {
+    "name": "Zell B. Miller Learning Center",
+    "buildingUse": "Academics",
+    "longitude": -83.37577163,
+    "latitude": 33.95168412
+  },
+  {
+    "name": "Joe Frank Harris Commons",
+    "buildingUse": "Student Life",
+    "longitude": -83.37082376,
+    "latitude": 33.93908655
+  },
+  {
+    "name": "Facilities Management North",
+    "buildingUse": "Support",
+    "longitude": -83.37963606,
+    "latitude": 33.9536462
+  },
+  {
+    "name": "Government Relations",
+    "buildingUse": "Administration",
+    "longitude": -83.37893462,
+    "latitude": 33.95459655
+  },
+  {
+    "name": "Instructional Plaza",
+    "buildingUse": "Academics",
+    "longitude": -83.37339835,
+    "latitude": 33.9524087
+  },
+  {
+    "name": "R. C. Wilson Pharmacy",
+    "buildingUse": "Academics",
+    "longitude": -83.37542445,
+    "latitude": 33.94418311
+  },
+  {
+    "name": "Coop. Ext. Serv. - Hoke Smith",
+    "buildingUse": "Outreach",
+    "longitude": -83.37953338,
+    "latitude": 33.94433469
+  },
+  {
+    "name": "1260 S. Lumpkin St.",
+    "buildingUse": "Outreach",
+    "longitude": -83.38110381,
+    "latitude": 33.94429289
+  },
+  {
+    "name": "Forestry Resources 1",
+    "buildingUse": "Academics",
+    "longitude": -83.37467331,
+    "latitude": 33.94408307
+  },
+  {
+    "name": "Family Science Center 2",
+    "buildingUse": "Academics",
+    "longitude": -83.37682565,
+    "latitude": 33.94421114
+  },
+  {
+    "name": "Alpha Epsilon Pi",
+    "buildingUse": "Housing",
+    "longitude": -83.36987668,
+    "latitude": 33.94405737
+  },
+  {
+    "name": "UGAREF",
+    "buildingUse": "Administration",
+    "longitude": -83.38126354,
+    "latitude": 33.94422205
+  },
+  {
+    "name": "Horticulture Greenhouse",
+    "buildingUse": "Academics",
+    "longitude": -83.37602332,
+    "latitude": 33.94405284
+  },
+  {
+    "name": "Forestry Resources 3",
+    "buildingUse": "Academics",
+    "longitude": -83.37408149,
+    "latitude": 33.94394901
+  },
+  {
+    "name": "Hoke Smith Annex",
+    "buildingUse": "Outreach",
+    "longitude": -83.37895387,
+    "latitude": 33.94389715
+  },
+  {
+    "name": "Office of Global Engagement",
+    "buildingUse": "Administration",
+    "longitude": -83.38192222,
+    "latitude": 33.94401578
+  },
+  {
+    "name": "Family Science Center 1",
+    "buildingUse": "Academics",
+    "longitude": -83.37664371,
+    "latitude": 33.94401826
+  },
+  {
+    "name": "Housing and Consumer Research Center",
+    "buildingUse": "Academics",
+    "longitude": -83.37712012,
+    "latitude": 33.94401512
+  },
+  {
+    "name": "Pharmacy Haz Mat Bldg",
+    "buildingUse": "Academics",
+    "longitude": -83.37580855,
+    "latitude": 33.9440041
+  },
+  {
+    "name": "Charles Schwab Financial Planning Center",
+    "buildingUse": "Academics",
+    "longitude": -83.37694059,
+    "latitude": 33.94380836
+  },
+  {
+    "name": "Child Development Laboratory",
+    "buildingUse": "Academics",
+    "longitude": -83.37671381,
+    "latitude": 33.94354604
+  },
+  {
+    "name": "Forestry Resources 4",
+    "buildingUse": "Academics",
+    "longitude": -83.37448656,
+    "latitude": 33.94365542
+  },
+  {
+    "name": "Building 1050",
+    "buildingUse": "Academics",
+    "longitude": -83.37480919,
+    "latitude": 33.94332125
+  },
+  {
+    "name": "Life Sciences Fermentation Lab",
+    "buildingUse": "Academics",
+    "longitude": -83.3718029,
+    "latitude": 33.9432408
+  },
+  {
+    "name": "Stegeman Coliseum",
+    "buildingUse": "Athletics",
+    "longitude": -83.3781464,
+    "latitude": 33.94278834
+  },
+  {
+    "name": "Sigma Delta Tau Sorority",
+    "buildingUse": "Housing",
+    "longitude": -83.38394588,
+    "latitude": 33.94300145
+  },
+  {
+    "name": "Building 2130",
+    "buildingUse": "Support",
+    "longitude": -83.36981397,
+    "latitude": 33.9428487
+  },
+  {
+    "name": "Tucker Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37113462,
+    "latitude": 33.9426488
+  },
+  {
+    "name": "Miller Plant Science",
+    "buildingUse": "Academics",
+    "longitude": -83.37507242,
+    "latitude": 33.94238652
+  },
+  {
+    "name": "Butts-Mehre Heritage Hall",
+    "buildingUse": "Athletics",
+    "longitude": -83.38123115,
+    "latitude": 33.94213394
+  },
+  {
+    "name": "Storage Shed",
+    "buildingUse": "Not Classified",
+    "longitude": -83.37930404,
+    "latitude": 33.9422788
+  },
+  {
+    "name": "Rankin M. Smith, Sr, Student Ath Acad Ctr",
+    "buildingUse": "Athletics",
+    "longitude": -83.37884695,
+    "latitude": 33.94205417
+  },
+  {
+    "name": "Aderhold Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37296634,
+    "latitude": 33.94176381
+  },
+  {
+    "name": "Hugh Hodgson School of Music",
+    "buildingUse": "Academics",
+    "longitude": -83.36872883,
+    "latitude": 33.94122687
+  },
+  {
+    "name": "Georgia Museum of Art",
+    "buildingUse": "Student Life",
+    "longitude": -83.3701541,
+    "latitude": 33.94110757
+  },
+  {
+    "name": "Foley Baseball Stadium",
+    "buildingUse": "Athletics",
+    "longitude": -83.38091475,
+    "latitude": 33.94102876
+  },
+  {
+    "name": "Animal Health Research Center",
+    "buildingUse": "Academics",
+    "longitude": -83.37295263,
+    "latitude": 33.94091427
+  },
+  {
+    "name": "Tennis Hall of Fame",
+    "buildingUse": "Athletics",
+    "longitude": -83.37905188,
+    "latitude": 33.94070384
+  },
+  {
+    "name": "UGA Pet Health Center, A Stanton Spectrum of Care Clinic",
+    "buildingUse": "Academics",
+    "longitude": -83.37392751,
+    "latitude": 33.9405576
+  },
+  {
+    "name": "Men's Tennis Clubhouse",
+    "buildingUse": "Athletics",
+    "longitude": -83.3794257,
+    "latitude": 33.94051399
+  },
+  {
+    "name": "Locomotive Diag. Center",
+    "buildingUse": "Support",
+    "longitude": -83.3732856,
+    "latitude": 33.94042846
+  },
+  {
+    "name": "Vet. Medicine 2",
+    "buildingUse": "Academics",
+    "longitude": -83.374637,
+    "latitude": 33.94036943
+  },
+  {
+    "name": "Vet. Medicine 10",
+    "buildingUse": "Academics",
+    "longitude": -83.37368872,
+    "latitude": 33.94023625
+  },
+  {
+    "name": "Henry Feild Tennis Stadium",
+    "buildingUse": "Athletics",
+    "longitude": -83.37909859,
+    "latitude": 33.94024158
+  },
+  {
+    "name": "College of Veterinary Medicine 1",
+    "buildingUse": "Academics",
+    "longitude": -83.37545718,
+    "latitude": 33.94006719
+  },
+  {
+    "name": "Vet. Medicine 11",
+    "buildingUse": "Academics",
+    "longitude": -83.37333523,
+    "latitude": 33.93989157
+  },
+  {
+    "name": "Vet Med BioResources Facility",
+    "buildingUse": "Academics",
+    "longitude": -83.37449174,
+    "latitude": 33.9399363
+  },
+  {
+    "name": "Tennis Court Restrooms",
+    "buildingUse": "Athletics",
+    "longitude": -83.37806956,
+    "latitude": 33.9399155
+  },
+  {
+    "name": "Athletics Storage Shed 1 NCAA",
+    "buildingUse": "Support",
+    "longitude": -83.37844198,
+    "latitude": 33.9400166
+  },
+  {
+    "name": "Alpha Psi Vet. Frat.",
+    "buildingUse": "Housing",
+    "longitude": -83.37962231,
+    "latitude": 33.93982965
+  },
+  {
+    "name": "Omega Tau Sigma Frat.",
+    "buildingUse": "Housing",
+    "longitude": -83.37853883,
+    "latitude": 33.93978223
+  },
+  {
+    "name": "Vet. Medicine 6",
+    "buildingUse": "Academics",
+    "longitude": -83.37531252,
+    "latitude": 33.93963592
+  },
+  {
+    "name": "Vet. Medicine 5D",
+    "buildingUse": "Academics",
+    "longitude": -83.37416147,
+    "latitude": 33.93969828
+  },
+  {
+    "name": "Wildlife Health",
+    "buildingUse": "Academics",
+    "longitude": -83.37470486,
+    "latitude": 33.93949709
+  },
+  {
+    "name": "Vet. Medicine 5C",
+    "buildingUse": "Academics",
+    "longitude": -83.37398683,
+    "latitude": 33.93956384
+  },
+  {
+    "name": "Vet. Medicine 5A",
+    "buildingUse": "Academics",
+    "longitude": -83.37414736,
+    "latitude": 33.93960298
+  },
+  {
+    "name": "Driftmier Engineering Annex",
+    "buildingUse": "Academics",
+    "longitude": -83.37392539,
+    "latitude": 33.93894126
+  },
+  {
+    "name": "East Village Deck",
+    "buildingUse": "Parking",
+    "longitude": -83.36629955,
+    "latitude": 33.93841982
+  },
+  {
+    "name": "Ag. Engineering Shed 2",
+    "buildingUse": "Academics",
+    "longitude": -83.37415348,
+    "latitude": 33.93888058
+  },
+  {
+    "name": "Ramsey Center",
+    "buildingUse": "Student Life",
+    "longitude": -83.37135738,
+    "latitude": 33.93773731
+  },
+  {
+    "name": "East Campus Deck",
+    "buildingUse": "Parking",
+    "longitude": -83.36931709,
+    "latitude": 33.93812902
+  },
+  {
+    "name": "McWhorter Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.36712829,
+    "latitude": 33.93820183
+  },
+  {
+    "name": "George D. Busbee Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.36810892,
+    "latitude": 33.93802864
+  },
+  {
+    "name": "Ag. Engineering Shed 1",
+    "buildingUse": "Support",
+    "longitude": -83.37417118,
+    "latitude": 33.93851129
+  },
+  {
+    "name": "Vandiver Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.36731193,
+    "latitude": 33.93752201
+  },
+  {
+    "name": "University Village L",
+    "buildingUse": "Housing",
+    "longitude": -83.37393968,
+    "latitude": 33.93720621
+  },
+  {
+    "name": "Rooker Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.36790387,
+    "latitude": 33.93709262
+  },
+  {
+    "name": "University Village B",
+    "buildingUse": "Housing",
+    "longitude": -83.37556729,
+    "latitude": 33.93682773
+  },
+  {
+    "name": "University Village K",
+    "buildingUse": "Housing",
+    "longitude": -83.3738485,
+    "latitude": 33.93671241
+  },
+  {
+    "name": "University Village D",
+    "buildingUse": "Housing",
+    "longitude": -83.37480499,
+    "latitude": 33.93655084
+  },
+  {
+    "name": "University Village A",
+    "buildingUse": "Housing",
+    "longitude": -83.37553028,
+    "latitude": 33.93614085
+  },
+  {
+    "name": "Four Towers",
+    "buildingUse": "Outreach",
+    "longitude": -83.37023156,
+    "latitude": 33.93598942
+  },
+  {
+    "name": "UGA Health Center",
+    "buildingUse": "Student Life",
+    "longitude": -83.37217,
+    "latitude": 33.93592618
+  },
+  {
+    "name": "University Village J",
+    "buildingUse": "Housing",
+    "longitude": -83.37400265,
+    "latitude": 33.9359194
+  },
+  {
+    "name": "University Village C",
+    "buildingUse": "Housing",
+    "longitude": -83.37523202,
+    "latitude": 33.93573467
+  },
+  {
+    "name": "Rhodes Animal Science Center - A",
+    "buildingUse": "Academics",
+    "longitude": -83.36906943,
+    "latitude": 33.93536298
+  },
+  {
+    "name": "University Village H",
+    "buildingUse": "Housing",
+    "longitude": -83.37431563,
+    "latitude": 33.93472779
+  },
+  {
+    "name": "University Village F",
+    "buildingUse": "Housing",
+    "longitude": -83.37517354,
+    "latitude": 33.93496038
+  },
+  {
+    "name": "University Village E",
+    "buildingUse": "Housing",
+    "longitude": -83.37550219,
+    "latitude": 33.93431451
+  },
+  {
+    "name": "University Village G",
+    "buildingUse": "Housing",
+    "longitude": -83.37532635,
+    "latitude": 33.93390371
+  },
+  {
+    "name": "HorseShoe Ecology Building",
+    "buildingUse": "Academics",
+    "longitude": -83.35826624,
+    "latitude": 33.9337808
+  },
+  {
+    "name": "HorseShoe Ecology ll",
+    "buildingUse": "Academics",
+    "longitude": -83.35861823,
+    "latitude": 33.93371893
+  },
+  {
+    "name": "Intramural Field Equipment Shed",
+    "buildingUse": "Support",
+    "longitude": -83.37271434,
+    "latitude": 33.93368091
+  },
+  {
+    "name": "Ecology Greenhouse",
+    "buildingUse": "Academics",
+    "longitude": -83.35508257,
+    "latitude": 33.93330569
+  },
+  {
+    "name": "Intramural Fields Restrooms",
+    "buildingUse": "Student Life",
+    "longitude": -83.37287022,
+    "latitude": 33.93336527
+  },
+  {
+    "name": "Ecology Research Building",
+    "buildingUse": "Academics",
+    "longitude": -83.35503335,
+    "latitude": 33.93244123
+  },
+  {
+    "name": "CAGTECH",
+    "buildingUse": "Academics",
+    "longitude": -83.3620174,
+    "latitude": 33.93161987
+  },
+  {
+    "name": "Herrick Pavilion Boat House",
+    "buildingUse": "Student Life",
+    "longitude": -83.37123211,
+    "latitude": 33.93196937
+  },
+  {
+    "name": "Lake Herrick Pavilion",
+    "buildingUse": "Student Life",
+    "longitude": -83.37182399,
+    "latitude": 33.93177601
+  },
+  {
+    "name": "University Village Community Office",
+    "buildingUse": "Administration",
+    "longitude": -83.37772177,
+    "latitude": 33.93168162
+  },
+  {
+    "name": "Riverbend Research Lab North",
+    "buildingUse": "Academics",
+    "longitude": -83.36559735,
+    "latitude": 33.93134458
+  },
+  {
+    "name": "Center for Applied Isotope Studies",
+    "buildingUse": "Academics",
+    "longitude": -83.36652238,
+    "latitude": 33.93105525
+  },
+  {
+    "name": "River's Crossing",
+    "buildingUse": "Academics",
+    "longitude": -83.35925362,
+    "latitude": 33.93104823
+  },
+  {
+    "name": "Plant Pathology Headhouse",
+    "buildingUse": "Academics",
+    "longitude": -83.36248902,
+    "latitude": 33.93113724
+  },
+  {
+    "name": "Headhouse Plants Agronomy",
+    "buildingUse": "Academics",
+    "longitude": -83.36319617,
+    "latitude": 33.93104109
+  },
+  {
+    "name": "Greenhouse Plant Pathology",
+    "buildingUse": "Academics",
+    "longitude": -83.36234266,
+    "latitude": 33.93090071
+  },
+  {
+    "name": "Agronomy Soil Building",
+    "buildingUse": "Academics",
+    "longitude": -83.36350825,
+    "latitude": 33.93099538
+  },
+  {
+    "name": "Greenhouse Plant Pathology",
+    "buildingUse": "Academics",
+    "longitude": -83.3625449,
+    "latitude": 33.93087349
+  },
+  {
+    "name": "Headhouse Horticulture",
+    "buildingUse": "Academics",
+    "longitude": -83.36390321,
+    "latitude": 33.93094186
+  },
+  {
+    "name": "Soil Storage Building",
+    "buildingUse": "Academics",
+    "longitude": -83.36213822,
+    "latitude": 33.93092342
+  },
+  {
+    "name": "Greenhouse Plants Agronomy",
+    "buildingUse": "Academics",
+    "longitude": -83.36305094,
+    "latitude": 33.93080657
+  },
+  {
+    "name": "Greenhouse Plant Pathology",
+    "buildingUse": "Academics",
+    "longitude": -83.36293298,
+    "latitude": 33.93088915
+  },
+  {
+    "name": "Greenhouse Plants Agronomy",
+    "buildingUse": "Academics",
+    "longitude": -83.36324939,
+    "latitude": 33.9307758
+  },
+  {
+    "name": "River's Crossing #2",
+    "buildingUse": "Academics",
+    "longitude": -83.35978147,
+    "latitude": 33.93079365
+  },
+  {
+    "name": "Greenhouse Plant Pathology",
+    "buildingUse": "Academics",
+    "longitude": -83.36207412,
+    "latitude": 33.93088176
+  },
+  {
+    "name": "Greenhouse Plants Agronomy",
+    "buildingUse": "Academics",
+    "longitude": -83.36345813,
+    "latitude": 33.93075447
+  },
+  {
+    "name": "Riverbend Research Lab South",
+    "buildingUse": "Academics",
+    "longitude": -83.36602933,
+    "latitude": 33.93041916
+  },
+  {
+    "name": "Greenhouse Horticulture",
+    "buildingUse": "Academics",
+    "longitude": -83.3637577,
+    "latitude": 33.93070457
+  },
+  {
+    "name": "Horticulture Greenhouse 1",
+    "buildingUse": "Academics",
+    "longitude": -83.36430215,
+    "latitude": 33.9307923
+  },
+  {
+    "name": "Horticulture Greenhouse 1",
+    "buildingUse": "Academics",
+    "longitude": -83.36398615,
+    "latitude": 33.93067238
+  },
+  {
+    "name": "PDRC Colony House 14",
+    "buildingUse": "Academics",
+    "longitude": -83.35686343,
+    "latitude": 33.93067649
+  },
+  {
+    "name": "Horticulture Greenhouse 2",
+    "buildingUse": "Academics",
+    "longitude": -83.36420382,
+    "latitude": 33.93061784
+  },
+  {
+    "name": "PDRC Colony House 13",
+    "buildingUse": "Academics",
+    "longitude": -83.35681827,
+    "latitude": 33.93064199
+  },
+  {
+    "name": "Horticulture Greenhouse 1",
+    "buildingUse": "Academics",
+    "longitude": -83.36436567,
+    "latitude": 33.93057603
+  },
+  {
+    "name": "PDRC Colony House 12",
+    "buildingUse": "Academics",
+    "longitude": -83.35677426,
+    "latitude": 33.93060972
+  },
+  {
+    "name": "Intramural Tennis Pavilion",
+    "buildingUse": "Student Life",
+    "longitude": -83.37566658,
+    "latitude": 33.93059441
+  },
+  {
+    "name": "Central Food Storage",
+    "buildingUse": "Support",
+    "longitude": -83.36698557,
+    "latitude": 33.93035704
+  },
+  {
+    "name": "Entomology Greenhouse/Headhouse",
+    "buildingUse": "Academics",
+    "longitude": -83.36252506,
+    "latitude": 33.93043288
+  },
+  {
+    "name": "Soil Chemical &  Equipment Bldg",
+    "buildingUse": "Academics",
+    "longitude": -83.36219539,
+    "latitude": 33.93037693
+  },
+  {
+    "name": "Agronomy Seed Lab",
+    "buildingUse": "Academics",
+    "longitude": -83.36303801,
+    "latitude": 33.93022952
+  },
+  {
+    "name": "Swine Arthritis Research",
+    "buildingUse": "Academics",
+    "longitude": -83.35591184,
+    "latitude": 33.93022452
+  },
+  {
+    "name": "Entomology Greenhouse/Headhouse",
+    "buildingUse": "Academics",
+    "longitude": -83.36238684,
+    "latitude": 33.93021135
+  },
+  {
+    "name": "Entomology Greenhouse/Headhouse",
+    "buildingUse": "Academics",
+    "longitude": -83.36256659,
+    "latitude": 33.93019491
+  },
+  {
+    "name": "Rogers Road Apts M",
+    "buildingUse": "Housing",
+    "longitude": -83.37746652,
+    "latitude": 33.92988459
+  },
+  {
+    "name": "Brandon Oaks T",
+    "buildingUse": "Housing",
+    "longitude": -83.379352,
+    "latitude": 33.93012934
+  },
+  {
+    "name": "Brandon Oaks U",
+    "buildingUse": "Housing",
+    "longitude": -83.3788521,
+    "latitude": 33.93010419
+  },
+  {
+    "name": "Environmental Safety Building",
+    "buildingUse": "Support",
+    "longitude": -83.36735638,
+    "latitude": 33.93000781
+  },
+  {
+    "name": "Brandon Oaks V",
+    "buildingUse": "Housing",
+    "longitude": -83.37894787,
+    "latitude": 33.92972837
+  },
+  {
+    "name": "PDRC Colony House 11",
+    "buildingUse": "Academics",
+    "longitude": -83.35619344,
+    "latitude": 33.92971379
+  },
+  {
+    "name": "PDRC Colony House 10",
+    "buildingUse": "Academics",
+    "longitude": -83.35621038,
+    "latitude": 33.92966657
+  },
+  {
+    "name": "Vehicle Transporation & Maintenance",
+    "buildingUse": "Support",
+    "longitude": -83.36563043,
+    "latitude": 33.92935148
+  },
+  {
+    "name": "Herrick Picnic Pavilion",
+    "buildingUse": "Student Life",
+    "longitude": -83.3727874,
+    "latitude": 33.92949889
+  },
+  {
+    "name": "Greenhouse Botany",
+    "buildingUse": "Academics",
+    "longitude": -83.36388363,
+    "latitude": 33.92920944
+  },
+  {
+    "name": "Rogers Road Apts N",
+    "buildingUse": "Housing",
+    "longitude": -83.37710227,
+    "latitude": 33.92898781
+  },
+  {
+    "name": "Arthritis Research Building",
+    "buildingUse": "Academics",
+    "longitude": -83.35616327,
+    "latitude": 33.92929048
+  },
+  {
+    "name": "Herrick Boat House",
+    "buildingUse": "Student Life",
+    "longitude": -83.37336815,
+    "latitude": 33.92934876
+  },
+  {
+    "name": "Lath Greenhouse 3 Botany",
+    "buildingUse": "Not Classified",
+    "longitude": -83.363032,
+    "latitude": 33.92910221
+  },
+  {
+    "name": "VT&M Car Wash",
+    "buildingUse": "Support",
+    "longitude": -83.36491401,
+    "latitude": 33.92910889
+  },
+  {
+    "name": "PDRC Animal Isolation 2",
+    "buildingUse": "Academics",
+    "longitude": -83.35515753,
+    "latitude": 33.92882627
+  },
+  {
+    "name": "VT&M Tire Storage",
+    "buildingUse": "Support",
+    "longitude": -83.366257,
+    "latitude": 33.92894121
+  },
+  {
+    "name": "PDRC Animal Isolation 1",
+    "buildingUse": "Academics",
+    "longitude": -83.3552351,
+    "latitude": 33.92881719
+  },
+  {
+    "name": "PDRC Poultry Block House",
+    "buildingUse": "Academics",
+    "longitude": -83.35444326,
+    "latitude": 33.92874726
+  },
+  {
+    "name": "PDRC Tin House Storage",
+    "buildingUse": "Academics",
+    "longitude": -83.35501739,
+    "latitude": 33.928757
+  },
+  {
+    "name": "Rogers Road Apts P",
+    "buildingUse": "Housing",
+    "longitude": -83.37750047,
+    "latitude": 33.92828392
+  },
+  {
+    "name": "PDRC Diagnostic",
+    "buildingUse": "Academics",
+    "longitude": -83.35467225,
+    "latitude": 33.92831279
+  },
+  {
+    "name": "Poultry Disease Research Center",
+    "buildingUse": "Academics",
+    "longitude": -83.35498056,
+    "latitude": 33.92784865
+  },
+  {
+    "name": "PDRC Poultry House",
+    "buildingUse": "Academics",
+    "longitude": -83.35318036,
+    "latitude": 33.92795544
+  },
+  {
+    "name": "PDRC Avian Medicine",
+    "buildingUse": "Academics",
+    "longitude": -83.35459558,
+    "latitude": 33.92783286
+  },
+  {
+    "name": "PDRC Compost Facility",
+    "buildingUse": "Academics",
+    "longitude": -83.3537853,
+    "latitude": 33.92787823
+  },
+  {
+    "name": "CCRC",
+    "buildingUse": "Academics",
+    "longitude": -83.36706869,
+    "latitude": 33.92728463
+  },
+  {
+    "name": "PDRC Isolation Unit",
+    "buildingUse": "Academics",
+    "longitude": -83.353856,
+    "latitude": 33.92770106
+  },
+  {
+    "name": "PDRC Laying House",
+    "buildingUse": "Academics",
+    "longitude": -83.35361788,
+    "latitude": 33.92760607
+  },
+  {
+    "name": "PDRC Poultry House",
+    "buildingUse": "Academics",
+    "longitude": -83.35338298,
+    "latitude": 33.92752503
+  },
+  {
+    "name": "Incinerator Building",
+    "buildingUse": "Support",
+    "longitude": -83.3541712,
+    "latitude": 33.92763823
+  },
+  {
+    "name": "PDRC Poultry House",
+    "buildingUse": "Academics",
+    "longitude": -83.35300533,
+    "latitude": 33.92746439
+  },
+  {
+    "name": "Rogers Road Apts Q",
+    "buildingUse": "Housing",
+    "longitude": -83.37714086,
+    "latitude": 33.92725271
+  },
+  {
+    "name": "PDRC Tin House Storage",
+    "buildingUse": "Academics",
+    "longitude": -83.35276338,
+    "latitude": 33.92737971
+  },
+  {
+    "name": "PDRC Resident Manager House",
+    "buildingUse": "Not Classified",
+    "longitude": -83.35474407,
+    "latitude": 33.92715463
+  },
+  {
+    "name": "PDRC Brooder House",
+    "buildingUse": "Academics",
+    "longitude": -83.3535425,
+    "latitude": 33.92713532
+  },
+  {
+    "name": "Research Hatchery",
+    "buildingUse": "Academics",
+    "longitude": -83.35296325,
+    "latitude": 33.92714166
+  },
+  {
+    "name": "Storage Building",
+    "buildingUse": "Not Classified",
+    "longitude": -83.35234292,
+    "latitude": 33.92713721
+  },
+  {
+    "name": "PDRC Poultry House",
+    "buildingUse": "Academics",
+    "longitude": -83.35267173,
+    "latitude": 33.92697727
+  },
+  {
+    "name": "Pole Barn Supply Storage",
+    "buildingUse": "Academics",
+    "longitude": -83.35207411,
+    "latitude": 33.92689848
+  },
+  {
+    "name": "Vet Med PDR Implemen",
+    "buildingUse": "Academics",
+    "longitude": -83.35364039,
+    "latitude": 33.92686268
+  },
+  {
+    "name": "Pole Barn/Equip Storage",
+    "buildingUse": "Academics",
+    "longitude": -83.3534146,
+    "latitude": 33.92681028
+  },
+  {
+    "name": "Rogers Road Apts R",
+    "buildingUse": "Housing",
+    "longitude": -83.37678354,
+    "latitude": 33.92621945
+  },
+  {
+    "name": "Rogers Road Apts S",
+    "buildingUse": "Housing",
+    "longitude": -83.37642777,
+    "latitude": 33.92519143
+  },
+  {
+    "name": "Campus Transit Facility Bus Wash",
+    "buildingUse": "Not Classified",
+    "longitude": -83.37090549,
+    "latitude": 33.92373251
+  },
+  {
+    "name": "Campus Transit Facility",
+    "buildingUse": "Support",
+    "longitude": -83.37141577,
+    "latitude": 33.92350502
+  },
+  {
+    "name": "Vet. Medicine  Shop",
+    "buildingUse": "Academics",
+    "longitude": -83.37158861,
+    "latitude": 33.9221868
+  },
+  {
+    "name": "Vet. Medicine Fish Barn",
+    "buildingUse": "Academics",
+    "longitude": -83.37194882,
+    "latitude": 33.92198589
+  },
+  {
+    "name": "Vet. Medicine  Storage",
+    "buildingUse": "Academics",
+    "longitude": -83.37148194,
+    "latitude": 33.92191222
+  },
+  {
+    "name": "Vet. Medicine  Barn",
+    "buildingUse": "Academics",
+    "longitude": -83.37121064,
+    "latitude": 33.92167672
+  },
+  {
+    "name": "Vet. Medicine Block Building",
+    "buildingUse": "Academics",
+    "longitude": -83.37145608,
+    "latitude": 33.92171242
+  },
+  {
+    "name": "Pump House SRPGL",
+    "buildingUse": "Support",
+    "longitude": -83.34966476,
+    "latitude": 33.92073765
+  },
+  {
+    "name": "Equipment Shed Veterinary Medici",
+    "buildingUse": "Academics",
+    "longitude": -83.37153453,
+    "latitude": 33.92044637
+  },
+  {
+    "name": "Quarantine Building",
+    "buildingUse": "Academics",
+    "longitude": -83.37176453,
+    "latitude": 33.92025303
+  },
+  {
+    "name": "Ag. & Env. Services Lab",
+    "buildingUse": "Academics",
+    "longitude": -83.34413506,
+    "latitude": 33.91977781
+  },
+  {
+    "name": "Vet. Medicine Chicken House",
+    "buildingUse": "Academics",
+    "longitude": -83.37105597,
+    "latitude": 33.91996986
+  },
+  {
+    "name": "Vet. Medicine Swine Faciliy",
+    "buildingUse": "Academics",
+    "longitude": -83.37026812,
+    "latitude": 33.91988636
+  },
+  {
+    "name": "Soil Testing Lab",
+    "buildingUse": "Academics",
+    "longitude": -83.34322867,
+    "latitude": 33.91960305
+  },
+  {
+    "name": "Pole Barn",
+    "buildingUse": "Academics",
+    "longitude": -83.37237986,
+    "latitude": 33.91976262
+  },
+  {
+    "name": "Isolation Barn",
+    "buildingUse": "Academics",
+    "longitude": -83.37053039,
+    "latitude": 33.91973242
+  },
+  {
+    "name": "Geese Pole Barn",
+    "buildingUse": "Academics",
+    "longitude": -83.37024277,
+    "latitude": 33.91960409
+  },
+  {
+    "name": "CES Plant Pathology Greenhouse",
+    "buildingUse": "Academics",
+    "longitude": -83.34355159,
+    "latitude": 33.91928438
+  },
+  {
+    "name": "Soil Sample Storage",
+    "buildingUse": "Academics",
+    "longitude": -83.34329059,
+    "latitude": 33.91918571
+  },
+  {
+    "name": "Equipment Shed",
+    "buildingUse": "Not Classified",
+    "longitude": -83.34333096,
+    "latitude": 33.91913539
+  },
+  {
+    "name": "Plant Pathology Nematode Lab",
+    "buildingUse": "Academics",
+    "longitude": -83.34358573,
+    "latitude": 33.91908469
+  },
+  {
+    "name": "Driving Range Building",
+    "buildingUse": "Student Life",
+    "longitude": -83.37328654,
+    "latitude": 33.91816786
+  },
+  {
+    "name": "Boyd Golf Center",
+    "buildingUse": "Athletics",
+    "longitude": -83.37134223,
+    "latitude": 33.91576554
+  },
+  {
+    "name": "Golf Cart Storage",
+    "buildingUse": "Support",
+    "longitude": -83.37256413,
+    "latitude": 33.91573249
+  },
+  {
+    "name": "E B Smith Clubhouse",
+    "buildingUse": "Student Life",
+    "longitude": -83.37240446,
+    "latitude": 33.91544826
+  },
+  {
+    "name": "Golf Cart Maintenance",
+    "buildingUse": "Support",
+    "longitude": -83.37299237,
+    "latitude": 33.91536807
+  },
+  {
+    "name": "Golf Rest Room 2 (#7 Tee)",
+    "buildingUse": "Student Life",
+    "longitude": -83.36489037,
+    "latitude": 33.91354744
+  },
+  {
+    "name": "Rain Shelter (# 2 Tee)",
+    "buildingUse": "Student Life",
+    "longitude": -83.36759116,
+    "latitude": 33.91293893
+  },
+  {
+    "name": "Golf Rain Shelter 1 (#2 Green)",
+    "buildingUse": "Student Life",
+    "longitude": -83.3636888,
+    "latitude": 33.91198034
+  },
+  {
+    "name": "Liquid Waste Storage",
+    "buildingUse": "Support",
+    "longitude": -83.38789865,
+    "latitude": 33.91149554
+  },
+  {
+    "name": "Dry Waste Storage",
+    "buildingUse": "Support",
+    "longitude": -83.38803626,
+    "latitude": 33.91144872
+  },
+  {
+    "name": "Research Stores Administration Building",
+    "buildingUse": "Administration",
+    "longitude": -83.38862049,
+    "latitude": 33.91119928
+  },
+  {
+    "name": "Central Research Stores Warehouse",
+    "buildingUse": "Support",
+    "longitude": -83.38803601,
+    "latitude": 33.91123531
+  },
+  {
+    "name": "Softball Stadium",
+    "buildingUse": "Athletics",
+    "longitude": -83.37984229,
+    "latitude": 33.91074767
+  },
+  {
+    "name": "Softball Indoor Training",
+    "buildingUse": "Athletics",
+    "longitude": -83.38182466,
+    "latitude": 33.91050019
+  },
+  {
+    "name": "Soccer Clubhouse",
+    "buildingUse": "Athletics",
+    "longitude": -83.37999142,
+    "latitude": 33.91046267
+  },
+  {
+    "name": "Maintenance Facility",
+    "buildingUse": "Support",
+    "longitude": -83.37815558,
+    "latitude": 33.91035902
+  },
+  {
+    "name": "Golf Rain Shelter 3 (#13 Tee)",
+    "buildingUse": "Student Life",
+    "longitude": -83.36791446,
+    "latitude": 33.91008582
+  },
+  {
+    "name": "Feed Mill Whitehall",
+    "buildingUse": "Academics",
+    "longitude": -83.37703413,
+    "latitude": 33.90844755
+  },
+  {
+    "name": "Golf Course Fertilizer Storage",
+    "buildingUse": "Support",
+    "longitude": -83.36276902,
+    "latitude": 33.90777888
+  },
+  {
+    "name": "Golf Machine Storage Shed",
+    "buildingUse": "Support",
+    "longitude": -83.36296092,
+    "latitude": 33.90771189
+  },
+  {
+    "name": "Golf Maintenance",
+    "buildingUse": "Support",
+    "longitude": -83.36300229,
+    "latitude": 33.90751218
+  },
+  {
+    "name": "Poultry Science Broiler House J",
+    "buildingUse": "Academics",
+    "longitude": -83.37857752,
+    "latitude": 33.90728537
+  },
+  {
+    "name": "Golf Pump House 2 / Storage",
+    "buildingUse": "Support",
+    "longitude": -83.36310218,
+    "latitude": 33.90730363
+  },
+  {
+    "name": "Storage Shop Building PS",
+    "buildingUse": "Academics",
+    "longitude": -83.38262307,
+    "latitude": 33.90722683
+  },
+  {
+    "name": "Poultry Science Laying-Breed G",
+    "buildingUse": "Academics",
+    "longitude": -83.38177719,
+    "latitude": 33.90724318
+  },
+  {
+    "name": "Poultry Science Laying-Breed F",
+    "buildingUse": "Academics",
+    "longitude": -83.38188432,
+    "latitude": 33.90702822
+  },
+  {
+    "name": "Transgenic Poultry",
+    "buildingUse": "Academics",
+    "longitude": -83.3774383,
+    "latitude": 33.90679978
+  },
+  {
+    "name": "Broiler House Whitehall",
+    "buildingUse": "Academics",
+    "longitude": -83.38067885,
+    "latitude": 33.90695556
+  },
+  {
+    "name": "Golf Restroom 1",
+    "buildingUse": "Student Life",
+    "longitude": -83.36361356,
+    "latitude": 33.9068642
+  },
+  {
+    "name": "Poultry Science Battery House C",
+    "buildingUse": "Academics",
+    "longitude": -83.38090586,
+    "latitude": 33.90685348
+  },
+  {
+    "name": "Golf Rain Shelter 4 (#16 Tee)",
+    "buildingUse": "Student Life",
+    "longitude": -83.3637035,
+    "latitude": 33.90680367
+  },
+  {
+    "name": "Poultry Science Laying-Breed E",
+    "buildingUse": "Academics",
+    "longitude": -83.38198621,
+    "latitude": 33.90681658
+  },
+  {
+    "name": "Poultry Science Brooding H",
+    "buildingUse": "Academics",
+    "longitude": -83.37929138,
+    "latitude": 33.90679143
+  },
+  {
+    "name": "Coop Ext Service Poultry Feed La",
+    "buildingUse": "Academics",
+    "longitude": -83.38027172,
+    "latitude": 33.90674318
+  },
+  {
+    "name": "Poultry Science Environmental D",
+    "buildingUse": "Academics",
+    "longitude": -83.38102354,
+    "latitude": 33.90660993
+  },
+  {
+    "name": "Payne Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.37183369,
+    "latitude": 33.95169295
+  },
+  {
+    "name": "University Bookstore",
+    "buildingUse": "Student Life",
+    "longitude": -83.37477185,
+    "latitude": 33.95143912
+  },
+  {
+    "name": "Memorial Hall",
+    "buildingUse": "Student Life",
+    "longitude": -83.3736172,
+    "latitude": 33.9512641
+  },
+  {
+    "name": "Reed Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.37266825,
+    "latitude": 33.95104086
+  },
+  {
+    "name": "Lipscomb Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.37826974,
+    "latitude": 33.95094775
+  },
+  {
+    "name": "Mell Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.37871485,
+    "latitude": 33.9508429
+  },
+  {
+    "name": "Tate Student Center",
+    "buildingUse": "Student Life",
+    "longitude": -83.37499668,
+    "latitude": 33.95043103
+  },
+  {
+    "name": "Sanford Stadium West Stands",
+    "buildingUse": "Athletics",
+    "longitude": -83.37410165,
+    "latitude": 33.95008838
+  },
+  {
+    "name": "Russell Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.38152096,
+    "latitude": 33.94993868
+  },
+  {
+    "name": "Creswell Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.380032,
+    "latitude": 33.949987
+  },
+  {
+    "name": "Brumby Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.38284979,
+    "latitude": 33.94966235
+  },
+  {
+    "name": "Sanford Stadium East Stands",
+    "buildingUse": "Athletics",
+    "longitude": -83.37244604,
+    "latitude": 33.9494535
+  },
+  {
+    "name": "Clark Howell Hall",
+    "buildingUse": "Student Life",
+    "longitude": -83.37697569,
+    "latitude": 33.94951444
+  },
+  {
+    "name": "Sanford Stadium South Stands",
+    "buildingUse": "Athletics",
+    "longitude": -83.37362362,
+    "latitude": 33.94920882
+  },
+  {
+    "name": "Hill Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.37806928,
+    "latitude": 33.94943685
+  },
+  {
+    "name": "Geology Hydrothermal Lab",
+    "buildingUse": "Academics",
+    "longitude": -83.37600032,
+    "latitude": 33.94939881
+  },
+  {
+    "name": "Sanford Stadium Gate 6",
+    "buildingUse": "Athletics",
+    "longitude": -83.3724072,
+    "latitude": 33.94891382
+  },
+  {
+    "name": "Church Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.3782837,
+    "latitude": 33.94896705
+  },
+  {
+    "name": "Geography and Geology",
+    "buildingUse": "Academics",
+    "longitude": -83.37539954,
+    "latitude": 33.9487058
+  },
+  {
+    "name": "Cedar Street Building C",
+    "buildingUse": "Academics",
+    "longitude": -83.37412108,
+    "latitude": 33.94849115
+  },
+  {
+    "name": "Boggs Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.37838061,
+    "latitude": 33.94859181
+  },
+  {
+    "name": "Chemistry Storage Building",
+    "buildingUse": "Academics",
+    "longitude": -83.37335565,
+    "latitude": 33.94863928
+  },
+  {
+    "name": "Cedar Street Building D",
+    "buildingUse": "Academics",
+    "longitude": -83.37482148,
+    "latitude": 33.94825059
+  },
+  {
+    "name": "Cedar Street Building B",
+    "buildingUse": "Academics",
+    "longitude": -83.37271187,
+    "latitude": 33.94796062
+  },
+  {
+    "name": "Physics Building",
+    "buildingUse": "Academics",
+    "longitude": -83.3761268,
+    "latitude": 33.94817231
+  },
+  {
+    "name": "Oglethorpe House",
+    "buildingUse": "Housing",
+    "longitude": -83.37934399,
+    "latitude": 33.94768492
+  },
+  {
+    "name": "Lumpkin House",
+    "buildingUse": "Academics",
+    "longitude": -83.37393486,
+    "latitude": 33.94780263
+  },
+  {
+    "name": "Conner Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37384438,
+    "latitude": 33.94750977
+  },
+  {
+    "name": "Cedar Street Building A",
+    "buildingUse": "Academics",
+    "longitude": -83.37252542,
+    "latitude": 33.946807
+  },
+  {
+    "name": "Myers Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.37780384,
+    "latitude": 33.94667885
+  },
+  {
+    "name": "Oglethorpe Dining Commons",
+    "buildingUse": "Student Life",
+    "longitude": -83.37944509,
+    "latitude": 33.94709889
+  },
+  {
+    "name": "Barrow Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37370058,
+    "latitude": 33.94650925
+  },
+  {
+    "name": "Alpha Chi Omega Sorority",
+    "buildingUse": "Housing",
+    "longitude": -83.37893276,
+    "latitude": 33.94642865
+  },
+  {
+    "name": "Soule Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.3759875,
+    "latitude": 33.94620719
+  },
+  {
+    "name": "Food Science Building",
+    "buildingUse": "Academics",
+    "longitude": -83.37214982,
+    "latitude": 33.94606601
+  },
+  {
+    "name": "Shirley Mathis McBay Science Library",
+    "buildingUse": "Academics",
+    "longitude": -83.37532078,
+    "latitude": 33.94600768
+  },
+  {
+    "name": "Food Processing Lab",
+    "buildingUse": "Academics",
+    "longitude": -83.37344475,
+    "latitude": 33.94619918
+  },
+  {
+    "name": "Ecology Annex",
+    "buildingUse": "Academics",
+    "longitude": -83.37378844,
+    "latitude": 33.94613909
+  },
+  {
+    "name": "Mary Lyndon Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.37702431,
+    "latitude": 33.94599026
+  },
+  {
+    "name": "Boyd Rsrch and Edu Ctr",
+    "buildingUse": "Academics",
+    "longitude": -83.37481699,
+    "latitude": 33.94589811
+  },
+  {
+    "name": "Auxiliary Services",
+    "buildingUse": "Administration",
+    "longitude": -83.37903279,
+    "latitude": 33.94574139
+  },
+  {
+    "name": "Central Steam Plant Boiler House #1",
+    "buildingUse": "Support",
+    "longitude": -83.37333832,
+    "latitude": 33.94570183
+  },
+  {
+    "name": "Cobb House",
+    "buildingUse": "Outreach",
+    "longitude": -83.37989517,
+    "latitude": 33.94559263
+  },
+  {
+    "name": "Central Steam Plant Boiler House #2",
+    "buildingUse": "Support",
+    "longitude": -83.37344421,
+    "latitude": 33.94545802
+  },
+  {
+    "name": "Fuel Oil Storage",
+    "buildingUse": "Support",
+    "longitude": -83.37388931,
+    "latitude": 33.94554675
+  },
+  {
+    "name": "Performing Arts",
+    "buildingUse": "Student Life",
+    "longitude": -83.36953741,
+    "latitude": 33.94197338
+  },
+  {
+    "name": "Poultry Science Building A",
+    "buildingUse": "Academics",
+    "longitude": -83.38042455,
+    "latitude": 33.90606651
+  },
+  {
+    "name": "Multi Purpose House 1 PS",
+    "buildingUse": "Academics",
+    "longitude": -83.37787759,
+    "latitude": 33.90593724
+  },
+  {
+    "name": "Poultry Process Hatchery Facilit",
+    "buildingUse": "Academics",
+    "longitude": -83.38068178,
+    "latitude": 33.90576694
+  },
+  {
+    "name": "Multi Purpose House 2 PS",
+    "buildingUse": "Academics",
+    "longitude": -83.37803379,
+    "latitude": 33.90560803
+  },
+  {
+    "name": "Poultry Science Cage Lay House B",
+    "buildingUse": "Academics",
+    "longitude": -83.38108121,
+    "latitude": 33.90552366
+  },
+  {
+    "name": "Poultry Science Isolation I",
+    "buildingUse": "Academics",
+    "longitude": -83.37960788,
+    "latitude": 33.90527858
+  },
+  {
+    "name": "AS B&B C Pavilion",
+    "buildingUse": "Support",
+    "longitude": -83.37043037,
+    "latitude": 33.90421074
+  },
+  {
+    "name": "Guard Shelter",
+    "buildingUse": "Support",
+    "longitude": -83.38100635,
+    "latitude": 33.90436127
+  },
+  {
+    "name": "Sustainable Food Systems Classroom Barn",
+    "buildingUse": "Academics",
+    "longitude": -83.37433254,
+    "latitude": 33.90338535
+  },
+  {
+    "name": "AS Farrowing Building",
+    "buildingUse": "Academics",
+    "longitude": -83.37469224,
+    "latitude": 33.90289994
+  },
+  {
+    "name": "South Milledge Greenhouse #2",
+    "buildingUse": "Academics",
+    "longitude": -83.37473075,
+    "latitude": 33.90266065
+  },
+  {
+    "name": "Botanical Garden Tractor Shed",
+    "buildingUse": "Support",
+    "longitude": -83.39142787,
+    "latitude": 33.90265058
+  },
+  {
+    "name": "Mimsie Lanier Ctr for Native Plant Studies",
+    "buildingUse": "Outreach",
+    "longitude": -83.39051152,
+    "latitude": 33.90241699
+  },
+  {
+    "name": "Botanical Garden Quad Greenhouse",
+    "buildingUse": "Greenhouse",
+    "longitude": -83.39046483,
+    "latitude": 33.9022508
+  },
+  {
+    "name": "Botanical Garden Boiler House",
+    "buildingUse": "Support",
+    "longitude": -83.39066853,
+    "latitude": 33.9022657
+  },
+  {
+    "name": "Botanical Garden Quonset House",
+    "buildingUse": "Outreach",
+    "longitude": -83.39025075,
+    "latitude": 33.90215498
+  },
+  {
+    "name": "Botanical Garden Day Chapel",
+    "buildingUse": "Outreach",
+    "longitude": -83.38052512,
+    "latitude": 33.9018691
+  },
+  {
+    "name": "Garden Club Headquarters",
+    "buildingUse": "Outreach",
+    "longitude": -83.38261652,
+    "latitude": 33.90177767
+  },
+  {
+    "name": "Sustainable Food Systems Maint. Barn",
+    "buildingUse": "Academics",
+    "longitude": -83.37297285,
+    "latitude": 33.90106386
+  },
+  {
+    "name": "Botanical Gardens Restrooms",
+    "buildingUse": "Support",
+    "longitude": -83.38477264,
+    "latitude": 33.9010815
+  },
+  {
+    "name": "Callaway Building",
+    "buildingUse": "Outreach",
+    "longitude": -83.38544118,
+    "latitude": 33.9006294
+  },
+  {
+    "name": "Milledge Hall",
+    "buildingUse": "Student Life",
+    "longitude": -83.37227365,
+    "latitude": 33.95158699
+  },
+  {
+    "name": "Women's Tennis Clubhouse",
+    "buildingUse": "Athletics",
+    "longitude": -83.37817108,
+    "latitude": 33.94047747
+  },
+  {
+    "name": "Kappa Sigma",
+    "buildingUse": "Housing",
+    "longitude": -83.37001684,
+    "latitude": 33.94523282
+  },
+  {
+    "name": "Office of Service-Learning",
+    "buildingUse": "Outreach",
+    "longitude": -83.38105208,
+    "latitude": 33.94537878
+  },
+  {
+    "name": "Treanor House",
+    "buildingUse": "Outreach",
+    "longitude": -83.38002637,
+    "latitude": 33.94533716
+  },
+  {
+    "name": "Hardman Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37415125,
+    "latitude": 33.94507902
+  },
+  {
+    "name": "Georgia Center for Cont Ed",
+    "buildingUse": "Outreach",
+    "longitude": -83.37776814,
+    "latitude": 33.94456509
+  },
+  {
+    "name": "District Energy Plant #2",
+    "buildingUse": "Support",
+    "longitude": -83.37281786,
+    "latitude": 33.94492722
+  },
+  {
+    "name": "Landscaoe Storage Shed",
+    "buildingUse": "Not Classified",
+    "longitude": -83.3775271,
+    "latitude": 33.94497818
+  },
+  {
+    "name": "Snelling Dining Hall",
+    "buildingUse": "Student Life",
+    "longitude": -83.37639234,
+    "latitude": 33.94472428
+  },
+  {
+    "name": "Sanford Stadium North Stands",
+    "buildingUse": "Athletics",
+    "longitude": -83.37297005,
+    "latitude": 33.95037827
+  },
+  {
+    "name": "Small Business Development Center",
+    "buildingUse": "Administration",
+    "longitude": -83.37354229,
+    "latitude": 33.9577437
+  },
+  {
+    "name": "Mahoney Entrepreneurship Hub",
+    "buildingUse": "Academics",
+    "longitude": -83.37875985,
+    "latitude": 33.95659795
+  },
+  {
+    "name": "Interior Design Studios",
+    "buildingUse": "Academics",
+    "longitude": -83.37905397,
+    "latitude": 33.95652157
+  },
+  {
+    "name": "The Athenaeum",
+    "buildingUse": "Academics",
+    "longitude": -83.37936642,
+    "latitude": 33.95648342
+  },
+  {
+    "name": "Carlton Street Deck",
+    "buildingUse": "Parking",
+    "longitude": -83.37794931,
+    "latitude": 33.94121004
+  },
+  {
+    "name": "Hodgson Oil Building",
+    "buildingUse": "Administration",
+    "longitude": -83.37092125,
+    "latitude": 33.95720317
+  },
+  {
+    "name": "Golf Pump House 2",
+    "buildingUse": "Support",
+    "longitude": -83.37065177,
+    "latitude": 33.91579256
+  },
+  {
+    "name": "Boyd Golf Tee Box",
+    "buildingUse": "Athletics",
+    "longitude": -83.37006352,
+    "latitude": 33.91722841
+  },
+  {
+    "name": "529 Baxter St",
+    "buildingUse": "Outreach",
+    "longitude": -83.38410481,
+    "latitude": 33.94965346
+  },
+  {
+    "name": "Paul D. Coverdell Center",
+    "buildingUse": "Academics",
+    "longitude": -83.37675666,
+    "latitude": 33.94107153
+  },
+  {
+    "name": "Hull Street Deck",
+    "buildingUse": "Parking",
+    "longitude": -83.37871668,
+    "latitude": 33.95286379
+  },
+  {
+    "name": "South Campus Deck",
+    "buildingUse": "Parking",
+    "longitude": -83.37753203,
+    "latitude": 33.94554479
+  },
+  {
+    "name": "Forestry Resources 2",
+    "buildingUse": "Academics",
+    "longitude": -83.37438817,
+    "latitude": 33.94401225
+  },
+  {
+    "name": "Davison Life Sciences Complex",
+    "buildingUse": "Academics",
+    "longitude": -83.37235379,
+    "latitude": 33.94320559
+  },
+  {
+    "name": "Marine Science / Dance",
+    "buildingUse": "Academics",
+    "longitude": -83.37577092,
+    "latitude": 33.94520752
+  },
+  {
+    "name": "Founders Garden House",
+    "buildingUse": "Academics",
+    "longitude": -83.376136,
+    "latitude": 33.95420986
+  },
+  {
+    "name": "Ecology Centers",
+    "buildingUse": "Support",
+    "longitude": -83.37347897,
+    "latitude": 33.94501093
+  },
+  {
+    "name": "Ecology",
+    "buildingUse": "Academics",
+    "longitude": -83.37328111,
+    "latitude": 33.94434657
+  },
+  {
+    "name": "UGAPD & OEP Training Facility",
+    "buildingUse": "Support",
+    "longitude": -83.38746346,
+    "latitude": 33.91051367
+  },
+  {
+    "name": "Botanical Garden Visitors Center",
+    "buildingUse": "Outreach",
+    "longitude": -83.38341456,
+    "latitude": 33.90132316
+  },
+  {
+    "name": "Rhodes Animal Science Center - B",
+    "buildingUse": "Academics",
+    "longitude": -83.36861235,
+    "latitude": 33.93582156
+  },
+  {
+    "name": "Rhodes Animal Science Center - C",
+    "buildingUse": "Academics",
+    "longitude": -83.36845464,
+    "latitude": 33.936349
+  },
+  {
+    "name": "College of Veterinary Medicine 1",
+    "buildingUse": "Academics",
+    "longitude": -83.37499039,
+    "latitude": 33.94103374
+  },
+  {
+    "name": "Veterinary Diagnostic Lab",
+    "buildingUse": "Academics",
+    "longitude": -83.37490425,
+    "latitude": 33.94060786
+  },
+  {
+    "name": "Coliseum Training Facility",
+    "buildingUse": "Athletics",
+    "longitude": -83.37753031,
+    "latitude": 33.94219695
+  },
+  {
+    "name": "Lamar Dodd School of Art",
+    "buildingUse": "Academics",
+    "longitude": -83.36917468,
+    "latitude": 33.94040489
+  },
+  {
+    "name": "Hirsch Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37447163,
+    "latitude": 33.9546902
+  },
+  {
+    "name": "Law School Addition",
+    "buildingUse": "Academics",
+    "longitude": -83.3747533,
+    "latitude": 33.9550095
+  },
+  {
+    "name": "Law Library Annex",
+    "buildingUse": "Academics",
+    "longitude": -83.37544872,
+    "latitude": 33.95537707
+  },
+  {
+    "name": "Speirs Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37526315,
+    "latitude": 33.9469264
+  },
+  {
+    "name": "Dawson Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37569426,
+    "latitude": 33.94704048
+  },
+  {
+    "name": "Park Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37524289,
+    "latitude": 33.95333913
+  },
+  {
+    "name": "Driftmier Engineering Center",
+    "buildingUse": "Academics",
+    "longitude": -83.37506535,
+    "latitude": 33.93883498
+  },
+  {
+    "name": "Dean Rusk Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37437242,
+    "latitude": 33.9540178
+  },
+  {
+    "name": "Anthropology Greenhouse",
+    "buildingUse": "Greenhouse",
+    "longitude": -83.37164081,
+    "latitude": 33.95339393
+  },
+  {
+    "name": "Computing Services",
+    "buildingUse": "Academics",
+    "longitude": -83.37185316,
+    "latitude": 33.94518817
+  },
+  {
+    "name": "Crop & Soil Science Greenhouse",
+    "buildingUse": "Academics",
+    "longitude": -83.3627484,
+    "latitude": 33.93085823
+  },
+  {
+    "name": "Agronomy Seed Cold Storgae",
+    "buildingUse": "Not Classified",
+    "longitude": -83.36295257,
+    "latitude": 33.93098082
+  },
+  {
+    "name": "Golf Pump House",
+    "buildingUse": "Student Life",
+    "longitude": -83.36782419,
+    "latitude": 33.91138305
+  },
+  {
+    "name": "110 E Clayton St",
+    "buildingUse": "Not Classified",
+    "longitude": -83.37677816,
+    "latitude": 33.95795833
+  },
+  {
+    "name": "425 N Lumpkins St",
+    "buildingUse": "Not Classified",
+    "longitude": -83.37791951,
+    "latitude": 33.96026684
+  },
+  {
+    "name": "Phi Kappa Hall",
+    "buildingUse": "Student Life",
+    "longitude": -83.37420571,
+    "latitude": 33.95713815
+  },
+  {
+    "name": "Tate Student Center Expansion",
+    "buildingUse": "Student Life",
+    "longitude": -83.37576249,
+    "latitude": 33.95063001
+  },
+  {
+    "name": "Pharmacy South",
+    "buildingUse": "Academics",
+    "longitude": -83.37591404,
+    "latitude": 33.94343971
+  },
+  {
+    "name": "Golf Scoreboard",
+    "buildingUse": "Athletics",
+    "longitude": -83.37212179,
+    "latitude": 33.91564125
+  },
+  {
+    "name": "Golf Maintenance Facility",
+    "buildingUse": "Support",
+    "longitude": -83.3633172,
+    "latitude": 33.90768291
+  },
+  {
+    "name": "Golf Pump House 1",
+    "buildingUse": "Support",
+    "longitude": -83.36187485,
+    "latitude": 33.90831559
+  },
+  {
+    "name": "Tate Center Deck",
+    "buildingUse": "Parking",
+    "longitude": -83.37652966,
+    "latitude": 33.95066713
+  },
+  {
+    "name": "School of Social Work Building",
+    "buildingUse": "Academics",
+    "longitude": -83.36929324,
+    "latitude": 33.95285899
+  },
+  {
+    "name": "South Milledge Greenhouse #1",
+    "buildingUse": "Academics",
+    "longitude": -83.3738232,
+    "latitude": 33.90220241
+  },
+  {
+    "name": "South Milledge Greenhouse #1",
+    "buildingUse": "Academics",
+    "longitude": -83.373637,
+    "latitude": 33.90220122
+  },
+  {
+    "name": "South Milledge Greenhouse #1",
+    "buildingUse": "Academics",
+    "longitude": -83.37345081,
+    "latitude": 33.90220002
+  },
+  {
+    "name": "South Milledge Greenhouse #1",
+    "buildingUse": "Academics",
+    "longitude": -83.37363489,
+    "latitude": 33.90242654
+  },
+  {
+    "name": "Tate Deck Booth 1",
+    "buildingUse": "Support",
+    "longitude": -83.37612452,
+    "latitude": 33.95003519
+  },
+  {
+    "name": "Tate Deck Booth 2",
+    "buildingUse": "Support",
+    "longitude": -83.37613805,
+    "latitude": 33.94998989
+  },
+  {
+    "name": "Communication Hut",
+    "buildingUse": "Support",
+    "longitude": -83.3760721,
+    "latitude": 33.93717384
+  },
+  {
+    "name": "Communication Hut 2",
+    "buildingUse": "Support",
+    "longitude": -83.37943846,
+    "latitude": 33.93043399
+  },
+  {
+    "name": "Sigma Nu",
+    "buildingUse": "Housing",
+    "longitude": -83.37030928,
+    "latitude": 33.94651323
+  },
+  {
+    "name": "Pi Kappa Alpha",
+    "buildingUse": "Housing",
+    "longitude": -83.36977671,
+    "latitude": 33.94581171
+  },
+  {
+    "name": "Tau Epsilon Phi",
+    "buildingUse": "Housing",
+    "longitude": -83.36985264,
+    "latitude": 33.94625657
+  },
+  {
+    "name": "Phi Delta Theta",
+    "buildingUse": "Housing",
+    "longitude": -83.37050914,
+    "latitude": 33.94601642
+  },
+  {
+    "name": "Towns Residence 2",
+    "buildingUse": "Not Classified",
+    "longitude": -83.38028906,
+    "latitude": 33.91275508
+  },
+  {
+    "name": "PAC Deck",
+    "buildingUse": "Parking",
+    "longitude": -83.37006157,
+    "latitude": 33.94220744
+  },
+  {
+    "name": "Intramural Fields Deck",
+    "buildingUse": "Parking",
+    "longitude": -83.37234771,
+    "latitude": 33.93251042
+  },
+  {
+    "name": "Facilities Management East",
+    "buildingUse": "Support",
+    "longitude": -83.36768175,
+    "latitude": 33.93603719
+  },
+  {
+    "name": "Plant Biology Greenhouse",
+    "buildingUse": "Academics",
+    "longitude": -83.36327116,
+    "latitude": 33.92926925
+  },
+  {
+    "name": "Flo Pak Mech. Bldg. 1",
+    "buildingUse": "Support",
+    "longitude": -83.38278017,
+    "latitude": 33.9499736
+  },
+  {
+    "name": "Club Sports RR",
+    "buildingUse": "Student Life",
+    "longitude": -83.37134315,
+    "latitude": 33.90526007
+  },
+  {
+    "name": "Ceramics",
+    "buildingUse": "Academics",
+    "longitude": -83.36971557,
+    "latitude": 33.9433648
+  },
+  {
+    "name": "Richard B. Russell Jr. Special Collections",
+    "buildingUse": "Academics",
+    "longitude": -83.37821532,
+    "latitude": 33.95405923
+  },
+  {
+    "name": "Nichols Building",
+    "buildingUse": "Not Classified",
+    "longitude": -83.3508672,
+    "latitude": 33.92221621
+  },
+  {
+    "name": "J.W. Fanning Building",
+    "buildingUse": "Outreach",
+    "longitude": -83.38027185,
+    "latitude": 33.94481217
+  },
+  {
+    "name": "Reed Plaza East Restroom",
+    "buildingUse": "Athletics",
+    "longitude": -83.37206529,
+    "latitude": 33.95059854
+  },
+  {
+    "name": "Reed Plaza Concessions Bldg.",
+    "buildingUse": "Athletics",
+    "longitude": -83.37240946,
+    "latitude": 33.9507019
+  },
+  {
+    "name": "Reed Plaza West Restroom",
+    "buildingUse": "Athletics",
+    "longitude": -83.37279323,
+    "latitude": 33.95083961
+  },
+  {
+    "name": "District Energy Plant #1",
+    "buildingUse": "Support",
+    "longitude": -83.37918206,
+    "latitude": 33.95200125
+  },
+  {
+    "name": "Building 1516",
+    "buildingUse": "Housing",
+    "longitude": -83.36709952,
+    "latitude": 33.93670381
+  },
+  {
+    "name": "Cooling Tower",
+    "buildingUse": "Not Classified",
+    "longitude": -83.36632957,
+    "latitude": 33.93759228
+  },
+  {
+    "name": "Hort. Office",
+    "buildingUse": "Outreach",
+    "longitude": -83.38264603,
+    "latitude": 33.90508692
+  },
+  {
+    "name": "Bot. Garden Head House",
+    "buildingUse": "Outreach",
+    "longitude": -83.38263258,
+    "latitude": 33.90474755
+  },
+  {
+    "name": "Greenhouse 1",
+    "buildingUse": "Outreach",
+    "longitude": -83.38280121,
+    "latitude": 33.90456725
+  },
+  {
+    "name": "Greenhouse 1",
+    "buildingUse": "Outreach",
+    "longitude": -83.38263479,
+    "latitude": 33.90456619
+  },
+  {
+    "name": "Greenhouse 1",
+    "buildingUse": "Outreach",
+    "longitude": -83.38246836,
+    "latitude": 33.90456513
+  },
+  {
+    "name": "Maintenance Bldg.",
+    "buildingUse": "Support",
+    "longitude": -83.3820351,
+    "latitude": 33.90465532
+  },
+  {
+    "name": "Storage Shed",
+    "buildingUse": "Not Classified",
+    "longitude": -83.38226957,
+    "latitude": 33.9423811
+  },
+  {
+    "name": "Quarters A Garage",
+    "buildingUse": "Not Classified",
+    "longitude": -83.40751627,
+    "latitude": 33.96332902
+  },
+  {
+    "name": "Clinical & Translational Research",
+    "buildingUse": "Outreach",
+    "longitude": -83.40904736,
+    "latitude": 33.96581299
+  },
+  {
+    "name": "Facilities Management HSC Annex",
+    "buildingUse": "Not Classified",
+    "longitude": -83.40714569,
+    "latitude": 33.96688731
+  },
+  {
+    "name": "Housing Occupant Storage",
+    "buildingUse": "Housing",
+    "longitude": -83.40728514,
+    "latitude": 33.96625248
+  },
+  {
+    "name": "George Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.40328099,
+    "latitude": 33.96423399
+  },
+  {
+    "name": "Scott Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.40301009,
+    "latitude": 33.96368842
+  },
+  {
+    "name": "Miller Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.40451694,
+    "latitude": 33.9633132
+  },
+  {
+    "name": "Quarters B",
+    "buildingUse": "Not Classified",
+    "longitude": -83.40268095,
+    "latitude": 33.96310973
+  },
+  {
+    "name": "Housing Occupant Storage",
+    "buildingUse": "Housing",
+    "longitude": -83.4073065,
+    "latitude": 33.96633175
+  },
+  {
+    "name": "University Childcare Center",
+    "buildingUse": "Outreach",
+    "longitude": -83.40954653,
+    "latitude": 33.96590663
+  },
+  {
+    "name": "109A Bowstrom Road",
+    "buildingUse": "Support",
+    "longitude": -83.40865881,
+    "latitude": 33.96559315
+  },
+  {
+    "name": "Police Department Training Annex",
+    "buildingUse": "Administration",
+    "longitude": -83.40837556,
+    "latitude": 33.96612622
+  },
+  {
+    "name": "Quarters A",
+    "buildingUse": "Not Classified",
+    "longitude": -83.40727964,
+    "latitude": 33.96302302
+  },
+  {
+    "name": "105 Bowstrom Road",
+    "buildingUse": "Not Classified",
+    "longitude": -83.40825771,
+    "latitude": 33.96649494
+  },
+  {
+    "name": "Field House",
+    "buildingUse": "Not Classified",
+    "longitude": -83.40805858,
+    "latitude": 33.96489108
+  },
+  {
+    "name": "Pound Hall",
+    "buildingUse": "Student Life",
+    "longitude": -83.40622355,
+    "latitude": 33.96435603
+  },
+  {
+    "name": "Warehouse",
+    "buildingUse": "Support",
+    "longitude": -83.40767022,
+    "latitude": 33.96660865
+  },
+  {
+    "name": "Wright Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.40539417,
+    "latitude": 33.96381369
+  },
+  {
+    "name": "Quarters B Garage",
+    "buildingUse": "Not Classified",
+    "longitude": -83.40308886,
+    "latitude": 33.96305133
+  },
+  {
+    "name": "Hudson Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.40276664,
+    "latitude": 33.96347628
+  },
+  {
+    "name": "Carnegie Library Learning Center",
+    "buildingUse": "Academics",
+    "longitude": -83.40454626,
+    "latitude": 33.96406418
+  },
+  {
+    "name": "Russell Hall HSC",
+    "buildingUse": "Academics",
+    "longitude": -83.40380933,
+    "latitude": 33.96467566
+  },
+  {
+    "name": "Winnie Davis",
+    "buildingUse": "Academics",
+    "longitude": -83.40397326,
+    "latitude": 33.9640246
+  },
+  {
+    "name": "Brown Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.4050272,
+    "latitude": 33.96452389
+  },
+  {
+    "name": "Central Heating Plant",
+    "buildingUse": "Support",
+    "longitude": -83.40434696,
+    "latitude": 33.96520691
+  },
+  {
+    "name": "Rhodes Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.40374672,
+    "latitude": 33.96358897
+  },
+  {
+    "name": "Wheeler Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.40676242,
+    "latitude": 33.96436896
+  },
+  {
+    "name": "Handball Court",
+    "buildingUse": "Student Life",
+    "longitude": -83.40640159,
+    "latitude": 33.96417108
+  },
+  {
+    "name": "Facilities Management HSC",
+    "buildingUse": "Administration",
+    "longitude": -83.40420302,
+    "latitude": 33.96501882
+  },
+  {
+    "name": "AS Shade Shelter 4",
+    "buildingUse": "Academics",
+    "longitude": -83.3725923,
+    "latitude": 33.90327881
+  },
+  {
+    "name": "AS Shade Shelter 5",
+    "buildingUse": "Academics",
+    "longitude": -83.37321537,
+    "latitude": 33.90420166
+  },
+  {
+    "name": "AS Shade Shelter 7",
+    "buildingUse": "Academics",
+    "longitude": -83.3728207,
+    "latitude": 33.90441758
+  },
+  {
+    "name": "AS Shade Shelter 11",
+    "buildingUse": "Academics",
+    "longitude": -83.37439593,
+    "latitude": 33.90670527
+  },
+  {
+    "name": "AS Shade Shelter 12",
+    "buildingUse": "Academics",
+    "longitude": -83.37478422,
+    "latitude": 33.90666409
+  },
+  {
+    "name": "Pole Shelter",
+    "buildingUse": "Not Classified",
+    "longitude": -83.35360561,
+    "latitude": 33.92735256
+  },
+  {
+    "name": "Rutherford Hall",
+    "buildingUse": "Housing",
+    "longitude": -83.37667073,
+    "latitude": 33.94694628
+  },
+  {
+    "name": "Bolton Dining Commons",
+    "buildingUse": "Student Life",
+    "longitude": -83.37750237,
+    "latitude": 33.95102131
+  },
+  {
+    "name": "Athens Turfgrass Res & Ed Ctr Greenhouse",
+    "buildingUse": "Greenhouse",
+    "longitude": -83.37371821,
+    "latitude": 33.90516225
+  },
+  {
+    "name": "Athens Turfgrass Res & Ed Center Office",
+    "buildingUse": "Not Classified",
+    "longitude": -83.37394942,
+    "latitude": 33.90553349
+  },
+  {
+    "name": "Veterinary Teaching Hospital",
+    "buildingUse": "Academics",
+    "longitude": -83.34687153,
+    "latitude": 33.91872158
+  },
+  {
+    "name": "Veterinary Education Center",
+    "buildingUse": "Academics",
+    "longitude": -83.34552252,
+    "latitude": 33.91950263
+  },
+  {
+    "name": "Equine Performance Arena",
+    "buildingUse": "Academics",
+    "longitude": -83.34798764,
+    "latitude": 33.91768207
+  },
+  {
+    "name": "Field Services",
+    "buildingUse": "Academics",
+    "longitude": -83.3474147,
+    "latitude": 33.91749982
+  },
+  {
+    "name": "Large Animal Isolation",
+    "buildingUse": "Academics",
+    "longitude": -83.34622441,
+    "latitude": 33.91729235
+  },
+  {
+    "name": "Correll Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37743804,
+    "latitude": 33.95279983
+  },
+  {
+    "name": "South Milledge Greenhouse #2",
+    "buildingUse": "Academics",
+    "longitude": -83.37476039,
+    "latitude": 33.90225956
+  },
+  {
+    "name": "South Milledge Greenhouse #2",
+    "buildingUse": "Academics",
+    "longitude": -83.37455607,
+    "latitude": 33.90225824
+  },
+  {
+    "name": "South Milledge Greenhouse #2",
+    "buildingUse": "Academics",
+    "longitude": -83.37435175,
+    "latitude": 33.90225693
+  },
+  {
+    "name": "Science Learning Center",
+    "buildingUse": "Academics",
+    "longitude": -83.37625283,
+    "latitude": 33.9427513
+  },
+  {
+    "name": "Greenhouse CCRC",
+    "buildingUse": "Not Classified",
+    "longitude": -83.36394832,
+    "latitude": 33.92914491
+  },
+  {
+    "name": "Turf Science Research Greenhouse",
+    "buildingUse": "Greenhouse",
+    "longitude": -83.37349132,
+    "latitude": 33.90483456
+  },
+  {
+    "name": "W.P. & P.O. Payne Indoor Athletic Facility",
+    "buildingUse": "Athletics",
+    "longitude": -83.3801166,
+    "latitude": 33.94218231
+  },
+  {
+    "name": "Amos Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37744174,
+    "latitude": 33.95228223
+  },
+  {
+    "name": "Center for Molecular Medicine",
+    "buildingUse": "Academics",
+    "longitude": -83.36717665,
+    "latitude": 33.92627253
+  },
+  {
+    "name": "Moore-Rooker Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37781566,
+    "latitude": 33.95237135
+  },
+  {
+    "name": "Benson Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37706272,
+    "latitude": 33.95234405
+  },
+  {
+    "name": "Broiler House B",
+    "buildingUse": "Academics",
+    "longitude": -83.37725895,
+    "latitude": 33.90638024
+  },
+  {
+    "name": "Broiler House A",
+    "buildingUse": "Academics",
+    "longitude": -83.37738628,
+    "latitude": 33.90617097
+  },
+  {
+    "name": "Storage Shed",
+    "buildingUse": "Support",
+    "longitude": -83.37692718,
+    "latitude": 33.90572451
+  },
+  {
+    "name": "District Energy Plant #2 Annex",
+    "buildingUse": "Support",
+    "longitude": -83.37271567,
+    "latitude": 33.94512248
+  },
+  {
+    "name": "Hazardous Storage Riverbend",
+    "buildingUse": "Not Classified",
+    "longitude": -83.36685994,
+    "latitude": 33.92910568
+  },
+  {
+    "name": "90 Day Haz Strg",
+    "buildingUse": "Not Classified",
+    "longitude": -83.3745738,
+    "latitude": 33.94074242
+  },
+  {
+    "name": "Hazardous Storage Printing",
+    "buildingUse": "Not Classified",
+    "longitude": -83.36945226,
+    "latitude": 33.94294392
+  },
+  {
+    "name": "ESD Hazardous Storage Pharmacy",
+    "buildingUse": "Not Classified",
+    "longitude": -83.37349403,
+    "latitude": 33.94600788
+  },
+  {
+    "name": "Hazardous Storage Chemistry",
+    "buildingUse": "Not Classified",
+    "longitude": -83.37232376,
+    "latitude": 33.94673971
+  },
+  {
+    "name": "Sanford & Barbara Orkin Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37781323,
+    "latitude": 33.95190541
+  },
+  {
+    "name": "Ivester Hall",
+    "buildingUse": "Academics",
+    "longitude": -83.37713637,
+    "latitude": 33.95189003
+  },
+  {
+    "name": "Children's Garden Restroom Building",
+    "buildingUse": "Support",
+    "longitude": -83.38524601,
+    "latitude": 33.90144361
+  },
+  {
+    "name": "Mechanical Bldg.",
+    "buildingUse": "Support",
+    "longitude": -83.37243879,
+    "latitude": 33.9453904
+  },
+  {
+    "name": "Vet. Med. Animal Shade",
+    "buildingUse": "Support",
+    "longitude": -83.37006952,
+    "latitude": 33.91916085
+  },
+  {
+    "name": "FMD Grounds Shop",
+    "buildingUse": "Support",
+    "longitude": -83.37014966,
+    "latitude": 33.92202258
+  },
+  {
+    "name": "FMD Construction Shop",
+    "buildingUse": "Support",
+    "longitude": -83.36999725,
+    "latitude": 33.92169945
+  },
+  {
+    "name": "FMD Grounds Admin. Bldg. (Riverbend)",
+    "buildingUse": "Support",
+    "longitude": -83.37074085,
+    "latitude": 33.92249566
+  },
+  {
+    "name": "One Press Place",
+    "buildingUse": "Support",
+    "longitude": -83.37160419,
+    "latitude": 33.95936737
+  },
+  {
+    "name": "Soccer Stadium",
+    "buildingUse": "Athletics",
+    "longitude": -83.380594,
+    "latitude": 33.910685
+  }
+]

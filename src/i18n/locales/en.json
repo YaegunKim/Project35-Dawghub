@@ -19,7 +19,17 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "about": "About",
-    "version": "Version {{version}}"
+    "version": "Version {{version}}",
+    "debugBusData": "Debug",
+    "debugBusDataToggle": "Bus data collection",
+    "debugLoading": "Loading…",
+    "debugError": "Couldn't load bus data stats.",
+    "debugTotalRows": "Rows logged",
+    "debugRoutes": "Routes seen",
+    "debugStops": "Stops seen",
+    "debugEarliest": "Earliest sample",
+    "debugLatest": "Latest sample",
+    "debugRefresh": "Refresh"
   },
   "community": {
     "boards": {
@@ -114,12 +124,44 @@
     "noRoutesYet": "No routes loaded yet.",
     "myDorm": "My dorm",
     "myDormPlaceholder": "Search your dorm building",
-    "busMode": {
-      "title": "Which routes to show",
-      "running": "Currently running only",
-      "all": "All routes",
-      "custom": "Only selected routes",
-      "selectRoutes": "Select routes"
+    "bus": {
+      "notOperating": "Not currently running",
+      "settings": "Bus settings",
+      "operatingOnly": "Show only currently running routes",
+      "allOn": "Show all routes",
+      "allOff": "Hide all routes",
+      "perRoute": "Show/hide by route"
+    },
+    "directions": {
+      "button": "Directions",
+      "title": "Directions",
+      "fromLabel": "From",
+      "toLabel": "To",
+      "swap": "Swap starting point and destination",
+      "fromPlaceholder": "Starting point",
+      "toPlaceholder": "Destination",
+      "useMyLocation": "Use my location",
+      "pickOnMap": "Pick on map",
+      "pickHint": "Tap a spot on the map",
+      "cancelPick": "Cancel",
+      "getDirections": "Get directions",
+      "planning": "Finding routes…",
+      "errorGeneric": "Couldn't find a route between those points.",
+      "walkOnly": "Walk only",
+      "walkAndBus": "Walk + Bus",
+      "walkAndBusRoute": "Walk + {{route}}",
+      "noBusOption": "No bus route connects these two points.",
+      "busEtaApprox": "Bus timing is an estimate",
+      "originGpsLabel": "My current location",
+      "pickedPointLabel": "Pinned location",
+      "minutes": "{{count}} min",
+      "go": "Go",
+      "endNavigation": "End",
+      "arrived": "You've arrived",
+      "navWalkToStop": "Walk to {{stop}}",
+      "navBoardBus": "Take {{route}} to {{stop}}",
+      "navWalkToDestination": "Walk to {{destination}}",
+      "navTotalRemaining": "{{duration}} total"
     }
   },
   "friends": {

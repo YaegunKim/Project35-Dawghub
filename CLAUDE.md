@@ -81,7 +81,7 @@ pwa-assets.config.ts          # PWA 아이콘 생성 설정 (@vite-pwa/assets-ge
 | 탭 | 폴더 |
 |---|---|
 | 커뮤니티 | `ai/pages/Community/` (CommunityPage, BoardPage, PostDetailPage) |
-| 시간표 | `ai/pages/Schedule/` (SchedulePage) |
+| 시간표 | `ai/pages/Schedule/` (SchedulePage, 친구 시간표 보기는 `FriendSchedulePage` — 같은 문서에 포함) |
 | 지도 | `ai/pages/Map/` (MapPage) |
 | 학식 | `ai/pages/Dining/` (DiningPage, DiningHallDetailPage) |
 | 설정 | `ai/pages/Settings/` (SettingsPage) |
@@ -128,9 +128,9 @@ pwa-assets.config.ts          # PWA 아이콘 생성 설정 (@vite-pwa/assets-ge
 - Amplify 데이터를 읽는 페이지는 `client.models.X.list()`/`.get()`을 `useEffect`+`useState`로 직접 부르지 말고 **TanStack Query의 `useQuery`**를 쓸 것 (`src/lib/queryClient.ts`의 싱글턴이 `main.tsx`에서 이미 `QueryClientProvider`로 배선돼 있음). 이유: 라우트 이동 시 페이지 컴포넌트가 언마운트/리마운트되는데, `useEffect` 방식은 매번 새로 fetch해서 탭을 오갈 때마다 로딩이 깜빡이는 문제가 있었음 — `useQuery`는 `staleTime` 동안 캐시를 그대로 재사용해서 이 문제를 해결함.
 - **쿼리 키 컨벤션**: `['posts', boardValue]`, `['comments', postId]`, `['diningMenu', hall, mealType]`처럼 `[리소스명, ...식별자]` 형태. 여러 페이지가 같은 데이터를 보면(예: Schedule의 시간표 목록을 Map도 씀) 키를 `src/lib/queryKeys.ts`에 상수로 뽑아서 두 파일이 정확히 같은 키를 참조하게 할 것 — 그래야 한쪽에서 이미 받아온 데이터를 다른 쪽이 재사용함.
 - **생성/삭제 후 갱신은 `queryClient.setQueryData`로 캐시를 직접 갱신**(옵티미스틱), `invalidateQueries`로 다시 fetch하지 않음 — 응답이 이미 서버에서 생성된 레코드를 돌려주므로 그걸 그대로 캐시에 append/remove하는 게 더 빠르고 기존 UX와 동일함. 새 mutation을 추가할 때도 이 패턴을 따를 것.
-- **Leaflet처럼 훅 기반이 아닌 명령형 코드**(`MapPage.tsx`)에서는 `useQuery` 대신 `queryClient.fetchQuery({ queryKey, queryFn })`(Promise 반환)를 씀 — 캐시 재사용 효과는 동일함.
+- **Leaflet처럼 훅 기반이 아닌 명령형 코드**(`MapPage.tsx`)에서는 `useQuery` 대신 `queryClient.fetchQuery({ queryKey, queryFn })`(Promise 반환)를 씀 — 캐시 재사용 효과는 동일함. 다만 이건 "한 번 읽어오면 되는 데이터"(건물 목록, 도서관 오늘 시간 등, 지도 마운트 시 스냅샷으로 충분함)에만 맞는 패턴 — 다른 페이지의 변경(Schedule에서 수업 추가/삭제 등)에 지도가 실시간으로 반응해야 하는 데이터는 이 패턴으로 못 잡음(지도를 언마운트 후 재마운트해야만 최신값을 다시 읽으므로). 그런 경우엔 `MapPage.tsx`의 강의동 마커처럼 **컴포넌트 최상단에서 `useQuery`로 반응형 구독** + 그 결과가 바뀔 때마다 `mapActionsRef.current`에 노출된 명령형 함수(`applyAcademicMarkers` 등)를 호출하는 `useEffect`로 연결할 것 — 명령형 Leaflet 코드 자체는 그대로 두고, "언제 다시 그릴지"만 리액트 쪽에서 반응형으로 트리거하는 식.
 - **캐싱하면 안 되는 데이터**: 실시간으로 바뀌어야 하는 것(버스 위치 폴링 `fetchUgaBuses`)이나, 의도적으로 항상 라이브 조회하기로 한 것(도서관 오늘 운영시간 `fetchLibraryHoursToday` — README "홈페이지 바뀌면..." 섹션 참조)은 그대로 둘 것.
-- `fetchUgaBuildings()`(`ugaBuildings.ts`)와 `fetchMapPreference()`(`mapPreferences.ts`)는 TanStack Query 도입 이전부터 자체 모듈 레벨 Promise 캐시를 갖고 있음 — 이미 해결된 문제라 건드리지 않았음, 새로 비슷한 걸 만들 땐 기존 패턴 대신 TanStack Query를 쓸 것.
+- `fetchUgaBuildings()`(`ugaBuildings.ts`)는 더 이상 라이브 API 호출이 아님 — `pnpm data:buildings`로 미리 떠서 커밋해둔 정적 JSON(`src/lib/ugaBuildingsData.json`)을 그냥 감싸서 반환함(README "외부 데이터 소스" 참고). `fetchMapPreference()`(`mapPreferences.ts`)는 여전히 TanStack Query 도입 이전부터 쓰던 자체 모듈 레벨 Promise 캐시 방식 그대로 — 이미 해결된 문제라 건드리지 않았음, 새로 비슷한 걸 만들 땐 기존 패턴 대신 TanStack Query를 쓸 것.
 
 ---
 

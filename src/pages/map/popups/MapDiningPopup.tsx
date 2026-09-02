@@ -4,6 +4,7 @@ import { client } from '../../../lib/amplifyClient'
 import { getDiningHoursToday, type DiningHall } from '../../../lib/diningHours'
 import { getCurrentMealType } from '../../../lib/dining'
 import { S as HallCardS } from '../../dining/DiningHallCard.style'
+import { MapDirectionsButton } from './MapDirectionsButton'
 import { S } from './MapDiningPopup.style'
 
 type MenuItem = { name: string }
@@ -11,9 +12,10 @@ type MenuItem = { name: string }
 type MapDiningPopupProps = {
   hall: DiningHall
   label: string
+  onDirections: () => void
 }
 
-export function MapDiningPopup({ hall, label }: MapDiningPopupProps) {
+export function MapDiningPopup({ hall, label, onDirections }: MapDiningPopupProps) {
   const { t } = useTranslation()
   const mealType = getCurrentMealType()
   const [items, setItems] = useState<MenuItem[] | null>(null)
@@ -61,6 +63,7 @@ export function MapDiningPopup({ hall, label }: MapDiningPopupProps) {
       </S.MenuScroll>
 
       <S.ViewLink href={`/dining/${hall}`}>{t('map.viewMenu')} →</S.ViewLink>
+      <MapDirectionsButton onClick={onDirections} />
     </S.Wrapper>
   )
 }

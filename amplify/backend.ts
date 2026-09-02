@@ -2,15 +2,26 @@ import { defineBackend } from '@aws-amplify/backend'
 import type { Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda'
 import { auth } from './auth/resource'
 import { data } from './data/resource'
+import { logBusArrivalsFn } from './data/log-bus-arrivals/resource'
 import { getFriendScheduleFn } from './data/get-friend-schedule/resource'
 import { findUserByEmailFn } from './data/find-user-by-email/resource'
 
 const backend = defineBackend({
   auth,
   data,
+  logBusArrivalsFn,
   getFriendScheduleFn,
   findUserByEmailFn,
 })
+
+// log-bus-arrivals isn't wired to any query/mutation in the schema (it's schedule-triggered,
+// see log-bus-arrivals/resource.ts), so it has no other way to reach the GraphQL API — hand
+// it the endpoint + an apiKey scoped to BusStopArrival-create only (see data/resource.ts).
+// `.resources.lambda` is typed as the generic CDK `IFunction`, which lacks `addEnvironment` —
+// cast to the concrete `Function` it actually is (same pattern Amplify's own docs use).
+const logBusArrivalsLambda = backend.logBusArrivalsFn.resources.lambda as LambdaFunction
+logBusArrivalsLambda.addEnvironment('GRAPHQL_ENDPOINT', backend.data.graphqlUrl)
+logBusArrivalsLambda.addEnvironment('GRAPHQL_API_KEY', backend.data.apiKey ?? '')
 
 // get-friend-schedule needs to read ClassEntry (a friend's schedule) and Friendship
 // rows for a user other than the caller, which ClassEntry's allow.owner()-only auth

@@ -1,7 +1,4 @@
-const BUILDINGS_URL =
-  'https://maps.itos.uga.edu/arcgis/rest/services/OUA/UGA_CampusMap_Base/MapServer/7/query'
-
-const ATHENS_BOUNDS = { minLon: -83.42, maxLon: -83.3, minLat: 33.9, maxLat: 33.98 }
+import buildingsData from './ugaBuildingsData.json'
 
 export type UgaBuilding = {
   name: string
@@ -10,49 +7,12 @@ export type UgaBuilding = {
   longitude: number
 }
 
-type RawFeature = {
-  attributes: {
-    NAME?: string
-    BuildingUse?: string
-    X_DD?: number
-    Y_DD?: number
-  }
-}
-
-async function fetchPage(offset: number): Promise<UgaBuilding[]> {
-  const params = new URLSearchParams({
-    where: '1=1',
-    outFields: 'NAME,BuildingUse,X_DD,Y_DD',
-    returnGeometry: 'false',
-    f: 'json',
-    resultRecordCount: '1000',
-    resultOffset: String(offset),
-  })
-
-  const response = await fetch(`${BUILDINGS_URL}?${params.toString()}`)
-  const data: { features?: RawFeature[] } = await response.json()
-
-  return (data.features ?? [])
-    .map((feature) => ({
-      name: (feature.attributes.NAME ?? '').trim(),
-      buildingUse: feature.attributes.BuildingUse ?? '',
-      longitude: feature.attributes.X_DD ?? Number.NaN,
-      latitude: feature.attributes.Y_DD ?? Number.NaN,
-    }))
-    .filter(
-      (building) =>
-        // Roughly 50 GIS records have a whitespace-only NAME — excluding them here
-        // (rather than just checking truthiness) keeps findBuildingByName's substring
-        // fallback from matching every multi-word query against a blank name.
-        building.name &&
-        Number.isFinite(building.latitude) &&
-        Number.isFinite(building.longitude) &&
-        building.longitude > ATHENS_BOUNDS.minLon &&
-        building.longitude < ATHENS_BOUNDS.maxLon &&
-        building.latitude > ATHENS_BOUNDS.minLat &&
-        building.latitude < ATHENS_BOUNDS.maxLat,
-    )
-}
+// Static snapshot of UGA's ArcGIS building layer (see scripts/fetch-uga-buildings.mjs) rather
+// than a live fetch on every session — building footprints barely change between semesters,
+// so there's no reason to hit a third-party endpoint (and depend on it being up) every time
+// someone opens the map. Re-run that script by hand when campus construction changes the
+// building list, and commit the refreshed JSON.
+const GIS_BUILDINGS: UgaBuilding[] = buildingsData
 
 // Buildings missing from (or named differently in) the official UGA GIS layer —
 // mostly newer construction. Coordinates are best-effort approximations, sourced
@@ -83,17 +43,12 @@ const MANUAL_BUILDINGS: UgaBuilding[] = [
   },
 ]
 
-let cachedBuildings: Promise<UgaBuilding[]> | null = null
+const ALL_BUILDINGS: UgaBuilding[] = [...GIS_BUILDINGS, ...MANUAL_BUILDINGS]
 
+// Kept async (a resolved Promise) so call sites — most of which already treat this as an
+// awaited fetch — don't need to change even though the data is now static and synchronous.
 export function fetchUgaBuildings(): Promise<UgaBuilding[]> {
-  if (!cachedBuildings) {
-    cachedBuildings = Promise.all([fetchPage(0), fetchPage(1000)]).then(([first, second]) => [
-      ...first,
-      ...second,
-      ...MANUAL_BUILDINGS,
-    ])
-  }
-  return cachedBuildings
+  return Promise.resolve(ALL_BUILDINGS)
 }
 
 export function findBuildingByName(buildings: UgaBuilding[], query: string): UgaBuilding | undefined {

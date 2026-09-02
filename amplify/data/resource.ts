@@ -3,6 +3,7 @@ import { getDiningMenuFn } from './get-dining-menu/resource'
 import { searchUgaClassesFn } from './search-uga-classes/resource'
 import { getProfessorRatingFn } from './get-professor-rating/resource'
 import { getProfessorReviewsFn } from './get-professor-reviews/resource'
+import { getWalkingRouteFn } from './get-walking-route/resource'
 import { findUserByEmailFn } from './find-user-by-email/resource'
 import { getFriendScheduleFn } from './get-friend-schedule/resource'
 
@@ -145,6 +146,29 @@ const schema = a.schema({
     .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(getProfessorReviewsFn)),
 
+  WalkingRouteCoordinate: a.customType({
+    lat: a.float().required(),
+    lng: a.float().required(),
+  }),
+
+  WalkingRouteResult: a.customType({
+    distanceMeters: a.float(),
+    durationSeconds: a.float(),
+    coordinates: a.ref('WalkingRouteCoordinate').array(),
+  }),
+
+  getWalkingRoute: a
+    .query()
+    .arguments({
+      fromLat: a.float().required(),
+      fromLng: a.float().required(),
+      toLat: a.float().required(),
+      toLng: a.float().required(),
+    })
+    .returns(a.ref('WalkingRouteResult'))
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(getWalkingRouteFn)),
+
   FindUserResult: a.customType({
     found: a.boolean(),
     userId: a.string(),
@@ -186,6 +210,27 @@ const schema = a.schema({
     .returns(a.ref('FriendClassEntry').array())
     .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(getFriendScheduleFn)),
+
+  // Raw (bus, stop) proximity samples written every minute by log-bus-arrivals — one row
+  // per poll a bus is within range of a stop, including repeats while it lingers. Building
+  // per-route/per-stop ETA stats means clustering these into discrete visits at query time.
+  // Written via an API key (see log-bus-arrivals/handler.ts) rather than allow.resource()
+  // because allow.resource() only exists at the schema level (a.schema({...}).authorization),
+  // and only takes effect on a model that has no .authorization() rules of its own — it
+  // can't grant access to a model like this one that already declares its own rules. (See
+  // get-friend-schedule/handler.ts for a case that genuinely needs cross-user access to an
+  // owner-only model — that uses a direct DynamoDB grant instead, for the same reason.)
+  BusStopArrival: a
+    .model({
+      busId: a.string().required(),
+      routeName: a.string().required(),
+      stopId: a.string().required(),
+      stopName: a.string().required(),
+      arrivedAt: a.datetime().required(),
+      latitude: a.float(),
+      longitude: a.float(),
+    })
+    .authorization((allow) => [allow.publicApiKey().to(['create']), allow.authenticated().to(['read'])]),
 })
 
 export type Schema = ClientSchema<typeof schema>
@@ -194,5 +239,8 @@ export const data = defineData({
   schema,
   authorizationModes: {
     defaultAuthorizationMode: 'userPool',
+    // Only used by log-bus-arrivals to write BusStopArrival rows — no other model grants
+    // apiKey access, so a leaked key can only ever spam that one append-only log table.
+    apiKeyAuthorizationMode: { expiresInDays: 365 },
   },
 })

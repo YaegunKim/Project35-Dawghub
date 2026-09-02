@@ -11,7 +11,8 @@
     "sandbox": "ampx sandbox",
     "sandbox:once": "ampx sandbox --once",
     "assets:icons": "pwa-assets-generator",
-    "assets:og": "node scripts/generate-og-image.mjs"
+    "assets:og": "node scripts/generate-og-image.mjs",
+    "data:buildings": "node scripts/fetch-uga-buildings.mjs"
   },
   "dependencies": {
     "@aws-amplify/ui-react": "^6.15.5",
@@ -43,6 +44,8 @@
     "@types/react-dom": "^19.2.3",
     "@vite-pwa/assets-generator": "^1.0.2",
     "@vitejs/plugin-react": "^6.0.4",
+    "aws-cdk-lib": "^2.265.0",
+    "constructs": "^10.8.1",
     "esbuild": "^0.28.2",
     "oxlint": "^1.75.0",
     "sharp": "^0.35.3",

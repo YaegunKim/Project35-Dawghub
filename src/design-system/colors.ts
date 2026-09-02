@@ -32,7 +32,6 @@ export const state = {
 // Semantic category colors used across map markers, schedule blocks, etc.
 // Centralized here so a category's color only needs to change in one place.
 export const category = {
-  bus: '#dc2626',
   campusBoundary: '#dc2626',
   library: '#2563eb',
   userLocation: '#2563eb',
@@ -43,6 +42,9 @@ export const category = {
   academics: '#6b7280',
   myDorm: { fill: '#f59e0b', border: '#78350f', bg: '#fef3c7', text: '#92400e' },
   myAcademic: { fill: '#7c3aed', border: '#4c1d95' },
+  directionsWalk: '#0d9488',
+  directionsOrigin: '#16a34a',
+  directionsDestination: '#dc2626',
   courses: [
     '#3B82F6',
     '#10B981',

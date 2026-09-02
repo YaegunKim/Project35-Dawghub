@@ -2,6 +2,7 @@ import styled from '@emotion/styled'
 import { keyframes } from '@emotion/react'
 import { brand } from '../../design-system/colors'
 import { radius } from '../../design-system/radius'
+import { shadow } from '../../design-system/shadow'
 import { spacing } from '../../design-system/spacing'
 import { motion } from '../../design-system/motion'
 
@@ -13,6 +14,16 @@ const fadeIn = keyframes`
 const slideIn = keyframes`
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
+`
+
+const dropIn = keyframes`
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+`
+
+const slideUp = keyframes`
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 `
 
 export const S = {
@@ -48,6 +59,159 @@ export const S = {
 
     &:active {
       transform: scale(0.94);
+    }
+  `,
+  // Standalone equivalent of DirectionsPickToast for pick-mode flows that aren't nested
+  // inside DirectionsTopBar (e.g. Schedule's "set location" — see the 'return' pickingFor
+  // case) — DirectionsPickToast's own positioning depends on DirectionsTopBar being its
+  // containing block, so it can't be reused outside that panel.
+  PickToast: styled.div`
+    position: absolute;
+    top: max(${spacing.base}, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    gap: ${spacing.sm};
+    padding: ${spacing.sm} ${spacing.md};
+    border-radius: ${radius.pill};
+    background: var(--text);
+    color: var(--bg);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: ${shadow.md};
+    animation: ${dropIn} ${motion.duration.base} ${motion.easing.standard};
+  `,
+  PickToastCancel: styled.button`
+    border: none;
+    background: none;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+    flex-shrink: 0;
+  `,
+  BusButtonRow: styled.div`
+    position: absolute;
+    top: ${spacing.base};
+    left: ${spacing.base};
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: ${spacing.sm};
+  `,
+  BusButton: styled.button<{ $active: boolean }>`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: ${radius.pill};
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: ${({ $active }) => ($active ? 'var(--accent)' : 'var(--text)')};
+    font-size: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+    cursor: pointer;
+    transition:
+      color ${motion.duration.fast} ${motion.easing.standard},
+      transform ${motion.duration.fast} ${motion.easing.standard};
+
+    &:active {
+      transform: scale(0.94);
+    }
+  `,
+  BusBulkButton: styled.button`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: ${radius.pill};
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+    cursor: pointer;
+    transition: transform ${motion.duration.fast} ${motion.easing.standard};
+
+    &:active {
+      transform: scale(0.94);
+    }
+  `,
+  BusPanel: styled.div`
+    position: absolute;
+    top: calc(${spacing.base} + 44px + ${spacing.sm});
+    left: ${spacing.base};
+    z-index: 1000;
+    width: 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: ${spacing.sm};
+    animation: ${dropIn} ${motion.duration.base} ${motion.easing.standard};
+  `,
+  BusRouteGrid: styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: ${spacing.xs};
+  `,
+  BusRouteBadge: styled.button<{ $background: string; $enabled: boolean; $operating: boolean }>`
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    color: ${brand.white};
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    background-color: ${({ $background }) => $background};
+    background-image: ${({ $operating }) =>
+      $operating
+        ? 'none'
+        : 'repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.65) 0, rgba(255, 255, 255, 0.65) 1px, transparent 1px, transparent 5px)'};
+    opacity: ${({ $enabled }) => ($enabled ? 1 : 0.35)};
+    cursor: pointer;
+    transition:
+      opacity ${motion.duration.fast} ${motion.easing.standard},
+      transform ${motion.duration.fast} ${motion.easing.standard};
+
+    &:active {
+      transform: scale(0.92);
+    }
+  `,
+  BusSettingsButton: styled.button`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border: none;
+    border-top: 1px solid var(--border);
+    border-radius: 0;
+    padding-top: ${spacing.sm};
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: color ${motion.duration.fast} ${motion.easing.standard};
+
+    &:hover {
+      color: var(--text);
     }
   `,
   DrawerBackdrop: styled.div`
@@ -279,5 +443,403 @@ export const S = {
     color: ${brand.white};
     background: ${({ $background }) => $background};
     flex-shrink: 0;
+  `,
+  DirectionsButton: styled.button<{ $active: boolean }>`
+    position: absolute;
+    top: calc(${spacing.base} + 44px + ${spacing.sm});
+    right: ${spacing.base};
+    z-index: 1000;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: ${radius.pill};
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: ${({ $active }) => ($active ? 'var(--accent)' : 'var(--text)')};
+    font-size: 18px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+    cursor: pointer;
+    transition:
+      color ${motion.duration.fast} ${motion.easing.standard},
+      transform ${motion.duration.fast} ${motion.easing.standard};
+
+    &:active {
+      transform: scale(0.94);
+    }
+  `,
+  // Docked full-width across the top of the map, like Google Maps' search bar — the
+  // origin/destination inputs need to stay reachable while the user pans/zooms to pick a
+  // point, which a corner panel would get in the way of. It sits above the corner buttons
+  // (Layers/Directions toggle/Bus) rather than beside them, so those are hidden while open
+  // (see MapPage.tsx) instead of fighting for the same top strip. Padding is deliberately
+  // tight (sm, not base) and there's no title row — swap/close live inline next to the
+  // fields instead of a separate header — to keep as much of the map visible as possible.
+  DirectionsTopBar: styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.sm};
+    padding: ${spacing.sm} ${spacing.base};
+    padding-top: max(${spacing.sm}, env(safe-area-inset-top));
+    border-bottom-left-radius: ${radius.lg};
+    border-bottom-right-radius: ${radius.lg};
+    background: var(--bg);
+    box-shadow: ${shadow.md};
+    animation: ${dropIn} ${motion.duration.base} ${motion.easing.standard};
+  `,
+  // Docked to the bottom edge, sheet-style — mirrors Google Maps surfacing route options
+  // beneath the map rather than in the same panel as the from/to search fields.
+  DirectionsBottomSheet: styled.div`
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1050;
+    max-height: 45vh;
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.sm};
+    padding: ${spacing.base};
+    padding-bottom: max(${spacing.base}, env(safe-area-inset-bottom));
+    border-top-left-radius: ${radius.lg};
+    border-top-right-radius: ${radius.lg};
+    background: var(--bg);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+    animation: ${slideUp} ${motion.duration.base} ${motion.easing.standard};
+    overflow-y: auto;
+  `,
+  // Row layout: fields column (flex: 1) + a fixed-width actions column (swap/close) — the
+  // actions column's own height (two 28px buttons + gap) sits well inside the fields
+  // column's height (two 40px input rows + gap), so it centers for free with no separate
+  // header row or hardcoded pixel offsets needed.
+  DirectionsFieldsWrap: styled.div`
+    display: flex;
+    align-items: center;
+    gap: ${spacing.sm};
+  `,
+  DirectionsFieldsColumn: styled.div`
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.sm};
+  `,
+  DirectionsActionsColumn: styled.div`
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: ${spacing.xs};
+  `,
+  DirectionsSwapButton: styled.button`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    transition: color ${motion.duration.fast} ${motion.easing.standard};
+
+    &:hover {
+      color: var(--accent);
+    }
+  `,
+  DirectionsCloseButton: styled.button`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: ${radius.sm};
+    background: var(--bg);
+    color: var(--text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    transition: color ${motion.duration.fast} ${motion.easing.standard};
+
+    &:hover {
+      color: var(--text);
+    }
+  `,
+  // Small circle for the origin, small square for the destination — same shorthand Google
+  // Maps uses so the from/to rows read at a glance without needing "FROM"/"TO" labels
+  // (those were dropped to save vertical space; the placeholder text still says it).
+  DirectionsFieldDot: styled.span<{ $color: string; $shape?: 'circle' | 'square' }>`
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: ${({ $shape }) => ($shape === 'square' ? '2px' : '50%')};
+    background: ${({ $color }) => $color};
+  `,
+  DirectionsFieldRow: styled.div`
+    display: flex;
+    align-items: center;
+    gap: ${spacing.xs};
+
+    > input {
+      flex: 1;
+      min-width: 0;
+    }
+  `,
+  DirectionsIconButton: styled.button`
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: ${radius.md};
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    cursor: pointer;
+    transition: color ${motion.duration.fast} ${motion.easing.standard};
+
+    &:hover {
+      color: var(--accent);
+    }
+  `,
+  // Compact primary action, deliberately not the shared Button (fixed 40px height) — this
+  // bar is trying to stay as short as possible, so it gets its own slimmer local button.
+  DirectionsSearchButton: styled.button`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: ${spacing.xs};
+    height: 32px;
+    border: none;
+    border-radius: ${radius.md};
+    background: var(--accent);
+    color: var(--accent-contrast);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      opacity ${motion.duration.fast} ${motion.easing.standard},
+      transform ${motion.duration.fast} ${motion.easing.standard};
+
+    &:active {
+      opacity: 0.8;
+      transform: scale(0.98);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  `,
+  // A toast anchored just below the top bar (not inline within it) so picking a point on the
+  // map doesn't push the bar's own height around — DirectionsTopBar is itself
+  // position:absolute, which makes it the containing block for this child's top:100%.
+  DirectionsPickToast: styled.div`
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: ${spacing.sm};
+    z-index: 1050;
+    display: flex;
+    align-items: center;
+    gap: ${spacing.sm};
+    padding: ${spacing.sm} ${spacing.md};
+    border-radius: ${radius.pill};
+    background: var(--text);
+    color: var(--bg);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: ${shadow.md};
+    animation: ${dropIn} ${motion.duration.fast} ${motion.easing.standard};
+  `,
+  DirectionsPickToastCancel: styled.button`
+    border: none;
+    background: none;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: underline;
+    cursor: pointer;
+    flex-shrink: 0;
+  `,
+  // A small centered bar at the top of the sheet — purely decorative (the sheet itself
+  // doesn't drag), but it's the visual shorthand people already read as "bottom sheet" from
+  // every native app, so it's cheap polish for very little markup.
+  BottomSheetHandle: styled.div`
+    align-self: center;
+    width: 36px;
+    height: 4px;
+    border-radius: ${radius.pill};
+    background: var(--border);
+    margin-bottom: ${spacing.xs};
+  `,
+  TripOptionList: styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.sm};
+  `,
+  // A row, not a button — it now holds two independently-clickable things (the
+  // select-this-option content and, only when already selected, the Go button), so only
+  // TripOptionRowContent is the actual button.
+  TripOptionRow: styled.div<{ $selected: boolean }>`
+    display: flex;
+    align-items: center;
+    gap: ${spacing.sm};
+    padding: ${spacing.sm};
+    border: 1px solid ${({ $selected }) => ($selected ? 'var(--accent)' : 'var(--border)')};
+    border-radius: ${radius.md};
+    background: ${({ $selected }) => ($selected ? 'var(--bg-elevated)' : 'var(--bg)')};
+    transition: border-color ${motion.duration.fast} ${motion.easing.standard};
+  `,
+  TripOptionRowContent: styled.button`
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: ${spacing.sm};
+    border: none;
+    background: none;
+    padding: 0;
+    color: var(--text);
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+  `,
+  // Reuses the same colored-circle badge language as LayerChipIcon elsewhere on this page —
+  // walk gets the fixed teal directionsWalk color, bus gets that specific route's own color
+  // so the badge previews which route you'd actually be boarding before you even select it.
+  TripOptionIconBadge: styled.span<{ $color: string }>`
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: ${({ $color }) => $color};
+    color: ${brand.white};
+    font-size: 15px;
+    font-weight: 700;
+  `,
+  TripOptionText: styled.div`
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  `,
+  // Duration leads (Google Maps-style) instead of the mode label — it's what actually
+  // differentiates the two options at a glance.
+  TripOptionDuration: styled.div`
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.2;
+  `,
+  TripOptionMeta: styled.div`
+    font-size: 12px;
+    color: var(--text-muted);
+  `,
+  TripOptionApproxNote: styled.div`
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+  `,
+  GoButton: styled.button`
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: ${spacing.xs};
+    height: 36px;
+    padding: 0 ${spacing.md};
+    border: none;
+    border-radius: ${radius.pill};
+    background: var(--accent);
+    color: var(--accent-contrast);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      opacity ${motion.duration.fast} ${motion.easing.standard},
+      transform ${motion.duration.fast} ${motion.easing.standard};
+
+    &:active {
+      opacity: 0.8;
+      transform: scale(0.96);
+    }
+  `,
+  TripEmptyState: styled.div`
+    font-size: 13px;
+    color: var(--text-muted);
+  `,
+  // Replaces the trip option list while live navigation is running — same bottom sheet, just
+  // different content, so it keeps the sheet's own dimensions/animation instead of needing a
+  // separate docked element.
+  NavHud: styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.sm};
+  `,
+  NavHudTopRow: styled.div`
+    display: flex;
+    align-items: center;
+    gap: ${spacing.sm};
+  `,
+  NavHudLegIcon: styled.span<{ $color: string }>`
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: ${({ $color }) => $color};
+    color: ${brand.white};
+    font-size: 16px;
+    font-weight: 700;
+  `,
+  NavHudInstruction: styled.div`
+    flex: 1;
+    min-width: 0;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.3;
+  `,
+  NavHudMeta: styled.div`
+    font-size: 13px;
+    color: var(--text-muted);
+  `,
+  // Segmented progress bar, one piece per leg, each sized proportionally to that leg's
+  // distance ($weight below feeds flex-grow) — not equal-width segments, so a short bus hop
+  // between two long walks reads as the short middle piece it actually is.
+  NavProgressTrack: styled.div`
+    display: flex;
+    gap: 2px;
+    height: 6px;
+    border-radius: ${radius.pill};
+    overflow: hidden;
+  `,
+  NavProgressSegment: styled.div<{ $color: string; $weight: number; $state: 'done' | 'active' | 'upcoming' }>`
+    flex-grow: ${({ $weight }) => $weight};
+    flex-basis: 0;
+    border-radius: ${radius.pill};
+    background: ${({ $color }) => $color};
+    opacity: ${({ $state }) => ($state === 'upcoming' ? 0.25 : 1)};
+    box-shadow: ${({ $state }) => ($state === 'active' ? '0 0 0 1px var(--bg), 0 0 0 2px var(--accent)' : 'none')};
+    transition: opacity ${motion.duration.base} ${motion.easing.standard};
   `,
 }

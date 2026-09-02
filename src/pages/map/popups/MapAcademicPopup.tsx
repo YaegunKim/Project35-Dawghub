@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { MapDirectionsButton } from './MapDirectionsButton'
 import { S } from './MapAcademicPopup.style'
 
 export type MapAcademicClass = {
@@ -11,9 +12,10 @@ export type MapAcademicClass = {
 type MapAcademicPopupProps = {
   buildingName: string
   classes: MapAcademicClass[]
+  onDirections: () => void
 }
 
-export function MapAcademicPopup({ buildingName, classes }: MapAcademicPopupProps) {
+export function MapAcademicPopup({ buildingName, classes, onDirections }: MapAcademicPopupProps) {
   const { t } = useTranslation()
 
   return (
@@ -33,6 +35,7 @@ export function MapAcademicPopup({ buildingName, classes }: MapAcademicPopupProp
           ))}
         </S.ClassList>
       )}
+      <MapDirectionsButton onClick={onDirections} />
     </S.Wrapper>
   )
 }
