@@ -43,7 +43,7 @@ pnpm test:e2e:ui   # playwright test --ui
 ## Git commits
 
 - Commit messages in English, concise about what and why.
-- Include the `Co-Authored-By: Claude ...` trailer (keep the default template).
+- Do **not** include a `Co-Authored-By: Claude ...` trailer — omit it even though it's Claude Code's default template. (User preference; past commits that had it were rewritten to remove it.)
 - Do not commit until the user explicitly asks.
 
 ---
