@@ -23,6 +23,23 @@ Adding/modifying a model in `amplify/data/resource.ts` must be deployed with `pn
 
 ---
 
+## Testing
+
+```bash
+pnpm test          # vitest run — unit + component tests
+pnpm test:watch    # vitest, watch mode
+pnpm test:e2e      # playwright test (starts its own dev server)
+pnpm test:e2e:ui   # playwright test --ui
+```
+
+- **Unit tests** (`src/lib/**/*.test.ts`) — pure logic (`diningHours.ts`, `dining.ts`, `scheduleGrid.ts`, `ugaBuildings.ts`, `useFavorites.ts`, `passio.ts`'s `getBusRouteCode`, `directions.ts`'s `planTrip`). Colocated next to the source file, not in a separate `__tests__` folder.
+- **Component tests** (`*.test.tsx`, also colocated) — use `src/test/renderWithProviders.tsx` (`MemoryRouter` + an isolated `QueryClient`) instead of hand-rolling providers per test. This is the permanent replacement for the old disposable `src/devharness/harness.tsx` + Playwright pattern previous sessions used and always deleted after one-off verification — don't recreate that pattern; extend `renderWithProviders`/`src/test/setup.ts` instead if a test needs something they don't yet provide.
+- **E2E tests** (`e2e/*.spec.ts`, Playwright) — mock the network boundary rather than hitting the real deployed backend: `e2e/fixtures/mockGraphQL.ts` intercepts `**/graphql` by `operationName`, `e2e/fixtures/geolocation.ts` fully replaces `navigator.geolocation` so GPS timing (e.g. the origin-autofill race in MapPage) is deterministic instead of racy.
+  - **Auth bypass**: `App.tsx` skips the real `<Authenticator>` login screen when `import.meta.env.VITE_E2E === 'true'` (set only by `playwright.config.ts`'s `webServer.env` — never by `pnpm dev`/`pnpm build`, so it can't leak into a real deploy).
+  - **Limitation — `allow.owner()`/`allow.authenticated()` models can't be exercised this way**: Amplify's client resolves a Cognito JWT locally and throws *before* making any network request if there's no real signed-in session — since the E2E bypass skips Cognito sign-in entirely, `page.route('**/graphql')` never even gets a chance to intercept those calls (`ClassEntry`, `Post`/`Comment`, `Friendship`, `MapPreference`, and `getDiningMenu`/`getFriendSchedule` all fall in this bucket). Test flows built on these models as a Vitest component test instead, mocking `../../lib/amplifyClient`'s `client` export directly (see `SchedulePage.test.tsx`) — that sidesteps Amplify's auth resolution entirely. Reserve Playwright E2E for flows that are either backend-free (Settings' theme/language) or only touch public/apiKey-authorized operations.
+
+---
+
 ## Git commits
 
 - Commit messages in English, concise about what and why.
@@ -97,7 +114,7 @@ For the detailed background of the external data sources (Passio bus, Nutrislice
 3. **No hardcoded colors**: if you need a new color, add it to `src/design-system/colors.ts` first and import it. Use `surface.*` (CSS variables) if it must change with the theme (light/dark), and `brand.*`/`category.*`/`state.*` if it is always fixed.
 4. **Emotion pattern**: export as `export const S = { Name: styled.div\`...\` }`, referenced by the consumer as `S.Name`.
 5. **Fonts**: body text uses `var(--font-body)` (system font); emphasis text like page titles and the brand wordmark uses `var(--font-display)` (Oswald, Google Fonts) — see `fontFamily` in `typography.ts`.
-6. **spacing/radius/shadow/motion tokens**: use `spacing.ts`/`radius.ts`/`shadow.ts`/`motion.ts` for a new component's spacing/corners/shadow/transition values instead of magic numbers. The existing per-page `.style.ts` files were not force-converted entirely to tokens — only the shared primitives (`Card`/`Button`/`IconButton`, etc.) and new components have them applied.
+6. **spacing/radius/shadow/motion tokens**: use `spacing.ts`/`radius.ts`/`shadow.ts`/`motion.ts` for a new component's spacing/corners/shadow/transition values instead of magic numbers. The existing per-page `.style.ts` files were not force-converted entirely to tokens — only the shared primitives (`Card`/`Button`/`IconButton`, etc.) and new components have them applied. `shadow.ts` holds a full elevation scale (`resting`/`hover`/`floating`/`card`/`fab`/`lg`/`modal`/`drawerRight`/`sheetUp`/`knob`/`tabActive`, plus the original `sm`/`md`) — if none of these fit a new surface, add a new named tier there instead of writing an inline `box-shadow: rgba(...)`.
 
 ### Dark mode
 

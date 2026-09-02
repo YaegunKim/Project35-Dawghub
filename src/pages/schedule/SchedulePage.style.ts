@@ -5,6 +5,7 @@ import { Button } from '../../design-system/Button/Button'
 import { brand, state } from '../../design-system/colors'
 import { motion } from '../../design-system/motion'
 import { radius } from '../../design-system/radius'
+import { shadow } from '../../design-system/shadow'
 
 const modalIn = keyframes`
   from {
@@ -127,11 +128,13 @@ export const S = {
       letter-spacing: 0.04em;
     }
   `,
-  TimeAxis: styled.div`
+  TimeAxis: styled.div<{ $height: number }>`
     position: relative;
+    height: ${({ $height }) => $height}px;
   `,
-  HourLabel: styled.span`
+  HourLabel: styled.span<{ $top: number }>`
     position: absolute;
+    top: ${({ $top }) => $top}px;
     right: 3px;
     transform: translateY(-50%);
     font-size: 9px;
@@ -143,20 +146,27 @@ export const S = {
       font-size: 11px;
     }
   `,
-  DayColumn: styled.div`
+  DayColumn: styled.div<{ $height: number }>`
     position: relative;
+    height: ${({ $height }) => $height}px;
     border-left: 1px solid var(--border);
   `,
-  HourLine: styled.div`
+  HourLine: styled.div<{ $top: number }>`
     position: absolute;
+    top: ${({ $top }) => $top}px;
     left: 0;
     right: 0;
     height: 1px;
     background: var(--border);
     opacity: 0.6;
   `,
-  Block: styled.div`
+  Block: styled.div<{ $top: number; $height: number; $left: string; $width: string; $color: string }>`
     position: absolute;
+    top: ${({ $top }) => $top}px;
+    height: ${({ $height }) => $height}px;
+    left: ${({ $left }) => $left};
+    width: ${({ $width }) => $width};
+    background: ${({ $color }) => $color};
     display: flex;
     flex-direction: column;
     gap: 1px;
@@ -168,7 +178,7 @@ export const S = {
     line-height: 1.3;
     overflow: hidden;
     cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    box-shadow: ${shadow.resting};
     transition:
       transform 0.1s ease,
       box-shadow 0.1s ease;
@@ -183,7 +193,7 @@ export const S = {
 
     &:hover {
       transform: scale(1.02);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      box-shadow: ${shadow.hover};
       z-index: 2;
     }
   `,
@@ -227,12 +237,13 @@ export const S = {
     border-radius: 20px;
     overflow: hidden;
     background: var(--bg);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    box-shadow: ${shadow.modal};
     animation: ${modalIn} 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
   `,
-  DetailAccent: styled.div`
+  DetailAccent: styled.div<{ $color: string }>`
     height: 6px;
     flex-shrink: 0;
+    background: ${({ $color }) => $color};
   `,
   DetailBody: styled.div`
     display: flex;
@@ -262,7 +273,7 @@ export const S = {
     border-radius: 20px;
     overflow: hidden;
     background: var(--bg);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    box-shadow: ${shadow.modal};
     animation: ${modalIn} 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
 
     @media (min-width: 768px) {
@@ -294,13 +305,15 @@ export const S = {
       padding: 20px;
     }
   `,
-  CoursePill: styled.span`
+  CoursePill: styled.span<{ $color: string }>`
     display: inline-flex;
     align-self: flex-start;
     padding: 3px 10px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 700;
+    background: ${({ $color }) => `${$color}26`};
+    color: ${({ $color }) => $color};
   `,
   MeetingList: styled.div`
     display: flex;
@@ -362,7 +375,7 @@ export const S = {
       background: ${state.dangerSoft};
     }
   `,
-  RatingBadge: styled.span`
+  RatingBadge: styled.span<{ $color: string }>`
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -370,12 +383,13 @@ export const S = {
     height: 28px;
     padding: 0 8px;
     border-radius: 999px;
+    background: ${({ $color }) => $color};
     color: ${brand.white};
     font-size: 13px;
     font-weight: 800;
     flex-shrink: 0;
   `,
-  RatingBadgeCompact: styled.span`
+  RatingBadgeCompact: styled.span<{ $color: string }>`
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -383,6 +397,7 @@ export const S = {
     height: 18px;
     padding: 0 5px;
     border-radius: 999px;
+    background: ${({ $color }) => $color};
     color: ${brand.white};
     font-size: 10px;
     font-weight: 800;
@@ -520,8 +535,11 @@ export const S = {
     inset: 0;
     z-index: 31;
   `,
-  FilterMenu: styled.div`
+  FilterMenu: styled.div<{ $top: number; $left: number; $width: number }>`
     position: fixed;
+    top: ${({ $top }) => $top}px;
+    left: ${({ $left }) => $left}px;
+    width: ${({ $width }) => $width}px;
     z-index: 32;
     display: flex;
     flex-direction: column;
@@ -532,7 +550,7 @@ export const S = {
     border-radius: ${radius.md};
     border: 1px solid var(--border);
     background: var(--bg-elevated);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    box-shadow: ${shadow.lg};
   `,
   FilterMenuItem: styled.button<{ $selected: boolean }>`
     display: block;
@@ -640,7 +658,7 @@ export const S = {
     border-radius: 12px;
     border: 1px solid var(--border);
     background: var(--bg-elevated);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+    box-shadow: ${shadow.card};
   `,
   FabMenuItem: styled.button`
     display: flex;
@@ -674,7 +692,7 @@ export const S = {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    box-shadow: ${shadow.fab};
     transition: transform 0.1s ease;
 
     &:hover {

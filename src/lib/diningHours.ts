@@ -233,11 +233,6 @@ const DINING_BUILDING_TO_HALL: Record<string, DiningHall> = {
   'Village Summit Dining Commons': 'villageSummit',
 }
 
-export function getDiningHoursTodayByBuildingName(buildingName: string, date: Date = new Date()): string | null {
-  const hall = DINING_BUILDING_TO_HALL[buildingName]
-  return hall ? getDiningHoursToday(hall, date) : null
-}
-
 export function getDiningHallByBuildingName(buildingName: string): DiningHall | null {
   return DINING_BUILDING_TO_HALL[buildingName] ?? null
 }

@@ -2,6 +2,7 @@ import styled from '@emotion/styled'
 import { keyframes } from '@emotion/react'
 import { brand, state } from '../../design-system/colors'
 import { radius } from '../../design-system/radius'
+import { shadow } from '../../design-system/shadow'
 import { spacing } from '../../design-system/spacing'
 import { motion } from '../../design-system/motion'
 import type { TagFilterState } from './tagFilters'
@@ -31,7 +32,7 @@ export const S = {
     max-height: 80vh;
     border-radius: ${radius.lg};
     background: var(--bg);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    box-shadow: ${shadow.modal};
     overflow: hidden;
   `,
   ModalHeader: styled.div`

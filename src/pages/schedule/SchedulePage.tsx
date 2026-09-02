@@ -623,7 +623,7 @@ export function SchedulePage() {
       >
         <S.ProfessorName>{name}</S.ProfessorName>
         {hasRating(rating) && (
-          <S.RatingBadgeCompact style={{ background: ratingColor(rating.rating) }}>
+          <S.RatingBadgeCompact $color={ratingColor(rating.rating)}>
             {rating.rating.toFixed(1)}
           </S.RatingBadgeCompact>
         )}
@@ -741,18 +741,18 @@ export function SchedulePage() {
             <S.DayHeader key={d}>{t(`schedule.days.${d}`).slice(0, 3)}</S.DayHeader>
           ))}
 
-          <S.TimeAxis style={{ height: totalHours * PX_PER_HOUR }}>
+          <S.TimeAxis $height={totalHours * PX_PER_HOUR}>
             {hourMarks.map((hour) => (
-              <S.HourLabel key={hour} style={{ top: (hour - rangeStartHour) * PX_PER_HOUR }}>
+              <S.HourLabel key={hour} $top={(hour - rangeStartHour) * PX_PER_HOUR}>
                 {formatHour(hour)}
               </S.HourLabel>
             ))}
           </S.TimeAxis>
 
           {DAYS.map((d) => (
-            <S.DayColumn key={d} style={{ height: totalHours * PX_PER_HOUR }}>
+            <S.DayColumn key={d} $height={totalHours * PX_PER_HOUR}>
               {hourMarks.map((hour) => (
-                <S.HourLine key={hour} style={{ top: (hour - rangeStartHour) * PX_PER_HOUR }} />
+                <S.HourLine key={hour} $top={(hour - rangeStartHour) * PX_PER_HOUR} />
               ))}
               {(entriesByDay.get(d) ?? []).map((entry) => {
                 const top = ((toMinutes(entry.startTime) - rangeStartHour * 60) / 60) * PX_PER_HOUR
@@ -766,13 +766,11 @@ export function SchedulePage() {
                   <S.Block
                     key={entry.id}
                     onClick={() => setSelectedId(entry.id)}
-                    style={{
-                      top,
-                      height,
-                      left: `${left}%`,
-                      width: `calc(${width}% - 4px)`,
-                      background: colorForCourse(entry.courseCode),
-                    }}
+                    $top={top}
+                    $height={height}
+                    $left={`${left}%`}
+                    $width={`calc(${width}% - 4px)`}
+                    $color={colorForCourse(entry.courseCode)}
                   >
                     <S.BlockCourse>{entry.courseCode}</S.BlockCourse>
                     {height > 34 && (
@@ -843,11 +841,9 @@ export function SchedulePage() {
                 <>
                   <S.FilterMenuBackdrop onClick={() => setOpenFilterMenu(null)} />
                   <S.FilterMenu
-                    style={{
-                      top: filterMenuPosition.top,
-                      left: filterMenuPosition.left,
-                      width: Math.max(filterMenuPosition.width, 220),
-                    }}
+                    $top={filterMenuPosition.top}
+                    $left={filterMenuPosition.left}
+                    $width={Math.max(filterMenuPosition.width, 220)}
                   >
                     {openFilterMenu === 'subject' ? (
                       <>
@@ -1043,18 +1039,13 @@ export function SchedulePage() {
       {selectedEntry && (
         <S.ModalBackdrop onClick={() => setSelectedId(null)}>
           <S.Detail onClick={(event) => event.stopPropagation()}>
-            <S.DetailAccent style={{ background: colorForCourse(selectedEntry.courseCode) }} />
+            <S.DetailAccent $color={colorForCourse(selectedEntry.courseCode)} />
             <S.DetailBody>
               <S.PanelHeader>
                 <S.SectionInfo>
                   <S.DetailCourse>{selectedEntry.title || selectedEntry.courseCode}</S.DetailCourse>
                   {selectedEntry.title && (
-                    <S.CoursePill
-                      style={{
-                        background: `${colorForCourse(selectedEntry.courseCode)}26`,
-                        color: colorForCourse(selectedEntry.courseCode),
-                      }}
-                    >
+                    <S.CoursePill $color={colorForCourse(selectedEntry.courseCode)}>
                       {selectedEntry.courseCode}
                     </S.CoursePill>
                   )}
@@ -1105,7 +1096,7 @@ export function SchedulePage() {
         <S.ModalBackdrop onClick={() => setSelectedProfessor(null)}>
           <S.Detail onClick={(event) => event.stopPropagation()}>
             {hasRating(selectedProfessor.rating) && (
-              <S.DetailAccent style={{ background: ratingColor(selectedProfessor.rating.rating) }} />
+              <S.DetailAccent $color={ratingColor(selectedProfessor.rating.rating)} />
             )}
             <S.DetailBody>
               <S.PanelHeader>
@@ -1117,7 +1108,7 @@ export function SchedulePage() {
 
               <S.RatingRow>
                 {hasRating(selectedProfessor.rating) && (
-                  <S.RatingBadge style={{ background: ratingColor(selectedProfessor.rating.rating) }}>
+                  <S.RatingBadge $color={ratingColor(selectedProfessor.rating.rating)}>
                     {selectedProfessor.rating.rating.toFixed(1)}
                   </S.RatingBadge>
                 )}

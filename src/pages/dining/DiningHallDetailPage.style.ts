@@ -1,5 +1,6 @@
 import styled from '@emotion/styled'
 import { Card } from '../../design-system/Card/Card'
+import { shadow } from '../../design-system/shadow'
 
 export const S = {
   Header: styled.div`
@@ -48,7 +49,7 @@ export const S = {
       box-shadow 0.15s ease;
     background: ${({ $active }) => ($active ? 'var(--bg)' : 'transparent')};
     color: ${({ $active }) => ($active ? 'var(--text)' : 'var(--text-muted)')};
-    box-shadow: ${({ $active }) => ($active ? '0 1px 3px rgba(0, 0, 0, 0.12)' : 'none')};
+    box-shadow: ${({ $active }) => ($active ? shadow.tabActive : 'none')};
   `,
   MealTabLabel: styled.span`
     display: block;

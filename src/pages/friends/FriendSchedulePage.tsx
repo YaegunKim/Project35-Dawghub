@@ -107,18 +107,18 @@ export function FriendSchedulePage() {
             <S.DayHeader key={d}>{t(`schedule.days.${d}`).slice(0, 3)}</S.DayHeader>
           ))}
 
-          <S.TimeAxis style={{ height: totalHours * PX_PER_HOUR }}>
+          <S.TimeAxis $height={totalHours * PX_PER_HOUR}>
             {hourMarks.map((hour) => (
-              <S.HourLabel key={hour} style={{ top: (hour - rangeStartHour) * PX_PER_HOUR }}>
+              <S.HourLabel key={hour} $top={(hour - rangeStartHour) * PX_PER_HOUR}>
                 {formatHour(hour)}
               </S.HourLabel>
             ))}
           </S.TimeAxis>
 
           {DAYS.map((d) => (
-            <S.DayColumn key={d} style={{ height: totalHours * PX_PER_HOUR }}>
+            <S.DayColumn key={d} $height={totalHours * PX_PER_HOUR}>
               {hourMarks.map((hour) => (
-                <S.HourLine key={hour} style={{ top: (hour - rangeStartHour) * PX_PER_HOUR }} />
+                <S.HourLine key={hour} $top={(hour - rangeStartHour) * PX_PER_HOUR} />
               ))}
               {(entriesByDay.get(d) ?? []).map((entry) => {
                 const top = ((toMinutes(entry.startTime) - rangeStartHour * 60) / 60) * PX_PER_HOUR
@@ -131,13 +131,11 @@ export function FriendSchedulePage() {
                 return (
                   <S.Block
                     key={entry.id}
-                    style={{
-                      top,
-                      height,
-                      left: `${left}%`,
-                      width: `calc(${width}% - 4px)`,
-                      background: colorForCourse(entry.courseCode),
-                    }}
+                    $top={top}
+                    $height={height}
+                    $left={`${left}%`}
+                    $width={`calc(${width}% - 4px)`}
+                    $color={colorForCourse(entry.courseCode)}
                   >
                     <S.BlockCourse>{entry.courseCode}</S.BlockCourse>
                     {height > 34 && (

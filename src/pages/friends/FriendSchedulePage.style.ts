@@ -1,5 +1,6 @@
 import styled from '@emotion/styled'
 import { brand } from '../../design-system/colors'
+import { shadow } from '../../design-system/shadow'
 
 export const S = {
   Root: styled.div`
@@ -74,11 +75,13 @@ export const S = {
       letter-spacing: 0.04em;
     }
   `,
-  TimeAxis: styled.div`
+  TimeAxis: styled.div<{ $height: number }>`
     position: relative;
+    height: ${({ $height }) => $height}px;
   `,
-  HourLabel: styled.span`
+  HourLabel: styled.span<{ $top: number }>`
     position: absolute;
+    top: ${({ $top }) => $top}px;
     right: 3px;
     transform: translateY(-50%);
     font-size: 9px;
@@ -90,20 +93,27 @@ export const S = {
       font-size: 11px;
     }
   `,
-  DayColumn: styled.div`
+  DayColumn: styled.div<{ $height: number }>`
     position: relative;
+    height: ${({ $height }) => $height}px;
     border-left: 1px solid var(--border);
   `,
-  HourLine: styled.div`
+  HourLine: styled.div<{ $top: number }>`
     position: absolute;
+    top: ${({ $top }) => $top}px;
     left: 0;
     right: 0;
     height: 1px;
     background: var(--border);
     opacity: 0.6;
   `,
-  Block: styled.div`
+  Block: styled.div<{ $top: number; $height: number; $left: string; $width: string; $color: string }>`
     position: absolute;
+    top: ${({ $top }) => $top}px;
+    height: ${({ $height }) => $height}px;
+    left: ${({ $left }) => $left};
+    width: ${({ $width }) => $width};
+    background: ${({ $color }) => $color};
     display: flex;
     flex-direction: column;
     gap: 1px;
@@ -114,7 +124,7 @@ export const S = {
     font-size: 9px;
     line-height: 1.3;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    box-shadow: ${shadow.resting};
 
     @media (min-width: 480px) {
       gap: 2px;

@@ -51,7 +51,7 @@ export const S = {
     background: var(--bg);
     color: ${({ $active }) => ($active ? 'var(--accent)' : 'var(--text)')};
     font-size: 18px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+    box-shadow: ${shadow.floating};
     cursor: pointer;
     transition:
       color ${motion.duration.fast} ${motion.easing.standard},
@@ -116,7 +116,7 @@ export const S = {
     background: var(--bg);
     color: ${({ $active }) => ($active ? 'var(--accent)' : 'var(--text)')};
     font-size: 18px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+    box-shadow: ${shadow.floating};
     cursor: pointer;
     transition:
       color ${motion.duration.fast} ${motion.easing.standard},
@@ -138,7 +138,7 @@ export const S = {
     background: var(--bg);
     color: var(--text);
     font-size: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+    box-shadow: ${shadow.floating};
     cursor: pointer;
     transition: transform ${motion.duration.fast} ${motion.easing.standard};
 
@@ -231,7 +231,7 @@ export const S = {
     display: flex;
     flex-direction: column;
     background: var(--bg);
-    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.2);
+    box-shadow: ${shadow.drawerRight};
     animation: ${slideIn} ${motion.duration.base} ${motion.easing.standard};
     overflow-y: auto;
   `,
@@ -315,7 +315,7 @@ export const S = {
     max-height: 80vh;
     border-radius: ${radius.lg};
     background: var(--bg);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    box-shadow: ${shadow.modal};
     overflow: hidden;
   `,
   ModalHeader: styled.div`
@@ -382,7 +382,7 @@ export const S = {
       height: 20px;
       border-radius: 50%;
       background: ${brand.white};
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      box-shadow: ${shadow.knob};
       transition: left ${motion.duration.fast} ${motion.easing.standard};
     }
   `,
@@ -459,7 +459,7 @@ export const S = {
     background: var(--bg);
     color: ${({ $active }) => ($active ? 'var(--accent)' : 'var(--text)')};
     font-size: 18px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+    box-shadow: ${shadow.floating};
     cursor: pointer;
     transition:
       color ${motion.duration.fast} ${motion.easing.standard},
@@ -510,7 +510,7 @@ export const S = {
     border-top-left-radius: ${radius.lg};
     border-top-right-radius: ${radius.lg};
     background: var(--bg);
-    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+    box-shadow: ${shadow.sheetUp};
     animation: ${slideUp} ${motion.duration.base} ${motion.easing.standard};
     overflow-y: auto;
   `,
