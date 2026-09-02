@@ -20,11 +20,38 @@ const FriendSchedulePage = lazy(() =>
 
 const MIN_SPLASH_MS = 500
 
+// Playwright's webServer sets this (see playwright.config.ts) to skip the real Cognito login
+// screen — E2E specs mock the network boundary (GraphQL responses) instead of hitting AWS, and
+// there's no way to reach that boundary through a real sign-in flow in a headless browser.
+// `pnpm dev`/`pnpm build` never set this, so the bypass never ships in a real build.
+const isE2E = import.meta.env.VITE_E2E === 'true'
+
 function RouteFallback() {
   return (
     <div style={{ padding: 32 }}>
       <Skeleton height="24px" width="60%" />
     </div>
+  )
+}
+
+function AppRoutes({ userEmail, onSignOut }: { userEmail?: string; onSignOut?: () => void }) {
+  return (
+    <AppShell>
+      <Suspense fallback={<RouteFallback />}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/community" replace />} />
+          <Route path="/community" element={<CommunityPage />} />
+          <Route path="/community/:boardId" element={<BoardPage />} />
+          <Route path="/community/:boardId/:postId" element={<PostDetailPage />} />
+          <Route path="/schedule" element={<SchedulePage />} />
+          <Route path="/friends/:friendUserId" element={<FriendSchedulePage />} />
+          <Route path="/map" element={<MapPage />} />
+          <Route path="/dining" element={<DiningPage />} />
+          <Route path="/dining/:hallSlug" element={<DiningHallDetailPage />} />
+          <Route path="/settings" element={<SettingsPage userEmail={userEmail} onSignOut={onSignOut} />} />
+        </Routes>
+      </Suspense>
+    </AppShell>
   )
 }
 
@@ -41,29 +68,13 @@ export function App() {
     return () => clearTimeout(timer)
   }, [])
 
+  if (isE2E) {
+    return <AppRoutes userEmail="e2e-test@uga.edu" onSignOut={() => {}} />
+  }
+
   return (
     <Authenticator>
-      {({ signOut, user }) => (
-        <AppShell>
-          <Suspense fallback={<RouteFallback />}>
-            <Routes>
-              <Route path="/" element={<Navigate to="/community" replace />} />
-              <Route path="/community" element={<CommunityPage />} />
-              <Route path="/community/:boardId" element={<BoardPage />} />
-              <Route path="/community/:boardId/:postId" element={<PostDetailPage />} />
-              <Route path="/schedule" element={<SchedulePage />} />
-              <Route path="/friends/:friendUserId" element={<FriendSchedulePage />} />
-              <Route path="/map" element={<MapPage />} />
-              <Route path="/dining" element={<DiningPage />} />
-              <Route path="/dining/:hallSlug" element={<DiningHallDetailPage />} />
-              <Route
-                path="/settings"
-                element={<SettingsPage userEmail={user?.signInDetails?.loginId} onSignOut={signOut} />}
-              />
-            </Routes>
-          </Suspense>
-        </AppShell>
-      )}
+      {({ signOut, user }) => <AppRoutes userEmail={user?.signInDetails?.loginId} onSignOut={signOut} />}
     </Authenticator>
   )
 }
