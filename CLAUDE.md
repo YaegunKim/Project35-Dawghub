@@ -23,6 +23,41 @@ Adding/modifying a model in `amplify/data/resource.ts` must be deployed with `pn
 
 ---
 
+## Production deployment (Amplify Hosting, manual — no git integration)
+
+Live at **https://main.d39vvoaezs33f5.amplifyapp.com** (Amplify app id `d39vvoaezs33f5`, `us-east-1`, `dawghub` account).
+
+**Why manual, not push-to-deploy**: this GitHub repo (`Gp00408/Dawg-Hub-`) isn't owned by the account operating Amplify — connecting Amplify Hosting's GitHub App needs *admin* rights on the repo, and this account only has push access. So there's no CI/CD; every deploy is a manual local build + upload. `amplify.yml` at the repo root documents what a real pipeline build would run, for whenever admin access (or a repo transfer) makes that possible.
+
+**The production backend is a separate, persistently-identified sandbox** — deployed with `--identifier dawghub-prod` instead of the default (username-based) identifier the personal dev sandbox uses. This means **production has its own Cognito user pool / AppSync API / DynamoDB tables**, completely separate from the `yaegunkim` dev sandbox's users/posts/friendships/classes. Don't expect dev-sandbox test data to show up in prod, or vice versa.
+
+To redeploy (after merging changes to `main`):
+```bash
+# 1. Deploy the prod backend (creates/updates the dawghub-prod sandbox stack, writes a fresh
+#    amplify_outputs.json to a scratch dir so it doesn't clobber the committed dev one yet)
+AWS_PROFILE=dawghub npx ampx sandbox --once --identifier dawghub-prod \
+  --outputs-out-dir /tmp/dawghub-prod-outputs
+
+# 2. Build the frontend against the prod backend config
+cp /tmp/dawghub-prod-outputs/amplify_outputs.json ./amplify_outputs.json
+pnpm build
+
+# 3. Upload dist/ to Amplify Hosting (manual deploy API — no git push involved)
+cd dist && zip -qr /tmp/dawghub-dist.zip . && cd ..
+aws amplify create-deployment --app-id d39vvoaezs33f5 --branch-name main \
+  --profile dawghub --region us-east-1 --query "{jobId:jobId,url:zipUploadUrl}" --output json
+# curl -X PUT -T /tmp/dawghub-dist.zip "<zipUploadUrl from above>"
+aws amplify start-deployment --app-id d39vvoaezs33f5 --branch-name main \
+  --job-id <jobId from above> --profile dawghub --region us-east-1
+
+# 4. IMPORTANT: restore the dev sandbox's amplify_outputs.json so local `pnpm dev` keeps
+#    pointing at the personal sandbox, not prod.
+git checkout -- amplify_outputs.json
+```
+Step 4 is easy to forget — always check `git status` shows `amplify_outputs.json` clean afterward. A schema change (`amplify/data/resource.ts`) needs step 1 regardless of whether the frontend changed at all; a frontend-only change still needs steps 2-4 to actually go live (the prod backend doesn't need re-running in that case).
+
+---
+
 ## Testing
 
 ```bash
