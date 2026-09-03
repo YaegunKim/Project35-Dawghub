@@ -1,6 +1,6 @@
 import styled from '@emotion/styled'
 import { Card } from '../../design-system/Card/Card'
-import { category, state } from '../../design-system/colors'
+import { category } from '../../design-system/colors'
 import { motion } from '../../design-system/motion'
 import { radius } from '../../design-system/radius'
 import { shadow } from '../../design-system/shadow'
@@ -47,26 +47,6 @@ export const S = {
     font-size: 16px;
     font-weight: 700;
     line-height: 1.25;
-  `,
-  StatusBadge: styled.span<{ $open: boolean }>`
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    flex-shrink: 0;
-    padding: 3px 9px 3px 7px;
-    border-radius: ${radius.pill};
-    background: ${({ $open }) => ($open ? state.successSoft : state.dangerSoft)};
-    color: ${({ $open }) => ($open ? state.success : state.danger)};
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-  `,
-  StatusDot: styled.span<{ $open: boolean }>`
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: ${({ $open }) => ($open ? state.success : state.danger)};
   `,
   Hours: styled.span`
     font-size: 12px;

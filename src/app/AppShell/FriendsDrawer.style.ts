@@ -4,6 +4,7 @@ import { brand, state } from '../../design-system/colors'
 import { radius } from '../../design-system/radius'
 import { spacing } from '../../design-system/spacing'
 import { motion } from '../../design-system/motion'
+import { zIndex } from '../../design-system/zIndex'
 
 const fadeIn = keyframes`
   from { opacity: 0; }
@@ -54,7 +55,7 @@ export const S = {
   DrawerBackdrop: styled.div`
     position: fixed;
     inset: 0;
-    z-index: 1100;
+    z-index: ${zIndex.drawer};
     background: rgba(0, 0, 0, 0.4);
     animation: ${fadeIn} ${motion.duration.base} ${motion.easing.standard};
   `,
@@ -63,7 +64,7 @@ export const S = {
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 1101;
+    z-index: ${zIndex.drawer + 1};
     width: min(360px, 90vw);
     display: flex;
     flex-direction: column;

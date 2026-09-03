@@ -25,6 +25,7 @@ export const surface = {
 export const state = {
   danger: '#ef4444',
   dangerSoft: 'rgba(239, 68, 68, 0.08)',
+  dangerContrast: brand.white, // text/icon color on top of a solid `danger` background
   success: '#16a34a',
   successSoft: 'rgba(22, 163, 74, 0.1)',
 } as const

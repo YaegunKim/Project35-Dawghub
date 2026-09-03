@@ -1,6 +1,7 @@
 import styled from '@emotion/styled'
 import { brand } from '../../design-system/colors'
 import { shadow } from '../../design-system/shadow'
+import { zIndex } from '../../design-system/zIndex'
 
 export const S = {
   Root: styled.div`
@@ -47,14 +48,14 @@ export const S = {
   CornerCell: styled.div`
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: ${zIndex.raised};
     background: var(--bg-elevated);
     border-bottom: 1px solid var(--border);
   `,
   DayHeader: styled.div`
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: ${zIndex.raised};
     padding: 6px 1px;
     text-align: center;
     font-size: 10px;

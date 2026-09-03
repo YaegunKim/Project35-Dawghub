@@ -1,40 +1,7 @@
 import styled from '@emotion/styled'
-import { keyframes } from '@emotion/react'
-import { brand, state } from '../../design-system/colors'
-import { radius } from '../../design-system/radius'
-import { shadow } from '../../design-system/shadow'
 import { spacing } from '../../design-system/spacing'
-import { motion } from '../../design-system/motion'
-import type { TagFilterState } from './tagFilters'
-
-const fadeIn = keyframes`
-  from { opacity: 0; }
-  to { opacity: 1; }
-`
 
 export const S = {
-  ModalBackdrop: styled.div`
-    position: fixed;
-    inset: 0;
-    z-index: 1200;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: ${spacing.base};
-    background: rgba(0, 0, 0, 0.5);
-    animation: ${fadeIn} ${motion.duration.fast} ${motion.easing.standard};
-  `,
-  Modal: styled.div`
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 380px;
-    max-height: 80vh;
-    border-radius: ${radius.lg};
-    background: var(--bg);
-    box-shadow: ${shadow.modal};
-    overflow: hidden;
-  `,
   ModalHeader: styled.div`
     display: flex;
     align-items: center;
@@ -108,43 +75,5 @@ export const S = {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  `,
-  SegmentedGroup: styled.div`
-    display: flex;
-    flex-shrink: 0;
-    border-radius: ${radius.pill};
-    overflow: hidden;
-    border: 1px solid var(--border);
-  `,
-  Segment: styled.button<{ $active: boolean; $variant: TagFilterState }>`
-    padding: 6px 14px;
-    border: none;
-    border-left: 1px solid var(--border);
-    font-size: 11px;
-    font-weight: 700;
-    white-space: nowrap;
-    cursor: pointer;
-    transition:
-      background-color ${motion.duration.fast} ${motion.easing.standard},
-      color ${motion.duration.fast} ${motion.easing.standard};
-
-    &:first-of-type {
-      border-left: none;
-    }
-
-    &:active {
-      opacity: 0.8;
-    }
-
-    background: ${({ $active, $variant }) => {
-      if (!$active) return 'var(--bg-elevated)'
-      if ($variant === 'hide') return state.danger
-      return 'var(--border)'
-    }};
-    color: ${({ $active, $variant }) => {
-      if (!$active) return 'var(--text-muted)'
-      if ($variant === 'hide') return brand.white
-      return 'var(--text)'
-    }};
   `,
 }

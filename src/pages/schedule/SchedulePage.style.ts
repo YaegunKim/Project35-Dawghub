@@ -1,31 +1,10 @@
 import styled from '@emotion/styled'
-import { keyframes } from '@emotion/react'
 import { Card } from '../../design-system/Card/Card'
-import { Button } from '../../design-system/Button/Button'
-import { brand, state } from '../../design-system/colors'
+import { brand } from '../../design-system/colors'
 import { motion } from '../../design-system/motion'
 import { radius } from '../../design-system/radius'
 import { shadow } from '../../design-system/shadow'
-
-const modalIn = keyframes`
-  from {
-    opacity: 0;
-    transform: scale(0.94) translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-`
-
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-`
+import { zIndex } from '../../design-system/zIndex'
 
 export const S = {
   Root: styled.div`
@@ -100,14 +79,14 @@ export const S = {
   CornerCell: styled.div`
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: ${zIndex.raised};
     background: var(--bg-elevated);
     border-bottom: 1px solid var(--border);
   `,
   DayHeader: styled.div`
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: ${zIndex.raised};
     padding: 6px 1px;
     text-align: center;
     font-size: 10px;
@@ -194,7 +173,7 @@ export const S = {
     &:hover {
       transform: scale(1.02);
       box-shadow: ${shadow.hover};
-      z-index: 2;
+      z-index: ${zIndex.raised + 1};
     }
   `,
   BlockCourse: styled.div`
@@ -216,30 +195,6 @@ export const S = {
     overflow: hidden;
     text-overflow: ellipsis;
   `,
-  ModalBackdrop: styled.div`
-    position: fixed;
-    inset: 0;
-    z-index: 30;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    background: rgba(0, 0, 0, 0.5);
-    animation: ${fadeIn} 0.15s ease;
-  `,
-  Detail: styled(Card)`
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 400px;
-    max-height: 80vh;
-    padding: 0;
-    border-radius: 20px;
-    overflow: hidden;
-    background: var(--bg);
-    box-shadow: ${shadow.modal};
-    animation: ${modalIn} 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
-  `,
   DetailAccent: styled.div<{ $color: string }>`
     height: 6px;
     flex-shrink: 0;
@@ -251,34 +206,6 @@ export const S = {
     gap: 12px;
     padding: 20px;
     overflow-y: auto;
-  `,
-  SearchBackdrop: styled.div`
-    position: fixed;
-    inset: 0;
-    z-index: 30;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    background: rgba(0, 0, 0, 0.5);
-    animation: ${fadeIn} 0.15s ease;
-  `,
-  SearchPanel: styled(Card)`
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 420px;
-    max-height: 85vh;
-    padding: 0;
-    border-radius: 20px;
-    overflow: hidden;
-    background: var(--bg);
-    box-shadow: ${shadow.modal};
-    animation: ${modalIn} 0.18s cubic-bezier(0.2, 0.9, 0.3, 1);
-
-    @media (min-width: 768px) {
-      max-width: 520px;
-    }
   `,
   SearchPanelHeader: styled.form`
     display: flex;
@@ -365,15 +292,6 @@ export const S = {
     font-size: 10px;
     font-weight: 700;
     flex-shrink: 0;
-  `,
-  DangerButton: styled(Button)`
-    background: transparent;
-    color: ${state.danger};
-    border-color: ${state.danger};
-
-    &:hover {
-      background: ${state.dangerSoft};
-    }
   `,
   RatingBadge: styled.span<{ $color: string }>`
     display: inline-flex;
@@ -530,17 +448,19 @@ export const S = {
       transform: rotate(${({ $active }) => ($active ? '180deg' : '0deg')});
     }
   `,
+  // This dropdown opens from inside the search modal, so it must render above zIndex.modal
+  // (not the generic zIndex.dropdown tier) or it would be hidden behind that still-open modal.
   FilterMenuBackdrop: styled.div`
     position: fixed;
     inset: 0;
-    z-index: 31;
+    z-index: ${zIndex.modal + 1};
   `,
   FilterMenu: styled.div<{ $top: number; $left: number; $width: number }>`
     position: fixed;
     top: ${({ $top }) => $top}px;
     left: ${({ $left }) => $left}px;
     width: ${({ $width }) => $width}px;
-    z-index: 32;
+    z-index: ${zIndex.modal + 2};
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -634,13 +554,13 @@ export const S = {
   FabBackdrop: styled.div`
     position: fixed;
     inset: 0;
-    z-index: 20;
+    z-index: ${zIndex.fab};
   `,
   FabWrap: styled.div`
     position: fixed;
     right: 20px;
     bottom: calc(64px + env(safe-area-inset-bottom) + 20px);
-    z-index: 21;
+    z-index: ${zIndex.fab + 1};
     display: flex;
     flex-direction: column;
     align-items: flex-end;

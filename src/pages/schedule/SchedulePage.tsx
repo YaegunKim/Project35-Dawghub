@@ -10,6 +10,7 @@ import { Input } from '../../design-system/Input/Input'
 import { Select } from '../../design-system/Select/Select'
 import { IconButton } from '../../design-system/IconButton/IconButton'
 import { EmptyState } from '../../design-system/EmptyState/EmptyState'
+import { Modal } from '../../design-system/Modal/Modal'
 import { Skeleton } from '../../design-system/Skeleton/Skeleton'
 import { PageTitle } from '../../design-system/Page/Page'
 import { FriendsDrawer } from '../../app/AppShell/FriendsDrawer'
@@ -673,65 +674,63 @@ export function SchedulePage() {
       </S.Padded>
 
       {showForm && (
-        <S.ModalBackdrop onClick={() => setShowForm(false)}>
-          <S.Detail onClick={(event) => event.stopPropagation()}>
-            <S.DetailBody>
-              <S.Form onSubmit={handleSubmit}>
-                <S.PanelHeader>
-                  <S.DetailCourse>{t('schedule.add')}</S.DetailCourse>
-                  <IconButton type="button" onClick={() => setShowForm(false)} aria-label={t('schedule.close')}>
-                    ×
-                  </IconButton>
-                </S.PanelHeader>
+        <Modal onClose={() => setShowForm(false)} maxWidth="400px">
+          <S.DetailBody>
+            <S.Form onSubmit={handleSubmit}>
+              <S.PanelHeader>
+                <S.DetailCourse>{t('schedule.add')}</S.DetailCourse>
+                <IconButton type="button" onClick={() => setShowForm(false)} aria-label={t('schedule.close')}>
+                  ×
+                </IconButton>
+              </S.PanelHeader>
+              <Input
+                placeholder={t('schedule.courseCode')}
+                value={courseCode}
+                onChange={(event) => setCourseCode(event.target.value)}
+              />
+              <Input
+                placeholder={t('schedule.title')}
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+              />
+              <Select value={day} onChange={(event) => setDay(event.target.value as Day)}>
+                {DAYS.map((d) => (
+                  <option key={d} value={d}>
+                    {t(`schedule.days.${d}`)}
+                  </option>
+                ))}
+              </Select>
+              <S.Row>
+                <Input type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} />
+                <Input type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} />
+              </S.Row>
+              <S.LocationRow>
                 <Input
-                  placeholder={t('schedule.courseCode')}
-                  value={courseCode}
-                  onChange={(event) => setCourseCode(event.target.value)}
+                  list="uga-building-names"
+                  placeholder={t('schedule.location')}
+                  value={location}
+                  onChange={(event) => {
+                    setLocation(event.target.value)
+                    setLocationLat(null)
+                    setLocationLng(null)
+                  }}
                 />
-                <Input
-                  placeholder={t('schedule.title')}
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                />
-                <Select value={day} onChange={(event) => setDay(event.target.value as Day)}>
-                  {DAYS.map((d) => (
-                    <option key={d} value={d}>
-                      {t(`schedule.days.${d}`)}
-                    </option>
-                  ))}
-                </Select>
-                <S.Row>
-                  <Input type="time" value={startTime} onChange={(event) => setStartTime(event.target.value)} />
-                  <Input type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} />
-                </S.Row>
-                <S.LocationRow>
-                  <Input
-                    list="uga-building-names"
-                    placeholder={t('schedule.location')}
-                    value={location}
-                    onChange={(event) => {
-                      setLocation(event.target.value)
-                      setLocationLat(null)
-                      setLocationLng(null)
-                    }}
-                  />
-                  <Button type="button" variant="secondary" onClick={handlePickLocationOnMap}>
-                    {t('schedule.setLocation')}
-                  </Button>
-                </S.LocationRow>
-                {locationLat != null && locationLng != null && (
-                  <S.LocationPickedNote>{t('schedule.locationPickedNote')}</S.LocationPickedNote>
-                )}
-                <datalist id="uga-building-names">
-                  {buildingNames.map((name) => (
-                    <option key={name} value={name} />
-                  ))}
-                </datalist>
-                <Button type="submit">{t('schedule.save')}</Button>
-              </S.Form>
-            </S.DetailBody>
-          </S.Detail>
-        </S.ModalBackdrop>
+                <Button type="button" variant="secondary" onClick={handlePickLocationOnMap}>
+                  {t('schedule.setLocation')}
+                </Button>
+              </S.LocationRow>
+              {locationLat != null && locationLng != null && (
+                <S.LocationPickedNote>{t('schedule.locationPickedNote')}</S.LocationPickedNote>
+              )}
+              <datalist id="uga-building-names">
+                {buildingNames.map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
+              <Button type="submit">{t('schedule.save')}</Button>
+            </S.Form>
+          </S.DetailBody>
+        </Modal>
       )}
 
       <S.GridWrap>
@@ -788,246 +787,244 @@ export function SchedulePage() {
       </S.GridWrap>
 
       {showSearch && (
-        <S.SearchBackdrop onClick={() => setShowSearch(false)}>
-          <S.SearchPanel onClick={(event) => event.stopPropagation()}>
-            <S.SearchPanelHeader onSubmit={handleSearch}>
-              <S.PanelHeader>
-                <S.DetailCourse>{t('schedule.addBySearch')}</S.DetailCourse>
-                <IconButton type="button" onClick={() => setShowSearch(false)} aria-label={t('schedule.close')}>
-                  ×
-                </IconButton>
-              </S.PanelHeader>
-              <S.Row>
-                <Input
-                  placeholder={t('schedule.searchPlaceholder')}
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                />
-                <Button type="submit">{t('schedule.search')}</Button>
-              </S.Row>
-              <S.Row>
-                <S.FilterMenuWrap>
-                  <S.FilterButton
-                    ref={subjectFilterButtonRef}
-                    type="button"
-                    $active={openFilterMenu === 'subject'}
-                    onClick={() => toggleFilterMenu('subject')}
-                  >
-                    <span>{subjectFilter || t('schedule.filterAllSubjects')}</span>
-                    <FontAwesomeIcon icon={faChevronDown} />
-                  </S.FilterButton>
-                </S.FilterMenuWrap>
-                <S.FilterMenuWrap>
-                  <S.FilterButton
-                    ref={levelFilterButtonRef}
-                    type="button"
-                    $active={openFilterMenu === 'level'}
-                    onClick={() => toggleFilterMenu('level')}
-                  >
-                    <span>
-                      {levelFilter
-                        ? t('schedule.levelLabel', { label: levelFilter === '5' ? '5000+' : `${levelFilter}000` })
-                        : t('schedule.filterAllLevels')}
-                    </span>
-                    <FontAwesomeIcon icon={faChevronDown} />
-                  </S.FilterButton>
-                </S.FilterMenuWrap>
-              </S.Row>
-            </S.SearchPanelHeader>
+        <Modal onClose={() => setShowSearch(false)} maxWidth="420px" maxWidthTablet="520px">
+          <S.SearchPanelHeader onSubmit={handleSearch}>
+            <S.PanelHeader>
+              <S.DetailCourse>{t('schedule.addBySearch')}</S.DetailCourse>
+              <IconButton type="button" onClick={() => setShowSearch(false)} aria-label={t('schedule.close')}>
+                ×
+              </IconButton>
+            </S.PanelHeader>
+            <S.Row>
+              <Input
+                placeholder={t('schedule.searchPlaceholder')}
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+              />
+              <Button type="submit">{t('schedule.search')}</Button>
+            </S.Row>
+            <S.Row>
+              <S.FilterMenuWrap>
+                <S.FilterButton
+                  ref={subjectFilterButtonRef}
+                  type="button"
+                  $active={openFilterMenu === 'subject'}
+                  onClick={() => toggleFilterMenu('subject')}
+                >
+                  <span>{subjectFilter || t('schedule.filterAllSubjects')}</span>
+                  <FontAwesomeIcon icon={faChevronDown} />
+                </S.FilterButton>
+              </S.FilterMenuWrap>
+              <S.FilterMenuWrap>
+                <S.FilterButton
+                  ref={levelFilterButtonRef}
+                  type="button"
+                  $active={openFilterMenu === 'level'}
+                  onClick={() => toggleFilterMenu('level')}
+                >
+                  <span>
+                    {levelFilter
+                      ? t('schedule.levelLabel', { label: levelFilter === '5' ? '5000+' : `${levelFilter}000` })
+                      : t('schedule.filterAllLevels')}
+                  </span>
+                  <FontAwesomeIcon icon={faChevronDown} />
+                </S.FilterButton>
+              </S.FilterMenuWrap>
+            </S.Row>
+          </S.SearchPanelHeader>
 
-            {openFilterMenu &&
-              filterMenuPosition &&
-              createPortal(
-                <>
-                  <S.FilterMenuBackdrop onClick={() => setOpenFilterMenu(null)} />
-                  <S.FilterMenu
-                    $top={filterMenuPosition.top}
-                    $left={filterMenuPosition.left}
-                    $width={Math.max(filterMenuPosition.width, 220)}
-                  >
-                    {openFilterMenu === 'subject' ? (
-                      <>
+          {openFilterMenu &&
+            filterMenuPosition &&
+            createPortal(
+              <>
+                <S.FilterMenuBackdrop onClick={() => setOpenFilterMenu(null)} />
+                <S.FilterMenu
+                  $top={filterMenuPosition.top}
+                  $left={filterMenuPosition.left}
+                  $width={Math.max(filterMenuPosition.width, 220)}
+                >
+                  {openFilterMenu === 'subject' ? (
+                    <>
+                      <S.FilterMenuItem
+                        type="button"
+                        $selected={!subjectFilter}
+                        onClick={() => {
+                          setSubjectFilter('')
+                          setOpenFilterMenu(null)
+                        }}
+                      >
+                        {t('schedule.filterAllSubjects')}
+                      </S.FilterMenuItem>
+                      {UGA_SUBJECTS.map((subject) => (
                         <S.FilterMenuItem
+                          key={subject.code}
                           type="button"
-                          $selected={!subjectFilter}
+                          $selected={subjectFilter === subject.code}
                           onClick={() => {
-                            setSubjectFilter('')
+                            setSubjectFilter(subject.code)
                             setOpenFilterMenu(null)
                           }}
                         >
-                          {t('schedule.filterAllSubjects')}
+                          {subject.description ? `${subject.code} — ${subject.description}` : subject.code}
                         </S.FilterMenuItem>
-                        {UGA_SUBJECTS.map((subject) => (
-                          <S.FilterMenuItem
-                            key={subject.code}
-                            type="button"
-                            $selected={subjectFilter === subject.code}
-                            onClick={() => {
-                              setSubjectFilter(subject.code)
-                              setOpenFilterMenu(null)
-                            }}
-                          >
-                            {subject.description ? `${subject.code} — ${subject.description}` : subject.code}
-                          </S.FilterMenuItem>
-                        ))}
-                      </>
-                    ) : (
-                      <>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      <S.FilterMenuItem
+                        type="button"
+                        $selected={!levelFilter}
+                        onClick={() => {
+                          setLevelFilter('')
+                          setOpenFilterMenu(null)
+                        }}
+                      >
+                        {t('schedule.filterAllLevels')}
+                      </S.FilterMenuItem>
+                      {LEVEL_OPTIONS.map((level) => (
                         <S.FilterMenuItem
+                          key={level}
                           type="button"
-                          $selected={!levelFilter}
+                          $selected={levelFilter === level}
                           onClick={() => {
-                            setLevelFilter('')
+                            setLevelFilter(level)
                             setOpenFilterMenu(null)
                           }}
                         >
-                          {t('schedule.filterAllLevels')}
+                          {t('schedule.levelLabel', { label: level === '5' ? '5000+' : `${level}000` })}
                         </S.FilterMenuItem>
-                        {LEVEL_OPTIONS.map((level) => (
-                          <S.FilterMenuItem
-                            key={level}
-                            type="button"
-                            $selected={levelFilter === level}
-                            onClick={() => {
-                              setLevelFilter(level)
-                              setOpenFilterMenu(null)
-                            }}
-                          >
-                            {t('schedule.levelLabel', { label: level === '5' ? '5000+' : `${level}000` })}
-                          </S.FilterMenuItem>
-                        ))}
-                      </>
-                    )}
-                  </S.FilterMenu>
-                </>,
-                document.body,
-              )}
+                      ))}
+                    </>
+                  )}
+                </S.FilterMenu>
+              </>,
+              document.body,
+            )}
 
-            <S.SearchPanelBody
-              onScroll={(event) => {
-                const el = event.currentTarget
-                if (el.scrollTop + el.clientHeight >= el.scrollHeight - 120) {
-                  setVisibleCount((prev) => prev + SEARCH_PAGE_SIZE)
-                }
-              }}
-            >
-              {searchLoading && (
-                <S.SectionList>
-                  {[0, 1, 2].map((i) => (
-                    <S.SectionCard key={i}>
-                      <Skeleton height="16px" width="45%" />
-                      <Skeleton height="28px" width="85%" radius="8px" />
-                    </S.SectionCard>
-                  ))}
-                </S.SectionList>
-              )}
+          <S.SearchPanelBody
+            onScroll={(event) => {
+              const el = event.currentTarget
+              if (el.scrollTop + el.clientHeight >= el.scrollHeight - 120) {
+                setVisibleCount((prev) => prev + SEARCH_PAGE_SIZE)
+              }
+            }}
+          >
+            {searchLoading && (
+              <S.SectionList>
+                {[0, 1, 2].map((i) => (
+                  <S.SectionCard key={i}>
+                    <Skeleton height="16px" width="45%" />
+                    <Skeleton height="28px" width="85%" radius="8px" />
+                  </S.SectionCard>
+                ))}
+              </S.SectionList>
+            )}
 
-              {!searchLoading && searchResults !== null && searchResults.length === 0 && (
-                <EmptyState>{t('schedule.searchEmpty')}</EmptyState>
-              )}
+            {!searchLoading && searchResults !== null && searchResults.length === 0 && (
+              <EmptyState>{t('schedule.searchEmpty')}</EmptyState>
+            )}
 
-              {!searchLoading && searchResults && searchResults.length > 0 && (
-                <S.SectionList>
-                  {sortResultGroups(groupSections(groupByCrn(searchResults)))
-                    .slice(0, visibleCount)
-                    .map((group) => {
-                    const singleOption = group.options.length === 1 ? group.options[0] : null
-                    const selectedCrn = selectedOptions[group.key]
-                    const selectedOption = group.options.find((option) => option.crn === selectedCrn) ?? null
+            {!searchLoading && searchResults && searchResults.length > 0 && (
+              <S.SectionList>
+                {sortResultGroups(groupSections(groupByCrn(searchResults)))
+                  .slice(0, visibleCount)
+                  .map((group) => {
+                  const singleOption = group.options.length === 1 ? group.options[0] : null
+                  const selectedCrn = selectedOptions[group.key]
+                  const selectedOption = group.options.find((option) => option.crn === selectedCrn) ?? null
 
-                    return (
-                      <S.SectionCard key={group.key}>
-                        <S.SectionHeader>
-                          <S.PanelHeader>
-                            <S.CourseCodeRow>
-                              <S.DetailCourse>{group.courseCode}</S.DetailCourse>
-                              <S.InfoButton
-                                type="button"
-                                onClick={() => setInfoGroup(group)}
-                                aria-label={t('schedule.courseInfo')}
-                              >
-                                <FontAwesomeIcon icon={faCircleInfo} />
-                              </S.InfoButton>
-                            </S.CourseCodeRow>
-                            {singleOption && (
-                              <Button
-                                type="button"
-                                onClick={() =>
-                                  handleAddSection({
-                                    crn: singleOption.crn,
-                                    courseCode: group.courseCode,
-                                    title: group.title,
-                                    section: '',
-                                    scheduleType: group.scheduleType,
-                                    instructor: singleOption.instructor,
-                                    instructorFirstName: singleOption.instructorFirstName,
-                                    instructorLastName: singleOption.instructorLastName,
-                                    meetings: singleOption.meetings,
-                                  })
-                                }
-                              >
-                                {t('schedule.addSection')}
-                              </Button>
-                            )}
-                          </S.PanelHeader>
-
-                          {singleOption &&
-                            renderProfessorSummary(
-                              singleOption.instructorFirstName,
-                              singleOption.instructorLastName,
-                              singleOption.instructor,
-                            )}
-                          {!singleOption &&
-                            group.sharedInstructor &&
-                            renderProfessorSummary(
-                              group.sharedInstructor.instructorFirstName,
-                              group.sharedInstructor.instructorLastName,
-                              group.sharedInstructor.instructor,
-                            )}
-                        </S.SectionHeader>
-
-                        {singleOption ? (
-                          <>{renderMeetingList(singleOption.meetings)}</>
-                        ) : (
-                          <>
-                            {renderMeetingList(group.commonMeetings)}
-                            <S.OptionGroup>
-                              {group.options.map((option) => (
-                                <S.OptionCard
-                                  key={option.crn}
-                                  type="button"
-                                  $selected={option.crn === selectedCrn}
-                                  onClick={() =>
-                                    setSelectedOptions((prev) => ({ ...prev, [group.key]: option.crn }))
-                                  }
-                                >
-                                  {!group.sharedInstructor &&
-                                    renderProfessorSummary(
-                                      option.instructorFirstName,
-                                      option.instructorLastName,
-                                      option.instructor,
-                                    )}
-                                  {renderMeetingList(option.meetings)}
-                                </S.OptionCard>
-                              ))}
-                            </S.OptionGroup>
+                  return (
+                    <S.SectionCard key={group.key}>
+                      <S.SectionHeader>
+                        <S.PanelHeader>
+                          <S.CourseCodeRow>
+                            <S.DetailCourse>{group.courseCode}</S.DetailCourse>
+                            <S.InfoButton
+                              type="button"
+                              onClick={() => setInfoGroup(group)}
+                              aria-label={t('schedule.courseInfo')}
+                            >
+                              <FontAwesomeIcon icon={faCircleInfo} />
+                            </S.InfoButton>
+                          </S.CourseCodeRow>
+                          {singleOption && (
                             <Button
                               type="button"
-                              disabled={!selectedOption}
-                              onClick={() => selectedOption && handleAddGroupOption(group, selectedOption)}
+                              onClick={() =>
+                                handleAddSection({
+                                  crn: singleOption.crn,
+                                  courseCode: group.courseCode,
+                                  title: group.title,
+                                  section: '',
+                                  scheduleType: group.scheduleType,
+                                  instructor: singleOption.instructor,
+                                  instructorFirstName: singleOption.instructorFirstName,
+                                  instructorLastName: singleOption.instructorLastName,
+                                  meetings: singleOption.meetings,
+                                })
+                              }
                             >
                               {t('schedule.addSection')}
                             </Button>
-                          </>
-                        )}
-                      </S.SectionCard>
-                    )
-                  })}
-                </S.SectionList>
-              )}
-            </S.SearchPanelBody>
-          </S.SearchPanel>
-        </S.SearchBackdrop>
+                          )}
+                        </S.PanelHeader>
+
+                        {singleOption &&
+                          renderProfessorSummary(
+                            singleOption.instructorFirstName,
+                            singleOption.instructorLastName,
+                            singleOption.instructor,
+                          )}
+                        {!singleOption &&
+                          group.sharedInstructor &&
+                          renderProfessorSummary(
+                            group.sharedInstructor.instructorFirstName,
+                            group.sharedInstructor.instructorLastName,
+                            group.sharedInstructor.instructor,
+                          )}
+                      </S.SectionHeader>
+
+                      {singleOption ? (
+                        <>{renderMeetingList(singleOption.meetings)}</>
+                      ) : (
+                        <>
+                          {renderMeetingList(group.commonMeetings)}
+                          <S.OptionGroup>
+                            {group.options.map((option) => (
+                              <S.OptionCard
+                                key={option.crn}
+                                type="button"
+                                $selected={option.crn === selectedCrn}
+                                onClick={() =>
+                                  setSelectedOptions((prev) => ({ ...prev, [group.key]: option.crn }))
+                                }
+                              >
+                                {!group.sharedInstructor &&
+                                  renderProfessorSummary(
+                                    option.instructorFirstName,
+                                    option.instructorLastName,
+                                    option.instructor,
+                                  )}
+                                {renderMeetingList(option.meetings)}
+                              </S.OptionCard>
+                            ))}
+                          </S.OptionGroup>
+                          <Button
+                            type="button"
+                            disabled={!selectedOption}
+                            onClick={() => selectedOption && handleAddGroupOption(group, selectedOption)}
+                          >
+                            {t('schedule.addSection')}
+                          </Button>
+                        </>
+                      )}
+                    </S.SectionCard>
+                  )
+                })}
+              </S.SectionList>
+            )}
+          </S.SearchPanelBody>
+        </Modal>
       )}
 
       {entries.length === 0 && (
@@ -1037,114 +1034,108 @@ export function SchedulePage() {
       )}
 
       {selectedEntry && (
-        <S.ModalBackdrop onClick={() => setSelectedId(null)}>
-          <S.Detail onClick={(event) => event.stopPropagation()}>
-            <S.DetailAccent $color={colorForCourse(selectedEntry.courseCode)} />
-            <S.DetailBody>
-              <S.PanelHeader>
-                <S.SectionInfo>
-                  <S.DetailCourse>{selectedEntry.title || selectedEntry.courseCode}</S.DetailCourse>
-                  {selectedEntry.title && (
-                    <S.CoursePill $color={colorForCourse(selectedEntry.courseCode)}>
-                      {selectedEntry.courseCode}
-                    </S.CoursePill>
-                  )}
-                </S.SectionInfo>
-                <IconButton onClick={() => setSelectedId(null)} aria-label={t('schedule.close')}>
-                  ×
-                </IconButton>
-              </S.PanelHeader>
+        <Modal onClose={() => setSelectedId(null)}>
+          <S.DetailAccent $color={colorForCourse(selectedEntry.courseCode)} />
+          <S.DetailBody>
+            <S.PanelHeader>
+              <S.SectionInfo>
+                <S.DetailCourse>{selectedEntry.title || selectedEntry.courseCode}</S.DetailCourse>
+                {selectedEntry.title && (
+                  <S.CoursePill $color={colorForCourse(selectedEntry.courseCode)}>
+                    {selectedEntry.courseCode}
+                  </S.CoursePill>
+                )}
+              </S.SectionInfo>
+              <IconButton onClick={() => setSelectedId(null)} aria-label={t('schedule.close')}>
+                ×
+              </IconButton>
+            </S.PanelHeader>
 
-              <S.MeetingList>
-                {selectedCourseEntries.map((entry) => (
-                  <S.MeetingRow key={entry.id}>
-                    <S.DayChip>{t(`schedule.daysShort.${entry.day as Day}`)}</S.DayChip>
-                    <S.MeetingTime>
-                      {entry.startTime}–{entry.endTime}
-                    </S.MeetingTime>
-                    {entry.location && <S.MeetingLocationText>{entry.location}</S.MeetingLocationText>}
-                  </S.MeetingRow>
-                ))}
-              </S.MeetingList>
+            <S.MeetingList>
+              {selectedCourseEntries.map((entry) => (
+                <S.MeetingRow key={entry.id}>
+                  <S.DayChip>{t(`schedule.daysShort.${entry.day as Day}`)}</S.DayChip>
+                  <S.MeetingTime>
+                    {entry.startTime}–{entry.endTime}
+                  </S.MeetingTime>
+                  {entry.location && <S.MeetingLocationText>{entry.location}</S.MeetingLocationText>}
+                </S.MeetingRow>
+              ))}
+            </S.MeetingList>
 
-              <S.DangerButton type="button" variant="secondary" onClick={() => handleDelete(selectedEntry.courseCode)}>
-                {t('schedule.delete')}
-              </S.DangerButton>
-            </S.DetailBody>
-          </S.Detail>
-        </S.ModalBackdrop>
+            <Button type="button" variant="danger" onClick={() => handleDelete(selectedEntry.courseCode)}>
+              {t('schedule.delete')}
+            </Button>
+          </S.DetailBody>
+        </Modal>
       )}
 
       {infoGroup && (
-        <S.ModalBackdrop onClick={() => setInfoGroup(null)}>
-          <S.Detail onClick={(event) => event.stopPropagation()}>
-            <S.DetailBody>
-              <S.PanelHeader>
-                <S.DetailCourse>{infoGroup.courseCode}</S.DetailCourse>
-                <IconButton onClick={() => setInfoGroup(null)} aria-label={t('schedule.close')}>
-                  ×
-                </IconButton>
-              </S.PanelHeader>
-              <S.DetailSub>{infoGroup.title}</S.DetailSub>
-              {infoGroup.scheduleType && <S.DetailSub>{infoGroup.scheduleType}</S.DetailSub>}
-            </S.DetailBody>
-          </S.Detail>
-        </S.ModalBackdrop>
+        <Modal onClose={() => setInfoGroup(null)}>
+          <S.DetailBody>
+            <S.PanelHeader>
+              <S.DetailCourse>{infoGroup.courseCode}</S.DetailCourse>
+              <IconButton onClick={() => setInfoGroup(null)} aria-label={t('schedule.close')}>
+                ×
+              </IconButton>
+            </S.PanelHeader>
+            <S.DetailSub>{infoGroup.title}</S.DetailSub>
+            {infoGroup.scheduleType && <S.DetailSub>{infoGroup.scheduleType}</S.DetailSub>}
+          </S.DetailBody>
+        </Modal>
       )}
 
       {selectedProfessor && (
-        <S.ModalBackdrop onClick={() => setSelectedProfessor(null)}>
-          <S.Detail onClick={(event) => event.stopPropagation()}>
-            {hasRating(selectedProfessor.rating) && (
-              <S.DetailAccent $color={ratingColor(selectedProfessor.rating.rating)} />
+        <Modal onClose={() => setSelectedProfessor(null)}>
+          {hasRating(selectedProfessor.rating) && (
+            <S.DetailAccent $color={ratingColor(selectedProfessor.rating.rating)} />
+          )}
+          <S.DetailBody>
+            <S.PanelHeader>
+              <S.DetailCourse>{selectedProfessor.name}</S.DetailCourse>
+              <IconButton onClick={() => setSelectedProfessor(null)} aria-label={t('schedule.close')}>
+                ×
+              </IconButton>
+            </S.PanelHeader>
+
+            <S.RatingRow>
+              {hasRating(selectedProfessor.rating) && (
+                <S.RatingBadge $color={ratingColor(selectedProfessor.rating.rating)}>
+                  {selectedProfessor.rating.rating.toFixed(1)}
+                </S.RatingBadge>
+              )}
+              <S.DetailSub>
+                {t('schedule.ratingMeta', {
+                  difficulty: selectedProfessor.rating.difficulty?.toFixed(1) ?? '?',
+                  count: selectedProfessor.rating.numRatings ?? 0,
+                })}
+                {typeof selectedProfessor.rating.wouldTakeAgainPercent === 'number' &&
+                selectedProfessor.rating.wouldTakeAgainPercent >= 0
+                  ? t('schedule.ratingRetake', { percent: Math.round(selectedProfessor.rating.wouldTakeAgainPercent) })
+                  : ''}
+              </S.DetailSub>
+            </S.RatingRow>
+
+            {professorReviewsLoading && <EmptyState>{t('schedule.reviewsLoading')}</EmptyState>}
+
+            {!professorReviewsLoading && professorReviews !== null && professorReviews.length === 0 && (
+              <EmptyState>{t('schedule.reviewsEmpty')}</EmptyState>
             )}
-            <S.DetailBody>
-              <S.PanelHeader>
-                <S.DetailCourse>{selectedProfessor.name}</S.DetailCourse>
-                <IconButton onClick={() => setSelectedProfessor(null)} aria-label={t('schedule.close')}>
-                  ×
-                </IconButton>
-              </S.PanelHeader>
 
-              <S.RatingRow>
-                {hasRating(selectedProfessor.rating) && (
-                  <S.RatingBadge $color={ratingColor(selectedProfessor.rating.rating)}>
-                    {selectedProfessor.rating.rating.toFixed(1)}
-                  </S.RatingBadge>
-                )}
-                <S.DetailSub>
-                  {t('schedule.ratingMeta', {
-                    difficulty: selectedProfessor.rating.difficulty?.toFixed(1) ?? '?',
-                    count: selectedProfessor.rating.numRatings ?? 0,
-                  })}
-                  {typeof selectedProfessor.rating.wouldTakeAgainPercent === 'number' &&
-                  selectedProfessor.rating.wouldTakeAgainPercent >= 0
-                    ? t('schedule.ratingRetake', { percent: Math.round(selectedProfessor.rating.wouldTakeAgainPercent) })
-                    : ''}
-                </S.DetailSub>
-              </S.RatingRow>
-
-              {professorReviewsLoading && <EmptyState>{t('schedule.reviewsLoading')}</EmptyState>}
-
-              {!professorReviewsLoading && professorReviews !== null && professorReviews.length === 0 && (
-                <EmptyState>{t('schedule.reviewsEmpty')}</EmptyState>
-              )}
-
-              {!professorReviewsLoading && professorReviews && professorReviews.length > 0 && (
-                <S.ReviewList>
-                  {professorReviews.map((review, index) => (
-                    <S.ReviewCard key={index}>
-                      <S.DetailSub>
-                        {[review.courseCode, review.date?.slice(0, 10), review.grade].filter(Boolean).join(' · ')}
-                      </S.DetailSub>
-                      <S.ReviewComment>{review.comment}</S.ReviewComment>
-                    </S.ReviewCard>
-                  ))}
-                </S.ReviewList>
-              )}
-            </S.DetailBody>
-          </S.Detail>
-        </S.ModalBackdrop>
+            {!professorReviewsLoading && professorReviews && professorReviews.length > 0 && (
+              <S.ReviewList>
+                {professorReviews.map((review, index) => (
+                  <S.ReviewCard key={index}>
+                    <S.DetailSub>
+                      {[review.courseCode, review.date?.slice(0, 10), review.grade].filter(Boolean).join(' · ')}
+                    </S.DetailSub>
+                    <S.ReviewComment>{review.comment}</S.ReviewComment>
+                  </S.ReviewCard>
+                ))}
+              </S.ReviewList>
+            )}
+          </S.DetailBody>
+        </Modal>
       )}
 
       {showFabMenu && <S.FabBackdrop onClick={() => setShowFabMenu(false)} />}

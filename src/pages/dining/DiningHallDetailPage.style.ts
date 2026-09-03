@@ -1,6 +1,7 @@
 import styled from '@emotion/styled'
 import { Card } from '../../design-system/Card/Card'
 import { shadow } from '../../design-system/shadow'
+import { zIndex } from '../../design-system/zIndex'
 
 export const S = {
   Header: styled.div`
@@ -22,7 +23,7 @@ export const S = {
   MealTabs: styled.div`
     position: sticky;
     top: 0;
-    z-index: 1;
+    z-index: ${zIndex.raised};
     display: flex;
     gap: 2px;
     padding: 3px;

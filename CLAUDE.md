@@ -55,14 +55,14 @@ src/
   app/
     App.tsx                # Routing (react-router-dom)
     AppShell/               # Responsive layout — mobile bottom tabs / tablet compact sidebar / desktop full sidebar
-  design-system/            # Reusable building blocks
+  design-system/            # Reusable building blocks — full token/component reference: ai/design-system.md
     colors.ts               #   - brand (static brand colors) · surface (re-exposes theme CSS variables) · state (UI state colors such as danger) · category (map/schedule category colors)
     typography.ts           #   - fontFamily.body/display, size, weight scales
-    spacing.ts / radius.ts / shadow.ts / motion.ts   #   - 4px-grid spacing, radius (sm/md/lg/pill), elevation shadow, transition duration/easing tokens
+    spacing.ts / radius.ts / shadow.ts / motion.ts / zIndex.ts   #   - 4px-grid spacing, radius (sm/md/lg/pill), elevation shadow, transition duration/easing, focus ring, stacking-order tokens
     GlobalStyles.tsx         #   - defines :root CSS variables (light/dark theme), the --font-body/--font-display bridge, data-theme overrides
     Brand/Logo.tsx           #   - original bulldog mark SVG component (for in-app rendering)
     Skeleton/Skeleton.tsx    #   - shimmer block that imitates the real layout while loading (width/height/radius props)
-    (Page, Card, Button, Input, Textarea, Select, IconButton, EmptyState, BackLink)
+    (Page, Card, Button, Input, Textarea, Select, IconButton, Badge, SegmentedControl, Modal, EmptyState, BackLink)
   app/ThemeContext.tsx      # Manual dark-mode switching (system/light/dark), persisted to localStorage `dawghub:theme`
   pages/
     community/  schedule/  map/  dining/  settings/    # Route-level pages (Page.tsx + Page.style.ts pairs; see ai/pages/ for details)
@@ -114,7 +114,7 @@ For the detailed background of the external data sources (Passio bus, Nutrislice
 3. **No hardcoded colors**: if you need a new color, add it to `src/design-system/colors.ts` first and import it. Use `surface.*` (CSS variables) if it must change with the theme (light/dark), and `brand.*`/`category.*`/`state.*` if it is always fixed.
 4. **Emotion pattern**: export as `export const S = { Name: styled.div\`...\` }`, referenced by the consumer as `S.Name`.
 5. **Fonts**: body text uses `var(--font-body)` (system font); emphasis text like page titles and the brand wordmark uses `var(--font-display)` (Oswald, Google Fonts) — see `fontFamily` in `typography.ts`.
-6. **spacing/radius/shadow/motion tokens**: use `spacing.ts`/`radius.ts`/`shadow.ts`/`motion.ts` for a new component's spacing/corners/shadow/transition values instead of magic numbers. The existing per-page `.style.ts` files were not force-converted entirely to tokens — only the shared primitives (`Card`/`Button`/`IconButton`, etc.) and new components have them applied. `shadow.ts` holds a full elevation scale (`resting`/`hover`/`floating`/`card`/`fab`/`lg`/`modal`/`drawerRight`/`sheetUp`/`knob`/`tabActive`, plus the original `sm`/`md`) — if none of these fit a new surface, add a new named tier there instead of writing an inline `box-shadow: rgba(...)`.
+6. **spacing/radius/shadow/motion/zIndex tokens**: use `spacing.ts`/`radius.ts`/`shadow.ts`/`motion.ts`/`zIndex.ts` for a new component's spacing/corners/shadow/transition/stacking-order values instead of magic numbers — see `ai/design-system.md` for the full token reference and when to add a new value to each. The existing per-page `.style.ts` files were not force-converted entirely to tokens — only the shared primitives (`Card`/`Button`/`IconButton`, etc.) and new components have them applied. Never write a raw `z-index: <number>` — use a `zIndex.ts` tier instead.
 
 ### Dark mode
 

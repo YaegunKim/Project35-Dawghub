@@ -37,6 +37,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '../../design-system/Button/Button'
 import { IconButton } from '../../design-system/IconButton/IconButton'
 import { Input } from '../../design-system/Input/Input'
+import { Modal } from '../../design-system/Modal/Modal'
 import { useFavorites } from '../../lib/useFavorites'
 import {
   MAP_DINING_FAVORITES_KEY,
@@ -307,40 +308,38 @@ function LayerChecklistModal({
   showLabel,
 }: LayerChecklistModalProps) {
   return (
-    <S.ModalBackdrop onClick={onClose}>
-      <S.Modal onClick={(event) => event.stopPropagation()}>
-        <S.ModalHeader>
-          <S.ModalTitle>{title}</S.ModalTitle>
-          <IconButton aria-label={title} onClick={onClose}>
-            <FontAwesomeIcon icon={faXmark} />
-          </IconButton>
-        </S.ModalHeader>
-        <S.ModalBody>
-          <S.MasterToggleRow>
-            <S.MasterToggleLabel>{showLabel}</S.MasterToggleLabel>
-            <S.Switch type="button" $checked={active} aria-pressed={active} onClick={onToggleActive} />
-          </S.MasterToggleRow>
-          <S.ModalSection>
-            {names.length === 0 ? (
-              <S.ChecklistEmpty>{emptyMessage}</S.ChecklistEmpty>
-            ) : (
-              <S.ChecklistGroup>
-                {names.map((name) => (
-                  <S.ChecklistRow key={name}>
-                    <input
-                      type="checkbox"
-                      checked={selected.length === 0 || selected.includes(name)}
-                      onChange={() => onToggleName(name)}
-                    />
-                    {name}
-                  </S.ChecklistRow>
-                ))}
-              </S.ChecklistGroup>
-            )}
-          </S.ModalSection>
-        </S.ModalBody>
-      </S.Modal>
-    </S.ModalBackdrop>
+    <Modal onClose={onClose}>
+      <S.ModalHeader>
+        <S.ModalTitle>{title}</S.ModalTitle>
+        <IconButton aria-label={title} onClick={onClose}>
+          <FontAwesomeIcon icon={faXmark} />
+        </IconButton>
+      </S.ModalHeader>
+      <S.ModalBody>
+        <S.MasterToggleRow>
+          <S.MasterToggleLabel>{showLabel}</S.MasterToggleLabel>
+          <S.Switch type="button" $checked={active} aria-pressed={active} onClick={onToggleActive} />
+        </S.MasterToggleRow>
+        <S.ModalSection>
+          {names.length === 0 ? (
+            <S.ChecklistEmpty>{emptyMessage}</S.ChecklistEmpty>
+          ) : (
+            <S.ChecklistGroup>
+              {names.map((name) => (
+                <S.ChecklistRow key={name}>
+                  <input
+                    type="checkbox"
+                    checked={selected.length === 0 || selected.includes(name)}
+                    onChange={() => onToggleName(name)}
+                  />
+                  {name}
+                </S.ChecklistRow>
+              ))}
+            </S.ChecklistGroup>
+          )}
+        </S.ModalSection>
+      </S.ModalBody>
+    </Modal>
   )
 }
 
@@ -1625,22 +1624,26 @@ export function MapPage() {
       )}
       {!directionsPanelOpen && (
         <>
-          <S.LayersButton
-            type="button"
-            $active={drawerOpen}
-            aria-label={t('map.layers')}
-            onClick={() => setDrawerOpen(true)}
-          >
-            <FontAwesomeIcon icon={faLayerGroup} />
-          </S.LayersButton>
-          <S.DirectionsButton
-            type="button"
-            $active={directionsPanelOpen}
-            aria-label={t('map.directions.button')}
-            onClick={() => setDirectionsPanelOpen(true)}
-          >
-            <FontAwesomeIcon icon={faRoute} />
-          </S.DirectionsButton>
+          <S.LayersButtonSlot>
+            <IconButton
+              size="lg"
+              aria-pressed={drawerOpen}
+              aria-label={t('map.layers')}
+              onClick={() => setDrawerOpen(true)}
+            >
+              <FontAwesomeIcon icon={faLayerGroup} />
+            </IconButton>
+          </S.LayersButtonSlot>
+          <S.DirectionsButtonSlot>
+            <IconButton
+              size="lg"
+              aria-pressed={directionsPanelOpen}
+              aria-label={t('map.directions.button')}
+              onClick={() => setDirectionsPanelOpen(true)}
+            >
+              <FontAwesomeIcon icon={faRoute} />
+            </IconButton>
+          </S.DirectionsButtonSlot>
         </>
       )}
 
@@ -1856,32 +1859,32 @@ export function MapPage() {
       )}
 
       {!directionsPanelOpen && <S.BusButtonRow>
-        <S.BusButton
-          type="button"
-          $active={busPrefs.panelOpen}
+        <IconButton
+          size="lg"
+          aria-pressed={busPrefs.panelOpen}
           aria-label={t('map.legend.bus')}
           onClick={() => busPrefs.setPanelOpen(!busPrefs.panelOpen)}
         >
           <FontAwesomeIcon icon={faBus} />
-        </S.BusButton>
+        </IconButton>
         {busPrefs.panelOpen && (
           <>
-            <S.BusBulkButton
-              type="button"
+            <IconButton
+              size="lg"
               aria-label={t('map.bus.allOn')}
               title={t('map.bus.allOn')}
               onClick={() => busPrefs.setDisabledRoutes([])}
             >
               <FontAwesomeIcon icon={faEye} />
-            </S.BusBulkButton>
-            <S.BusBulkButton
-              type="button"
+            </IconButton>
+            <IconButton
+              size="lg"
               aria-label={t('map.bus.allOff')}
               title={t('map.bus.allOff')}
               onClick={() => busPrefs.setDisabledRoutes(busRoutes.map((route) => route.name))}
             >
               <FontAwesomeIcon icon={faEyeSlash} />
-            </S.BusBulkButton>
+            </IconButton>
           </>
         )}
       </S.BusButtonRow>}
@@ -1930,58 +1933,56 @@ export function MapPage() {
         ))}
 
       {busSettingsOpen && (
-        <S.ModalBackdrop onClick={() => setBusSettingsOpen(false)}>
-          <S.Modal onClick={(event) => event.stopPropagation()}>
-            <S.ModalHeader>
-              <S.ModalTitle>{t('map.legend.bus')}</S.ModalTitle>
-              <IconButton aria-label={t('map.legend.bus')} onClick={() => setBusSettingsOpen(false)}>
-                <FontAwesomeIcon icon={faXmark} />
-              </IconButton>
-            </S.ModalHeader>
-            <S.ModalBody>
-              <S.MasterToggleRow>
-                <S.MasterToggleLabel>{t('map.showLayer')}</S.MasterToggleLabel>
-                <S.Switch
-                  type="button"
-                  $checked={!busPrefs.hideAll}
-                  aria-pressed={!busPrefs.hideAll}
-                  onClick={() => busPrefs.setHideAll(!busPrefs.hideAll)}
-                />
-              </S.MasterToggleRow>
-              <S.MasterToggleRow>
-                <S.MasterToggleLabel>{t('map.bus.operatingOnly')}</S.MasterToggleLabel>
-                <S.Switch
-                  type="button"
-                  $checked={busPrefs.operatingOnly}
-                  aria-pressed={busPrefs.operatingOnly}
-                  onClick={() => busPrefs.setOperatingOnly(!busPrefs.operatingOnly)}
-                />
-              </S.MasterToggleRow>
-              <S.ModalSection>
-                <S.ModalSectionTitle>{t('map.bus.perRoute')}</S.ModalSectionTitle>
-                {busRoutes.length === 0 ? (
-                  <S.ChecklistEmpty>{t('map.noRoutesYet')}</S.ChecklistEmpty>
-                ) : (
-                  <S.ChecklistGroup>
-                    {[...busRoutes]
-                      .sort((a, b) => a.name.localeCompare(b.name))
-                      .map((route) => (
-                        <S.ChecklistRow key={route.name}>
-                          <input
-                            type="checkbox"
-                            checked={!busPrefs.disabledRoutes.includes(route.name)}
-                            onChange={() => busPrefs.toggleRoute(route.name)}
-                          />
-                          <S.LayerChipIcon $background={route.color}>{route.code}</S.LayerChipIcon>
-                          {route.name}
-                        </S.ChecklistRow>
-                      ))}
-                  </S.ChecklistGroup>
-                )}
-              </S.ModalSection>
-            </S.ModalBody>
-          </S.Modal>
-        </S.ModalBackdrop>
+        <Modal onClose={() => setBusSettingsOpen(false)}>
+          <S.ModalHeader>
+            <S.ModalTitle>{t('map.legend.bus')}</S.ModalTitle>
+            <IconButton aria-label={t('map.legend.bus')} onClick={() => setBusSettingsOpen(false)}>
+              <FontAwesomeIcon icon={faXmark} />
+            </IconButton>
+          </S.ModalHeader>
+          <S.ModalBody>
+            <S.MasterToggleRow>
+              <S.MasterToggleLabel>{t('map.showLayer')}</S.MasterToggleLabel>
+              <S.Switch
+                type="button"
+                $checked={!busPrefs.hideAll}
+                aria-pressed={!busPrefs.hideAll}
+                onClick={() => busPrefs.setHideAll(!busPrefs.hideAll)}
+              />
+            </S.MasterToggleRow>
+            <S.MasterToggleRow>
+              <S.MasterToggleLabel>{t('map.bus.operatingOnly')}</S.MasterToggleLabel>
+              <S.Switch
+                type="button"
+                $checked={busPrefs.operatingOnly}
+                aria-pressed={busPrefs.operatingOnly}
+                onClick={() => busPrefs.setOperatingOnly(!busPrefs.operatingOnly)}
+              />
+            </S.MasterToggleRow>
+            <S.ModalSection>
+              <S.ModalSectionTitle>{t('map.bus.perRoute')}</S.ModalSectionTitle>
+              {busRoutes.length === 0 ? (
+                <S.ChecklistEmpty>{t('map.noRoutesYet')}</S.ChecklistEmpty>
+              ) : (
+                <S.ChecklistGroup>
+                  {[...busRoutes]
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((route) => (
+                      <S.ChecklistRow key={route.name}>
+                        <input
+                          type="checkbox"
+                          checked={!busPrefs.disabledRoutes.includes(route.name)}
+                          onChange={() => busPrefs.toggleRoute(route.name)}
+                        />
+                        <S.LayerChipIcon $background={route.color}>{route.code}</S.LayerChipIcon>
+                        {route.name}
+                      </S.ChecklistRow>
+                    ))}
+                </S.ChecklistGroup>
+              )}
+            </S.ModalSection>
+          </S.ModalBody>
+        </Modal>
       )}
 
       {drawerOpen && (
@@ -2081,64 +2082,62 @@ export function MapPage() {
       )}
 
       {activeModal === 'housing' && (
-        <S.ModalBackdrop onClick={() => setActiveModal(null)}>
-          <S.Modal onClick={(event) => event.stopPropagation()}>
-            <S.ModalHeader>
-              <S.ModalTitle>{t('map.legend.housing')}</S.ModalTitle>
-              <IconButton aria-label={t('map.legend.housing')} onClick={() => setActiveModal(null)}>
-                <FontAwesomeIcon icon={faXmark} />
-              </IconButton>
-            </S.ModalHeader>
-            <S.ModalBody>
-              <S.MasterToggleRow>
-                <S.MasterToggleLabel>{t('map.showLayer')}</S.MasterToggleLabel>
-                <S.Switch
-                  type="button"
-                  $checked={visible.housing}
-                  aria-pressed={visible.housing}
-                  onClick={() => toggleLayer('housing')}
-                />
-              </S.MasterToggleRow>
-              <S.ModalSection>
-                <S.ModalSectionTitle>{t('map.myDorm')}</S.ModalSectionTitle>
-                <Input
-                  list="dawghub-housing-names"
-                  placeholder={t('map.myDormPlaceholder')}
-                  value={dormInputValue}
-                  onChange={(event) => setDormInputValue(event.target.value)}
-                />
-                <datalist id="dawghub-housing-names">
-                  {housingBuildingNames.map((name) => (
-                    <option key={name} value={name} />
-                  ))}
-                </datalist>
+        <Modal onClose={() => setActiveModal(null)}>
+          <S.ModalHeader>
+            <S.ModalTitle>{t('map.legend.housing')}</S.ModalTitle>
+            <IconButton aria-label={t('map.legend.housing')} onClick={() => setActiveModal(null)}>
+              <FontAwesomeIcon icon={faXmark} />
+            </IconButton>
+          </S.ModalHeader>
+          <S.ModalBody>
+            <S.MasterToggleRow>
+              <S.MasterToggleLabel>{t('map.showLayer')}</S.MasterToggleLabel>
+              <S.Switch
+                type="button"
+                $checked={visible.housing}
+                aria-pressed={visible.housing}
+                onClick={() => toggleLayer('housing')}
+              />
+            </S.MasterToggleRow>
+            <S.ModalSection>
+              <S.ModalSectionTitle>{t('map.myDorm')}</S.ModalSectionTitle>
+              <Input
+                list="dawghub-housing-names"
+                placeholder={t('map.myDormPlaceholder')}
+                value={dormInputValue}
+                onChange={(event) => setDormInputValue(event.target.value)}
+              />
+              <datalist id="dawghub-housing-names">
+                {housingBuildingNames.map((name) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
+              <Button
+                type="button"
+                disabled={!housingBuildingNames.includes(dormInputValue)}
+                onClick={() => {
+                  mapActionsRef.current?.setMyDorm(dormInputValue)
+                  setActiveModal(null)
+                }}
+              >
+                {t('schedule.save')}
+              </Button>
+              {myDormBuilding && (
                 <Button
                   type="button"
-                  disabled={!housingBuildingNames.includes(dormInputValue)}
+                  variant="secondary"
                   onClick={() => {
-                    mapActionsRef.current?.setMyDorm(dormInputValue)
+                    mapActionsRef.current?.setMyDorm(null)
+                    setDormInputValue('')
                     setActiveModal(null)
                   }}
                 >
-                  {t('schedule.save')}
+                  {t('map.myDormSet')}
                 </Button>
-                {myDormBuilding && (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={() => {
-                      mapActionsRef.current?.setMyDorm(null)
-                      setDormInputValue('')
-                      setActiveModal(null)
-                    }}
-                  >
-                    {t('map.myDormSet')}
-                  </Button>
-                )}
-              </S.ModalSection>
-            </S.ModalBody>
-          </S.Modal>
-        </S.ModalBackdrop>
+              )}
+            </S.ModalSection>
+          </S.ModalBody>
+        </Modal>
       )}
     </S.Root>
   )

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Page, PageTitle } from '../../design-system/Page/Page'
 import { Logo } from '../../design-system/Brand/Logo'
+import { SegmentedControl } from '../../design-system/SegmentedControl/SegmentedControl'
 import { useTheme, type Theme } from '../../app/ThemeContext'
 import { BusDataDebugPanel } from './BusDataDebugPanel'
 import { S } from './SettingsPage.style'
@@ -14,15 +15,15 @@ export function SettingsPage({ userEmail, onSignOut }: SettingsPageProps) {
   const { t, i18n } = useTranslation()
   const { theme, setTheme } = useTheme()
 
-  const languages = [
-    { code: 'ko', labelKey: 'settings.languageKorean' },
-    { code: 'en', labelKey: 'settings.languageEnglish' },
+  const languageOptions = [
+    { value: 'ko', label: t('settings.languageKorean') },
+    { value: 'en', label: t('settings.languageEnglish') },
   ] as const
 
-  const themes: { value: Theme; labelKey: string }[] = [
-    { value: 'system', labelKey: 'settings.themeSystem' },
-    { value: 'light', labelKey: 'settings.themeLight' },
-    { value: 'dark', labelKey: 'settings.themeDark' },
+  const themeOptions: { value: Theme; label: string }[] = [
+    { value: 'system', label: t('settings.themeSystem') },
+    { value: 'light', label: t('settings.themeLight') },
+    { value: 'dark', label: t('settings.themeDark') },
   ]
 
   return (
@@ -45,33 +46,15 @@ export function SettingsPage({ userEmail, onSignOut }: SettingsPageProps) {
         <S.Card>
           <S.Row>
             <S.RowLabel>{t('settings.language')}</S.RowLabel>
-            <S.Segmented>
-              {languages.map((lang) => (
-                <S.SegmentButton
-                  key={lang.code}
-                  type="button"
-                  $active={i18n.language === lang.code}
-                  onClick={() => i18n.changeLanguage(lang.code)}
-                >
-                  {t(lang.labelKey)}
-                </S.SegmentButton>
-              ))}
-            </S.Segmented>
+            <SegmentedControl
+              options={languageOptions}
+              value={i18n.language as 'ko' | 'en'}
+              onChange={(code) => i18n.changeLanguage(code)}
+            />
           </S.Row>
           <S.Row>
             <S.RowLabel>{t('settings.theme')}</S.RowLabel>
-            <S.Segmented>
-              {themes.map((option) => (
-                <S.SegmentButton
-                  key={option.value}
-                  type="button"
-                  $active={theme === option.value}
-                  onClick={() => setTheme(option.value)}
-                >
-                  {t(option.labelKey)}
-                </S.SegmentButton>
-              ))}
-            </S.Segmented>
+            <SegmentedControl options={themeOptions} value={theme} onChange={setTheme} />
           </S.Row>
         </S.Card>
       </S.Section>

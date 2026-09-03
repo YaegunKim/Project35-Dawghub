@@ -5,6 +5,7 @@ import { radius } from '../../design-system/radius'
 import { shadow } from '../../design-system/shadow'
 import { spacing } from '../../design-system/spacing'
 import { motion } from '../../design-system/motion'
+import { zIndex } from '../../design-system/zIndex'
 
 const fadeIn = keyframes`
   from { opacity: 0; }
@@ -36,30 +37,12 @@ export const S = {
     position: absolute;
     inset: 0;
   `,
-  LayersButton: styled.button<{ $active: boolean }>`
+  // Positioning-only wrapper — the button's own visuals come from IconButton size="lg".
+  LayersButtonSlot: styled.div`
     position: absolute;
     top: ${spacing.base};
     right: ${spacing.base};
-    z-index: 1000;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: ${radius.pill};
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: ${({ $active }) => ($active ? 'var(--accent)' : 'var(--text)')};
-    font-size: 18px;
-    box-shadow: ${shadow.floating};
-    cursor: pointer;
-    transition:
-      color ${motion.duration.fast} ${motion.easing.standard},
-      transform ${motion.duration.fast} ${motion.easing.standard};
-
-    &:active {
-      transform: scale(0.94);
-    }
+    z-index: ${zIndex.overlay};
   `,
   // Standalone equivalent of DirectionsPickToast for pick-mode flows that aren't nested
   // inside DirectionsTopBar (e.g. Schedule's "set location" — see the 'return' pickingFor
@@ -70,7 +53,7 @@ export const S = {
     top: max(${spacing.base}, env(safe-area-inset-top));
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1050;
+    z-index: ${zIndex.overlay + 50};
     display: flex;
     align-items: center;
     gap: ${spacing.sm};
@@ -99,58 +82,16 @@ export const S = {
     position: absolute;
     top: ${spacing.base};
     left: ${spacing.base};
-    z-index: 1000;
+    z-index: ${zIndex.overlay};
     display: flex;
     align-items: center;
     gap: ${spacing.sm};
-  `,
-  BusButton: styled.button<{ $active: boolean }>`
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-    border-radius: ${radius.pill};
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: ${({ $active }) => ($active ? 'var(--accent)' : 'var(--text)')};
-    font-size: 18px;
-    box-shadow: ${shadow.floating};
-    cursor: pointer;
-    transition:
-      color ${motion.duration.fast} ${motion.easing.standard},
-      transform ${motion.duration.fast} ${motion.easing.standard};
-
-    &:active {
-      transform: scale(0.94);
-    }
-  `,
-  BusBulkButton: styled.button`
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-    border-radius: ${radius.pill};
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    font-size: 16px;
-    box-shadow: ${shadow.floating};
-    cursor: pointer;
-    transition: transform ${motion.duration.fast} ${motion.easing.standard};
-
-    &:active {
-      transform: scale(0.94);
-    }
   `,
   BusPanel: styled.div`
     position: absolute;
     top: calc(${spacing.base} + 44px + ${spacing.sm});
     left: ${spacing.base};
-    z-index: 1000;
+    z-index: ${zIndex.overlay};
     width: 44px;
     display: flex;
     flex-direction: column;
@@ -217,7 +158,7 @@ export const S = {
   DrawerBackdrop: styled.div`
     position: fixed;
     inset: 0;
-    z-index: 1100;
+    z-index: ${zIndex.drawer};
     background: rgba(0, 0, 0, 0.4);
     animation: ${fadeIn} ${motion.duration.base} ${motion.easing.standard};
   `,
@@ -226,7 +167,7 @@ export const S = {
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 1101;
+    z-index: ${zIndex.drawer + 1};
     width: min(340px, 88vw);
     display: flex;
     flex-direction: column;
@@ -295,28 +236,6 @@ export const S = {
     flex-shrink: 0;
     color: var(--text-muted);
     font-size: 13px;
-  `,
-  ModalBackdrop: styled.div`
-    position: fixed;
-    inset: 0;
-    z-index: 1200;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: ${spacing.base};
-    background: rgba(0, 0, 0, 0.5);
-    animation: ${fadeIn} ${motion.duration.fast} ${motion.easing.standard};
-  `,
-  Modal: styled.div`
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    max-width: 380px;
-    max-height: 80vh;
-    border-radius: ${radius.lg};
-    background: var(--bg);
-    box-shadow: ${shadow.modal};
-    overflow: hidden;
   `,
   ModalHeader: styled.div`
     display: flex;
@@ -444,30 +363,11 @@ export const S = {
     background: ${({ $background }) => $background};
     flex-shrink: 0;
   `,
-  DirectionsButton: styled.button<{ $active: boolean }>`
+  DirectionsButtonSlot: styled.div`
     position: absolute;
     top: calc(${spacing.base} + 44px + ${spacing.sm});
     right: ${spacing.base};
-    z-index: 1000;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: ${radius.pill};
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: ${({ $active }) => ($active ? 'var(--accent)' : 'var(--text)')};
-    font-size: 18px;
-    box-shadow: ${shadow.floating};
-    cursor: pointer;
-    transition:
-      color ${motion.duration.fast} ${motion.easing.standard},
-      transform ${motion.duration.fast} ${motion.easing.standard};
-
-    &:active {
-      transform: scale(0.94);
-    }
+    z-index: ${zIndex.overlay};
   `,
   // Docked full-width across the top of the map, like Google Maps' search bar — the
   // origin/destination inputs need to stay reachable while the user pans/zooms to pick a
@@ -481,7 +381,7 @@ export const S = {
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1050;
+    z-index: ${zIndex.overlay + 50};
     display: flex;
     flex-direction: column;
     gap: ${spacing.sm};
@@ -500,7 +400,7 @@ export const S = {
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 1050;
+    z-index: ${zIndex.overlay + 50};
     max-height: 45vh;
     display: flex;
     flex-direction: column;
@@ -652,7 +552,7 @@ export const S = {
     left: 50%;
     transform: translateX(-50%);
     margin-top: ${spacing.sm};
-    z-index: 1050;
+    z-index: ${zIndex.overlay + 50};
     display: flex;
     align-items: center;
     gap: ${spacing.sm};

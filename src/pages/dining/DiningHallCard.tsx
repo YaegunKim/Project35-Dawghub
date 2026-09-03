@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { faChevronDown, faStar, faThumbtack } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { Badge } from '../../design-system/Badge/Badge'
 import { IconButton } from '../../design-system/IconButton/IconButton'
 import { Skeleton } from '../../design-system/Skeleton/Skeleton'
 import { client } from '../../lib/amplifyClient'
@@ -111,10 +112,7 @@ export function DiningHallCard({ hall, mealType, isFavorite, onToggleFavorite }:
           {nextOpen && <S.NextOpen>{formatNextOpenLabel(t, nextOpen)}</S.NextOpen>}
         </S.HeaderText>
         <S.HeaderActions>
-          <S.StatusBadge $open={openNow}>
-            <S.StatusDot $open={openNow} />
-            {t(openNow ? 'dining.open' : 'dining.closed')}
-          </S.StatusBadge>
+          <Badge variant={openNow ? 'success' : 'danger'}>{t(openNow ? 'dining.open' : 'dining.closed')}</Badge>
           <IconButton
             aria-label={t(isFavorite ? 'dining.favoriteRemove' : 'dining.favoriteAdd')}
             aria-pressed={isFavorite}

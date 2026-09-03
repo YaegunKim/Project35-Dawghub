@@ -2,6 +2,7 @@ import styled from '@emotion/styled'
 import { NavLink } from 'react-router-dom'
 import { radius } from '../../design-system/radius'
 import { motion } from '../../design-system/motion'
+import { zIndex } from '../../design-system/zIndex'
 
 export const S = {
   Shell: styled.div`
@@ -108,7 +109,7 @@ export const S = {
   BottomNav: styled.nav`
     position: sticky;
     bottom: 0;
-    z-index: 10;
+    z-index: ${zIndex.chrome};
     display: flex;
     justify-content: space-around;
     align-items: center;

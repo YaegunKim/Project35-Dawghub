@@ -49,27 +49,6 @@ export const S = {
     text-overflow: ellipsis;
     white-space: nowrap;
   `,
-  Segmented: styled.div`
-    display: inline-flex;
-    padding: 2px;
-    background: var(--bg-elevated);
-    border-radius: ${radius.pill};
-    flex-shrink: 0;
-  `,
-  SegmentButton: styled.button<{ $active: boolean }>`
-    padding: 6px 12px;
-    border: none;
-    border-radius: ${radius.pill};
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-    transition:
-      background-color ${motion.duration.fast} ${motion.easing.standard},
-      color ${motion.duration.fast} ${motion.easing.standard};
-    background: ${({ $active }) => ($active ? 'var(--accent)' : 'transparent')};
-    color: ${({ $active }) => ($active ? 'var(--accent-contrast)' : 'var(--text-muted)')};
-  `,
   AboutRow: styled.div`
     display: flex;
     align-items: center;
