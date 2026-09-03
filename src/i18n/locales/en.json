@@ -47,7 +47,15 @@
     "comments": "Comments",
     "commentPlaceholder": "Write a comment...",
     "commentSubmit": "Comment",
-    "noComments": "No comments yet."
+    "noComments": "No comments yet.",
+    "notFound": "This page couldn't be found.",
+    "loadError": "Couldn't load posts.",
+    "loadErrorPost": "Couldn't load this post.",
+    "retry": "Retry",
+    "postFailed": "Couldn't post — try again.",
+    "postValidation": "Please fill in both a title and a message.",
+    "commentFailed": "Couldn't post your comment — try again.",
+    "commentValidation": "Please write a comment first."
   },
   "schedule": {
     "courseCode": "Course code (e.g. CSCI 4300)",
@@ -97,7 +105,10 @@
       "FRI": "Fri",
       "SAT": "Sat",
       "SUN": "Sun"
-    }
+    },
+    "deletedToast": "Removed {{course}}.",
+    "undo": "Undo",
+    "deleteFailed": "Couldn't remove the class — try again."
   },
   "map": {
     "placeholder": "Live UGA bus locations",
@@ -184,7 +195,8 @@
     "scheduleTitle": "{{email}}'s schedule",
     "scheduleTitleGeneric": "Friend's schedule",
     "scheduleLoading": "Loading schedule...",
-    "scheduleEmpty": "This friend hasn't added any classes yet."
+    "scheduleEmpty": "This friend hasn't added any classes yet.",
+    "actionFailed": "Couldn't complete that — try again."
   },
   "dining": {
     "halls": {

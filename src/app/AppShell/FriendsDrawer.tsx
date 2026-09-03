@@ -10,6 +10,7 @@ import { Button } from '../../design-system/Button/Button'
 import { IconButton } from '../../design-system/IconButton/IconButton'
 import { Skeleton } from '../../design-system/Skeleton/Skeleton'
 import { EmptyState } from '../../design-system/EmptyState/EmptyState'
+import { useToast } from '../../design-system/Toast/Toast'
 import { client } from '../../lib/amplifyClient'
 import { FRIENDSHIPS_KEY } from '../../lib/queryKeys'
 import type { Schema } from '../../../amplify/data/resource'
@@ -23,10 +24,12 @@ export function FriendsDrawer() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { showToast } = useToast()
   const [open, setOpen] = useState(false)
   const [emailInput, setEmailInput] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
+  const [pendingId, setPendingId] = useState<string | null>(null)
 
   const { data: me } = useQuery({
     queryKey: CURRENT_USER_KEY,
@@ -72,14 +75,25 @@ export function FriendsDrawer() {
     )
   }
 
-  async function handleAccept(f: Friendship) {
-    const res = await client.models.Friendship.update({ id: f.id, status: 'ACCEPTED' })
-    if (res.data) replaceInCache(res.data)
+  async function respondToRequest(f: Friendship, status: 'ACCEPTED' | 'DECLINED') {
+    setPendingId(f.id)
+    try {
+      const res = await client.models.Friendship.update({ id: f.id, status })
+      if (res.errors?.length || !res.data) throw new Error('Friendship.update failed')
+      replaceInCache(res.data)
+    } catch {
+      showToast({ message: t('friends.actionFailed'), variant: 'danger' })
+    } finally {
+      setPendingId(null)
+    }
   }
 
-  async function handleDecline(f: Friendship) {
-    const res = await client.models.Friendship.update({ id: f.id, status: 'DECLINED' })
-    if (res.data) replaceInCache(res.data)
+  function handleAccept(f: Friendship) {
+    return respondToRequest(f, 'ACCEPTED')
+  }
+
+  function handleDecline(f: Friendship) {
+    return respondToRequest(f, 'DECLINED')
   }
 
   async function handleAddFriend(e: FormEvent) {
@@ -168,10 +182,18 @@ export function FriendsDrawer() {
                           <S.DrawerRowSubtitle>{t('friends.incomingRequest')}</S.DrawerRowSubtitle>
                         </S.DrawerRowText>
                         <S.PendingActions>
-                          <IconButton aria-label={t('friends.accept')} onClick={() => handleAccept(f)}>
+                          <IconButton
+                            aria-label={t('friends.accept')}
+                            disabled={pendingId === f.id}
+                            onClick={() => handleAccept(f)}
+                          >
                             <FontAwesomeIcon icon={faCheck} />
                           </IconButton>
-                          <IconButton aria-label={t('friends.decline')} onClick={() => handleDecline(f)}>
+                          <IconButton
+                            aria-label={t('friends.decline')}
+                            disabled={pendingId === f.id}
+                            onClick={() => handleDecline(f)}
+                          >
                             <FontAwesomeIcon icon={faXmark} />
                           </IconButton>
                         </S.PendingActions>

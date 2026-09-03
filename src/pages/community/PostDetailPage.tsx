@@ -8,6 +8,7 @@ import { EmptyState } from '../../design-system/EmptyState/EmptyState'
 import { BackLink } from '../../design-system/BackLink/BackLink'
 import { Page } from '../../design-system/Page/Page'
 import { Skeleton } from '../../design-system/Skeleton/Skeleton'
+import { useToast } from '../../design-system/Toast/Toast'
 import { client } from '../../lib/amplifyClient'
 import type { Schema } from '../../../amplify/data/resource'
 import { S } from './PostDetailPage.style'
@@ -18,9 +19,17 @@ export function PostDetailPage() {
   const { boardId, postId } = useParams<{ boardId: string; postId: string }>()
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const { showToast } = useToast()
   const [body, setBody] = useState('')
+  const [validationError, setValidationError] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-  const { data: post, isLoading: postLoading } = useQuery({
+  const {
+    data: post,
+    isLoading: postLoading,
+    isError: postIsError,
+    refetch: refetchPost,
+  } = useQuery({
     queryKey: ['post', postId],
     queryFn: async () => {
       const { data } = await client.models.Post.get({ id: postId! })
@@ -29,7 +38,12 @@ export function PostDetailPage() {
     enabled: !!postId,
   })
 
-  const { data: comments = [], isLoading: commentsLoading } = useQuery({
+  const {
+    data: comments = [],
+    isLoading: commentsLoading,
+    isError: commentsIsError,
+    refetch: refetchComments,
+  } = useQuery({
     queryKey: ['comments', postId],
     queryFn: async () => {
       const { data } = await client.models.Comment.list({ filter: { postId: { eq: postId! } } })
@@ -42,13 +56,23 @@ export function PostDetailPage() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    if (!postId || !body.trim()) return
-
-    const { data } = await client.models.Comment.create({ postId, body })
-    if (data) {
-      queryClient.setQueryData<Comment[]>(['comments', postId], (prev) => [...(prev ?? []), data])
+    if (!postId) return
+    if (!body.trim()) {
+      setValidationError(true)
+      return
     }
-    setBody('')
+    setValidationError(false)
+    setSubmitting(true)
+    try {
+      const { data, errors } = await client.models.Comment.create({ postId, body })
+      if (errors?.length || !data) throw new Error('Comment.create failed')
+      queryClient.setQueryData<Comment[]>(['comments', postId], (prev) => [...(prev ?? []), data])
+      setBody('')
+    } catch {
+      showToast({ message: t('community.commentFailed'), variant: 'danger' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (loading) {
@@ -70,7 +94,29 @@ export function PostDetailPage() {
       </Page>
     )
   }
-  if (!post) return null
+
+  if (postIsError) {
+    return (
+      <Page>
+        <BackLink to={`/community/${boardId}`}>{t('community.back')}</BackLink>
+        <S.ErrorActions>
+          <EmptyState>{t('community.loadErrorPost')}</EmptyState>
+          <Button size="sm" variant="secondary" onClick={() => refetchPost()}>
+            {t('community.retry')}
+          </Button>
+        </S.ErrorActions>
+      </Page>
+    )
+  }
+
+  if (!post) {
+    return (
+      <Page>
+        <BackLink to={`/community/${boardId}`}>{t('community.back')}</BackLink>
+        <EmptyState>{t('community.notFound')}</EmptyState>
+      </Page>
+    )
+  }
 
   return (
     <Page>
@@ -92,10 +138,20 @@ export function PostDetailPage() {
             value={body}
             onChange={(event) => setBody(event.target.value)}
           />
-          <Button type="submit">{t('community.commentSubmit')}</Button>
+          {validationError && <S.FieldError>{t('community.commentValidation')}</S.FieldError>}
+          <Button type="submit" loading={submitting}>
+            {t('community.commentSubmit')}
+          </Button>
         </S.Form>
 
-        {comments.length === 0 ? (
+        {commentsIsError ? (
+          <S.ErrorActions>
+            <EmptyState>{t('community.loadError')}</EmptyState>
+            <Button size="sm" variant="secondary" onClick={() => refetchComments()}>
+              {t('community.retry')}
+            </Button>
+          </S.ErrorActions>
+        ) : comments.length === 0 ? (
           <EmptyState>{t('community.noComments')}</EmptyState>
         ) : (
           <S.CommentList>

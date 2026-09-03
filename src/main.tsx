@@ -7,6 +7,7 @@ import '@aws-amplify/ui-react/styles.css'
 import { App } from './app/App'
 import { ThemeProvider } from './app/ThemeContext'
 import { GlobalStyles } from './design-system/GlobalStyles'
+import { ToastProvider } from './design-system/Toast/Toast'
 import { queryClient } from './lib/queryClient'
 import outputs from '../amplify_outputs.json'
 import './i18n'
@@ -19,7 +20,9 @@ createRoot(document.getElementById('root')!).render(
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <GlobalStyles />
-          <App />
+          <ToastProvider>
+            <App />
+          </ToastProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </BrowserRouter>

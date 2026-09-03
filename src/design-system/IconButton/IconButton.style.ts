@@ -27,6 +27,11 @@ export const S = {
       ${focusRing}
     }
 
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
     ${({ $size }) =>
       $size === 'lg'
         ? `

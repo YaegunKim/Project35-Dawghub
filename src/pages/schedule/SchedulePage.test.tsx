@@ -1,10 +1,13 @@
-import { describe, expect, it, vi } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { screen } from '@testing-library/react'
 import { renderWithProviders } from '../../test/renderWithProviders'
 import { SchedulePage } from './SchedulePage'
 import type { Schema } from '../../../amplify/data/resource'
 
 type ClassEntry = Schema['ClassEntry']['type']
+
+let deleteImpl: () => Promise<{ errors?: unknown[] }>
 
 // ClassEntry/Friendship are allow.owner()/allow.authenticated() models — real Amplify calls
 // need a signed-in Cognito session to even attempt the request (Playwright's network-boundary
@@ -16,8 +19,8 @@ vi.mock('../../lib/amplifyClient', () => ({
     models: {
       ClassEntry: {
         list: vi.fn(async () => ({ data: mockEntries })),
-        create: vi.fn(),
-        delete: vi.fn(),
+        create: vi.fn(async (vars) => ({ data: { id: `restored-${Math.random()}`, ...vars } })),
+        delete: vi.fn(() => deleteImpl()),
       },
       Friendship: { list: vi.fn(async () => ({ data: [] })) },
     },
@@ -45,6 +48,46 @@ function entry(overrides: Partial<ClassEntry>): ClassEntry {
     ...overrides,
   } as ClassEntry
 }
+
+describe('SchedulePage delete + undo', () => {
+  beforeEach(() => {
+    deleteImpl = async () => ({})
+  })
+
+  it('removes the class immediately and offers an undo toast', async () => {
+    mockEntries = [entry({})]
+    renderWithProviders(<SchedulePage />)
+
+    await userEvent.click(await screen.findByText('CSCI4300'))
+    await userEvent.click(await screen.findByRole('button', { name: 'Remove class' }))
+
+    expect(screen.queryByText('CSCI4300')).not.toBeInTheDocument()
+    expect(await screen.findByText('Removed CSCI4300.')).toBeInTheDocument()
+  })
+
+  it('restores the class when Undo is clicked', async () => {
+    mockEntries = [entry({})]
+    renderWithProviders(<SchedulePage />)
+
+    await userEvent.click(await screen.findByText('CSCI4300'))
+    await userEvent.click(await screen.findByRole('button', { name: 'Remove class' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Undo' }))
+
+    expect(await screen.findByText('CSCI4300')).toBeInTheDocument()
+  })
+
+  it('rolls back and shows an error toast if the delete request fails', async () => {
+    deleteImpl = async () => ({ errors: [{ message: 'boom' }] })
+    mockEntries = [entry({})]
+    renderWithProviders(<SchedulePage />)
+
+    await userEvent.click(await screen.findByText('CSCI4300'))
+    await userEvent.click(await screen.findByRole('button', { name: 'Remove class' }))
+
+    expect(await screen.findByText("Couldn't remove the class — try again.")).toBeInTheDocument()
+    expect(await screen.findByText('CSCI4300')).toBeInTheDocument()
+  })
+})
 
 describe('SchedulePage grid layout', () => {
   it('renders a class block positioned at its start time (PX_PER_HOUR=56, default start hour=5)', async () => {

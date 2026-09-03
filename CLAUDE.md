@@ -62,7 +62,7 @@ src/
     GlobalStyles.tsx         #   - defines :root CSS variables (light/dark theme), the --font-body/--font-display bridge, data-theme overrides
     Brand/Logo.tsx           #   - original bulldog mark SVG component (for in-app rendering)
     Skeleton/Skeleton.tsx    #   - shimmer block that imitates the real layout while loading (width/height/radius props)
-    (Page, Card, Button, Input, Textarea, Select, IconButton, Badge, SegmentedControl, Modal, EmptyState, BackLink)
+    (Page, Card, Button, Input, Textarea, Select, IconButton, Badge, SegmentedControl, Modal, Toast, EmptyState, BackLink)
   app/ThemeContext.tsx      # Manual dark-mode switching (system/light/dark), persisted to localStorage `dawghub:theme`
   pages/
     community/  schedule/  map/  dining/  settings/    # Route-level pages (Page.tsx + Page.style.ts pairs; see ai/pages/ for details)

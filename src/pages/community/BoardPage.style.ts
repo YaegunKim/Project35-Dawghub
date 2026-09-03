@@ -1,5 +1,6 @@
 import styled from '@emotion/styled'
 import { Card, CardLink } from '../../design-system/Card/Card'
+import { state } from '../../design-system/colors'
 
 export const S = {
   SkeletonCard: styled(Card)`
@@ -15,6 +16,18 @@ export const S = {
     border-radius: 12px;
     border: 1px solid var(--border);
     background: var(--bg-elevated);
+  `,
+  FieldError: styled.p`
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: ${state.danger};
+  `,
+  ErrorActions: styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
   `,
   PostList: styled.div`
     display: flex;

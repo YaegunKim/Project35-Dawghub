@@ -12,6 +12,7 @@ import { IconButton } from '../../design-system/IconButton/IconButton'
 import { EmptyState } from '../../design-system/EmptyState/EmptyState'
 import { Modal } from '../../design-system/Modal/Modal'
 import { Skeleton } from '../../design-system/Skeleton/Skeleton'
+import { useToast } from '../../design-system/Toast/Toast'
 import { PageTitle } from '../../design-system/Page/Page'
 import { FriendsDrawer } from '../../app/AppShell/FriendsDrawer'
 import { client } from '../../lib/amplifyClient'
@@ -244,6 +245,7 @@ export function SchedulePage() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const routerLocation = useLocation()
+  const { showToast } = useToast()
   const { data: entries = [], isLoading: loading } = useQuery({
     queryKey: CLASS_ENTRIES_KEY,
     queryFn: async () => {
@@ -387,13 +389,56 @@ export function SchedulePage() {
     navigate('/map', { state: { pickIntent } satisfies MapLocationState })
   }
 
+  async function restoreDeletedEntries(
+    snapshot: Array<
+      Pick<ClassEntry, 'courseCode' | 'day' | 'startTime' | 'endTime'> & {
+        title?: string
+        location?: string
+        locationLat?: number
+        locationLng?: number
+      }
+    >,
+  ) {
+    const created = await Promise.all(snapshot.map((entry) => client.models.ClassEntry.create(entry)))
+    const restored = created
+      .map((result) => result.data as ClassEntry | null)
+      .filter((data): data is ClassEntry => data != null)
+    queryClient.setQueryData<ClassEntry[]>(CLASS_ENTRIES_KEY, (prev) => [...(prev ?? []), ...restored])
+  }
+
   async function handleDelete(courseCode: string) {
     const toDelete = entries.filter((entry) => entry.courseCode === courseCode)
-    await Promise.all(toDelete.map((entry) => client.models.ClassEntry.delete({ id: entry.id })))
+    const snapshot = toDelete.map((entry) => ({
+      courseCode: entry.courseCode,
+      title: entry.title ?? undefined,
+      day: entry.day,
+      startTime: entry.startTime,
+      endTime: entry.endTime,
+      location: entry.location ?? undefined,
+      locationLat: entry.locationLat ?? undefined,
+      locationLng: entry.locationLng ?? undefined,
+    }))
+
+    // Optimistic removal for an immediate response; undo re-creates these entries (with new
+    // ids) instead of deferring the real delete — nothing in this app references a
+    // ClassEntry by id across a session, so that's simpler and just as correct.
     queryClient.setQueryData<ClassEntry[]>(CLASS_ENTRIES_KEY, (prev) =>
       (prev ?? []).filter((entry) => entry.courseCode !== courseCode),
     )
     setSelectedId(null)
+
+    const results = await Promise.all(toDelete.map((entry) => client.models.ClassEntry.delete({ id: entry.id })))
+    if (results.some((result) => result.errors?.length)) {
+      queryClient.setQueryData<ClassEntry[]>(CLASS_ENTRIES_KEY, (prev) => [...(prev ?? []), ...toDelete])
+      showToast({ message: t('schedule.deleteFailed'), variant: 'danger' })
+      return
+    }
+
+    showToast({
+      message: t('schedule.deletedToast', { course: courseCode }),
+      actionLabel: t('schedule.undo'),
+      onAction: () => restoreDeletedEntries(snapshot),
+    })
   }
 
   async function runSearch() {

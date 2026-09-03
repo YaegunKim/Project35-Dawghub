@@ -47,7 +47,15 @@
     "comments": "댓글",
     "commentPlaceholder": "댓글을 남겨보세요...",
     "commentSubmit": "댓글 작성",
-    "noComments": "아직 댓글이 없어요."
+    "noComments": "아직 댓글이 없어요.",
+    "notFound": "이 페이지를 찾을 수 없어요.",
+    "loadError": "게시글을 불러오지 못했어요.",
+    "loadErrorPost": "이 글을 불러오지 못했어요.",
+    "retry": "다시 시도",
+    "postFailed": "게시하지 못했어요 — 다시 시도해주세요.",
+    "postValidation": "제목과 내용을 모두 입력해주세요.",
+    "commentFailed": "댓글을 남기지 못했어요 — 다시 시도해주세요.",
+    "commentValidation": "댓글 내용을 입력해주세요."
   },
   "schedule": {
     "courseCode": "과목 코드 (예: CSCI 4300)",
@@ -97,7 +105,10 @@
       "FRI": "금",
       "SAT": "토",
       "SUN": "일"
-    }
+    },
+    "deletedToast": "{{course}} 삭제됨.",
+    "undo": "실행 취소",
+    "deleteFailed": "수업을 삭제하지 못했어요 — 다시 시도해주세요."
   },
   "map": {
     "placeholder": "UGA 버스 실시간 위치",
@@ -184,7 +195,8 @@
     "scheduleTitle": "{{email}}님의 시간표",
     "scheduleTitleGeneric": "친구의 시간표",
     "scheduleLoading": "시간표 불러오는 중...",
-    "scheduleEmpty": "이 친구는 아직 등록된 수업이 없어요."
+    "scheduleEmpty": "이 친구는 아직 등록된 수업이 없어요.",
+    "actionFailed": "처리하지 못했어요 — 다시 시도해주세요."
   },
   "dining": {
     "halls": {

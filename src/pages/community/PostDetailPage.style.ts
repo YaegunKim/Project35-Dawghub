@@ -1,7 +1,20 @@
 import styled from '@emotion/styled'
 import { Card } from '../../design-system/Card/Card'
+import { state } from '../../design-system/colors'
 
 export const S = {
+  FieldError: styled.p`
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: ${state.danger};
+  `,
+  ErrorActions: styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  `,
   PostCard: styled(Card)`
     display: flex;
     flex-direction: column;

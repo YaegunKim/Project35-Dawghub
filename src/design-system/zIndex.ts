@@ -10,4 +10,5 @@ export const zIndex = {
   overlay: 1000, // controls/toolbars floating over full-bleed content (e.g. the map)
   drawer: 1100, // slide-in side drawers and their backdrop
   modal: 1200, // centered modal dialogs — always topmost
+  toast: 1300, // action-feedback toasts — above even an open modal
 } as const

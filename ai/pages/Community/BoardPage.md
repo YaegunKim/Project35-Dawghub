@@ -17,7 +17,9 @@ Shows the list of posts for a specific board (General / Housing / Classes / Buy 
 ## Things to know
 
 - **The `boardId` in the URL (`general`/`housing`/`classes`/`buySell`/`events`) is converted to the `Post` `board` enum value via `BOARD_ENUM_MAP`.** To add a new board you must update all three of (1) the `board` enum in `amplify/data/resource.ts`, (2) `BOARD_ENUM_MAP`, (3) the `community.boards.*` keys in `ko.json` / `en.json`, then deploy with `pnpm sandbox:once --profile dawghub`.
-- **If `boardId` is invalid it just renders `null`** — there is no redirect and no error UI (no 404 page).
+- **Invalid `boardId` shows an `EmptyState` message** (`community.notFound`) instead of a blank page — fixed from an earlier `return null`. There is still no redirect, just an in-place message + the `BackLink`.
+- **Post creation now has real feedback**: the submit button uses `Button`'s `loading` state while the request is in flight, empty title/body shows an inline `S.FieldError` instead of silently no-opping, and a failed create shows a `useToast()` danger toast (`community.postFailed`) — the form is only cleared on success (previously it cleared unconditionally, which could make a failed post look like it succeeded).
+- **The post list now distinguishes "empty" from "failed to load"**: `useQuery`'s `isError` renders an `EmptyState` + a `Button size="sm" variant="secondary"` "Retry" (calling `refetch()`) instead of falling through to the same UI as a genuinely empty board.
 - **No sorting or pagination.** The order returned by `list()` is just the DynamoDB scan order, not by creation date (there is no sort key), and there is no `nextToken` handling, so only the first page (100 items by default) is shown.
 - **After writing a new post it is only optimistically prepended to local state**, so a refresh may show it back in the real DB order (which is not guaranteed to be by creation date) — this is tied to the missing-sort issue above.
 - **No author display.** `Post` has no author-name field and the owner is an implicit value used only for authorization, so there is currently no way to show "who wrote this" on screen.
