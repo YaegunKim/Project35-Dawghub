@@ -129,6 +129,84 @@ export const S = {
       font-variant-numeric: tabular-nums;
     }
   `,
+  DebugDataAgeNote: styled.div`
+    padding: 0 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+  `,
+  DebugRouteSelectRow: styled.div`
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px;
+  `,
+  DebugScheduleScroll: styled.div`
+    overflow-x: auto;
+    border-top: 1px solid var(--border);
+  `,
+  DebugScheduleGrid: styled.div`
+    display: grid;
+    grid-template-columns: minmax(140px, 1.5fr) repeat(7, minmax(52px, 1fr));
+    width: max-content;
+    min-width: 100%;
+  `,
+  DebugScheduleHeaderCell: styled.div`
+    padding: 8px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+
+    &:first-of-type {
+      text-align: left;
+      padding-left: 16px;
+    }
+  `,
+  DebugScheduleStopCell: styled.div`
+    padding: 8px 6px 8px 16px;
+    font-size: 12px;
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `,
+  DebugScheduleTimeCell: styled.div`
+    padding: 8px 6px;
+    font-size: 11px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  `,
+  DebugSegmentList: styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 4px 16px 12px;
+  `,
+  DebugSegmentRow: styled.div`
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    font-size: 12px;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--border);
+    }
+  `,
+  DebugSegmentLabel: styled.span`
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `,
+  DebugSegmentValue: styled.span`
+    flex-shrink: 0;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  `,
   DebugRefreshButton: styled.button`
     display: flex;
     align-items: center;

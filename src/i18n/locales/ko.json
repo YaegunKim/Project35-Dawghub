@@ -29,7 +29,12 @@
     "debugStops": "수집된 정류장",
     "debugEarliest": "가장 이른 기록",
     "debugLatest": "가장 최근 기록",
-    "debugRefresh": "새로고침"
+    "debugRefresh": "새로고침",
+    "debugRouteSelect": "노선",
+    "debugDataAge": "{{since}}부터 {{days}}일치 데이터 수집됨 — 더 쌓일수록 요일별 패턴이 정확해져요.",
+    "debugStopScheduleTitle": "요일별 평균 도착 시각",
+    "debugSegmentTitle": "구간별 평균 소요시간",
+    "debugNoSample": "데이터 부족"
   },
   "community": {
     "boards": {

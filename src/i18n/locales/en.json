@@ -29,7 +29,12 @@
     "debugStops": "Stops seen",
     "debugEarliest": "Earliest sample",
     "debugLatest": "Latest sample",
-    "debugRefresh": "Refresh"
+    "debugRefresh": "Refresh",
+    "debugRouteSelect": "Route",
+    "debugDataAge": "{{days}} days of data collected since {{since}} — weekday patterns get more reliable as more accumulates.",
+    "debugStopScheduleTitle": "Typical arrival time by weekday",
+    "debugSegmentTitle": "Typical time between stops",
+    "debugNoSample": "not enough data yet"
   },
   "community": {
     "boards": {
