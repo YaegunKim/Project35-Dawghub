@@ -172,7 +172,8 @@
       "navWalkToStop": "{{stop}}까지 도보",
       "navBoardBus": "{{route}} 탑승 → {{stop}}까지",
       "navWalkToDestination": "{{destination}}까지 도보",
-      "navTotalRemaining": "총 {{duration}}"
+      "navTotalRemaining": "총 {{duration}}",
+      "recenter": "내 위치로 다시 맞추기"
     }
   },
   "friends": {

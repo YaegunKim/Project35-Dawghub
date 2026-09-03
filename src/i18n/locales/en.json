@@ -172,7 +172,8 @@
       "navWalkToStop": "Walk to {{stop}}",
       "navBoardBus": "Take {{route}} to {{stop}}",
       "navWalkToDestination": "Walk to {{destination}}",
-      "navTotalRemaining": "{{duration}} total"
+      "navTotalRemaining": "{{duration}} total",
+      "recenter": "Re-center on my location"
     }
   },
   "friends": {

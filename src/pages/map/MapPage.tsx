@@ -402,6 +402,10 @@ export function MapPage() {
   const [currentUserLocation, setCurrentUserLocation] = useState<LatLng | null>(null)
   const [autoSearchPending, setAutoSearchPending] = useState(false)
   const [navigating, setNavigating] = useState(false)
+  // Whether the map should keep auto-panning to the user's GPS position while navigating.
+  // Dragging the map manually turns this off (see the `dragstart` listener) so the view
+  // doesn't keep snapping back to the user the instant they let go — Recenter turns it back on.
+  const [isFollowingUser, setIsFollowingUser] = useState(true)
   const [activeLegIndex, setActiveLegIndex] = useState(0)
   // Bumped once when the map effect's own fetchUgaBuildings() resolves, so the effect below
   // re-runs applyAcademicMarkers as soon as buildings are ready even if classEntriesQuery's
@@ -499,6 +503,7 @@ export function MapPage() {
   // whatever zoom level the user manually sets while navigating.
   useEffect(() => {
     if (!navigating) return
+    setIsFollowingUser(true)
     const map = mapRef.current
     if (map && currentUserLocation) {
       map.setView([currentUserLocation.lat, currentUserLocation.lng], Math.max(map.getZoom(), NAVIGATION_ZOOM))
@@ -507,9 +512,9 @@ export function MapPage() {
   }, [navigating])
 
   useEffect(() => {
-    if (!navigating || !currentUserLocation) return
+    if (!navigating || !currentUserLocation || !isFollowingUser) return
     mapRef.current?.panTo([currentUserLocation.lat, currentUserLocation.lng], { animate: true })
-  }, [navigating, currentUserLocation])
+  }, [navigating, currentUserLocation, isFollowingUser])
 
   // startDirectionsTo (triggered from a popup's Directions button) sets both points and
   // flips this flag in one go — it can't call handleGetDirections directly since it lives in
@@ -565,6 +570,10 @@ export function MapPage() {
     }
     updateZoomLabel()
     map.on('zoom', updateZoomLabel)
+
+    // See isFollowingUser's declaration — a manual drag (any time, not just while navigating;
+    // harmless when not navigating since nothing reads this flag then) pauses auto-recentering.
+    map.on('dragstart', () => setIsFollowingUser(false))
 
     let userMarker: L.Marker | null = null
     let accuracyCircle: L.Circle | null = null
@@ -1513,6 +1522,13 @@ export function MapPage() {
     setActiveLegIndex(0)
   }
 
+  function handleRecenter() {
+    setIsFollowingUser(true)
+    if (mapRef.current && currentUserLocation) {
+      mapRef.current.panTo([currentUserLocation.lat, currentUserLocation.lng], { animate: true })
+    }
+  }
+
   async function resolveDirectionsPoint(point: DirectionsPoint | null, inputValue: string): Promise<DirectionsPoint | null> {
     if (point) return point
     const trimmed = inputValue.trim()
@@ -1645,6 +1661,17 @@ export function MapPage() {
             </IconButton>
           </S.DirectionsButtonSlot>
         </>
+      )}
+
+      {/* Reuses LayersButtonSlot's top-right position — safe since Layers/Directions (above)
+          are only ever shown when directionsPanelOpen is false, and this only shows while
+          navigating (which implies directionsPanelOpen is true), so the two never overlap. */}
+      {navigating && !isFollowingUser && (
+        <S.LayersButtonSlot>
+          <IconButton size="lg" aria-label={t('map.directions.recenter')} onClick={handleRecenter}>
+            <FontAwesomeIcon icon={faLocationCrosshairs} />
+          </IconButton>
+        </S.LayersButtonSlot>
       )}
 
       {directionsPanelOpen && !navigating && (
