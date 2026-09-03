@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { computeSegmentStats, computeStopWeekdayStats, formatMinuteOfDay, type ArrivalRow } from './busStats'
+import {
+  computeSegmentStats,
+  computeStopWeekdayStats,
+  distinctAthensDates,
+  formatMinuteOfDay,
+  reconstructCycles,
+  type ArrivalRow,
+} from './busStats'
 
 const STOPS = [
   { id: 'A', name: 'Stop A' },
@@ -107,5 +114,81 @@ describe('computeSegmentStats', () => {
       ['A', 'B'],
       ['B', 'C'],
     ])
+  })
+})
+
+describe('reconstructCycles', () => {
+  // 2026-09-01T12:00:00Z is 8:00am Athens time, still 2026-09-01 locally.
+  it('reconstructs one lap from a forward pass through the stops', () => {
+    const rows: ArrivalRow[] = [
+      row({ busId: 'bus-1', stopId: 'A', arrivedAt: '2026-09-01T12:00:00.000Z' }),
+      row({ busId: 'bus-1', stopId: 'B', arrivedAt: '2026-09-01T12:05:00.000Z' }),
+      row({ busId: 'bus-1', stopId: 'C', arrivedAt: '2026-09-01T12:09:00.000Z' }),
+    ]
+    const cycles = reconstructCycles(rows, STOPS)
+    expect(cycles).toHaveLength(1)
+    expect(cycles[0]).toMatchObject({ busId: 'bus-1', date: '2026-09-01', stopMinutes: [8 * 60, 8 * 60 + 5, 8 * 60 + 9] })
+  })
+
+  it('starts a new cycle once the loop wraps back to an earlier stop', () => {
+    const rows: ArrivalRow[] = [
+      row({ busId: 'bus-1', stopId: 'A', arrivedAt: '2026-09-01T12:00:00.000Z' }),
+      row({ busId: 'bus-1', stopId: 'B', arrivedAt: '2026-09-01T12:05:00.000Z' }),
+      row({ busId: 'bus-1', stopId: 'C', arrivedAt: '2026-09-01T12:09:00.000Z' }),
+      // Wraps back to A — a second lap, not a continuation of the first.
+      row({ busId: 'bus-1', stopId: 'A', arrivedAt: '2026-09-01T12:30:00.000Z' }),
+      row({ busId: 'bus-1', stopId: 'B', arrivedAt: '2026-09-01T12:35:00.000Z' }),
+    ]
+    const cycles = reconstructCycles(rows, STOPS)
+    expect(cycles).toHaveLength(2)
+    expect(cycles[0].stopMinutes).toEqual([8 * 60, 8 * 60 + 5, 8 * 60 + 9])
+    expect(cycles[1].stopMinutes).toEqual([8 * 60 + 30, 8 * 60 + 35, null])
+  })
+
+  it('tolerates a skipped stop within one lap instead of splitting it', () => {
+    const rows: ArrivalRow[] = [
+      row({ busId: 'bus-1', stopId: 'A', arrivedAt: '2026-09-01T12:00:00.000Z' }),
+      row({ busId: 'bus-1', stopId: 'C', arrivedAt: '2026-09-01T12:09:00.000Z' }), // B missed by the poll
+    ]
+    const cycles = reconstructCycles(rows, STOPS)
+    expect(cycles).toHaveLength(1)
+    expect(cycles[0].stopMinutes).toEqual([8 * 60, null, 8 * 60 + 9])
+  })
+
+  it('splits into a new cycle when the gap between stops is implausibly long', () => {
+    const rows: ArrivalRow[] = [
+      row({ busId: 'bus-1', stopId: 'A', arrivedAt: '2026-09-01T12:00:00.000Z' }),
+      row({ busId: 'bus-1', stopId: 'B', arrivedAt: '2026-09-01T14:00:00.000Z' }), // 2 hours later
+    ]
+    const cycles = reconstructCycles(rows, STOPS)
+    // Each single-stop fragment is below MIN_STOPS_PER_CYCLE, so neither survives.
+    expect(cycles).toHaveLength(0)
+  })
+
+  it('collapses repeated pings at the same stop into a single arrival, keeping the first time', () => {
+    const rows: ArrivalRow[] = [
+      row({ busId: 'bus-1', stopId: 'A', arrivedAt: '2026-09-01T12:00:00.000Z' }),
+      row({ busId: 'bus-1', stopId: 'A', arrivedAt: '2026-09-01T12:01:00.000Z' }), // still dwelling
+      row({ busId: 'bus-1', stopId: 'B', arrivedAt: '2026-09-01T12:05:00.000Z' }),
+    ]
+    const cycles = reconstructCycles(rows, STOPS)
+    expect(cycles).toHaveLength(1)
+    expect(cycles[0].stopMinutes).toEqual([8 * 60, 8 * 60 + 5, null])
+  })
+
+  it('drops fragments with fewer than 2 recorded stops', () => {
+    const rows: ArrivalRow[] = [row({ busId: 'bus-1', stopId: 'A', arrivedAt: '2026-09-01T12:00:00.000Z' })]
+    expect(reconstructCycles(rows, STOPS)).toHaveLength(0)
+  })
+})
+
+describe('distinctAthensDates', () => {
+  it('returns deduplicated Athens-local dates, most recent first', () => {
+    const rows: ArrivalRow[] = [
+      row({ arrivedAt: '2026-09-01T12:00:00.000Z' }),
+      row({ arrivedAt: '2026-09-01T13:00:00.000Z' }),
+      row({ arrivedAt: '2026-09-02T12:00:00.000Z' }),
+    ]
+    expect(distinctAthensDates(rows)).toEqual(['2026-09-02', '2026-09-01'])
   })
 })

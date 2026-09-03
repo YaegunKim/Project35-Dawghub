@@ -5,7 +5,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronDown, faChevronUp, faRotate } from '@fortawesome/free-solid-svg-icons'
 import { Select } from '../../design-system/Select/Select'
 import { client } from '../../lib/amplifyClient'
-import { computeSegmentStats, computeStopWeekdayStats, formatMinuteOfDay, type ArrivalRow } from '../../lib/busStats'
+import {
+  computeSegmentStats,
+  computeStopWeekdayStats,
+  distinctAthensDates,
+  formatMinuteOfDay,
+  reconstructCycles,
+  type ArrivalRow,
+} from '../../lib/busStats'
 import { WEEKDAY_I18N_KEYS } from '../../lib/dining'
 import { fetchUgaRoutesAndStops, getBusRouteCode } from '../../lib/passio'
 import { S } from './SettingsPage.style'
@@ -73,6 +80,7 @@ export function BusDataDebugPanel() {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null)
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
 
   const statsQuery = useQuery({
     queryKey: ['busStopArrivalStats'],
@@ -102,6 +110,13 @@ export function BusDataDebugPanel() {
 
   const stopStats = useMemo(() => computeStopWeekdayStats(routeRows, routeStopOrder), [routeRows, routeStopOrder])
   const segmentStats = useMemo(() => computeSegmentStats(routeRows, routeStopOrder), [routeRows, routeStopOrder])
+
+  const availableDates = useMemo(() => distinctAthensDates(routeRows), [routeRows])
+  const activeDate = selectedDate ?? availableDates[0] ?? null
+
+  const allCycles = useMemo(() => reconstructCycles(routeRows, routeStopOrder), [routeRows, routeStopOrder])
+  const cyclesForDate = useMemo(() => allCycles.filter((cycle) => cycle.date === activeDate), [allCycles, activeDate])
+  const busesForDate = useMemo(() => new Set(cyclesForDate.map((cycle) => cycle.busId)).size, [cyclesForDate])
 
   return (
     <S.Section>
@@ -161,7 +176,13 @@ export function BusDataDebugPanel() {
 
                 <S.DebugRouteSelectRow>
                   <S.RowLabel>{t('settings.debugRouteSelect')}</S.RowLabel>
-                  <Select value={activeRoute ?? ''} onChange={(event) => setSelectedRoute(event.target.value)}>
+                  <Select
+                    value={activeRoute ?? ''}
+                    onChange={(event) => {
+                      setSelectedRoute(event.target.value)
+                      setSelectedDate(null)
+                    }}
+                  >
                     {statsQuery.data.routeCounts.map(({ routeName }) => (
                       <option key={routeName} value={routeName}>
                         {getBusRouteCode(routeName) ? `${getBusRouteCode(routeName)} · ${routeName}` : routeName}
@@ -209,6 +230,56 @@ export function BusDataDebugPanel() {
                         </S.DebugSegmentRow>
                       ))}
                     </S.DebugSegmentList>
+
+                    <S.SectionTitle>{t('settings.debugCyclesTitle')}</S.SectionTitle>
+                    {availableDates.length > 0 && activeDate && (
+                      <>
+                        <S.DebugRouteSelectRow>
+                          <S.RowLabel>{t('settings.debugDateSelect')}</S.RowLabel>
+                          <Select value={activeDate} onChange={(event) => setSelectedDate(event.target.value)}>
+                            {availableDates.map((date) => (
+                              <option key={date} value={date}>
+                                {date}
+                              </option>
+                            ))}
+                          </Select>
+                        </S.DebugRouteSelectRow>
+
+                        <S.DebugCycleSummary>
+                          {t('settings.debugCycleSummary', { count: cyclesForDate.length, buses: busesForDate, date: activeDate })}
+                        </S.DebugCycleSummary>
+
+                        <S.DebugScheduleScroll>
+                          <S.DebugCycleGrid $columnCount={cyclesForDate.length}>
+                            <S.DebugScheduleHeaderCell />
+                            {cyclesForDate.map((cycle, index) => {
+                              const startMinute = cycle.stopMinutes.find((m) => m != null) ?? null
+                              return (
+                                <S.DebugScheduleHeaderCell
+                                  key={`${cycle.busId}-${index}`}
+                                  title={`Bus ${cycle.busId}${startMinute == null ? '' : `, started ${formatMinuteOfDay(startMinute)}`}`}
+                                >
+                                  {startMinute == null ? '—' : formatMinuteOfDay(startMinute)}
+                                </S.DebugScheduleHeaderCell>
+                              )
+                            })}
+                            {routeStopOrder.map((stop, stopIndex) => (
+                              <Fragment key={stop.id}>
+                                <S.DebugScheduleStopCell title={stop.name}>{stop.name}</S.DebugScheduleStopCell>
+                                {cyclesForDate.map((cycle, index) => {
+                                  const minute = cycle.stopMinutes[stopIndex]
+                                  return (
+                                    <S.DebugScheduleTimeCell key={`${cycle.busId}-${index}-${stop.id}`}>
+                                      {minute == null ? '—' : formatMinuteOfDay(minute)}
+                                    </S.DebugScheduleTimeCell>
+                                  )
+                                })}
+                              </Fragment>
+                            ))}
+                          </S.DebugCycleGrid>
+                        </S.DebugScheduleScroll>
+                      </>
+                    )}
                   </>
                 )}
               </>

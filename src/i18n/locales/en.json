@@ -34,7 +34,10 @@
     "debugDataAge": "{{days}} days of data collected since {{since}} — weekday patterns get more reliable as more accumulates.",
     "debugStopScheduleTitle": "Typical arrival time by weekday",
     "debugSegmentTitle": "Typical time between stops",
-    "debugNoSample": "not enough data yet"
+    "debugNoSample": "not enough data yet",
+    "debugDateSelect": "Date",
+    "debugCyclesTitle": "Individual cycles (bus laps)",
+    "debugCycleSummary": "{{count}} cycles across {{buses}} buses on {{date}}"
   },
   "community": {
     "boards": {

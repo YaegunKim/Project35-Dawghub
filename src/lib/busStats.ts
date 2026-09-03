@@ -33,11 +33,29 @@ export type SegmentStats = {
   sampleCount: number
 }
 
+// One bus's single loop around the route — e.g. "left the first stop at 7:05am, here's what
+// time it hit every other stop along the way." A route is serviced by several vehicles
+// running concurrently (confirmed from the live data — e.g. 18 distinct busIds cycling
+// Central East over 2.5 days), so "cycles in a day" means the combined count across every
+// vehicle, not one bus's own trip count.
+export type Cycle = {
+  busId: string
+  date: string // Athens-local YYYY-MM-DD of the cycle's first recorded stop
+  // Aligned to the stopOrder array passed to reconstructCycles — null where this particular
+  // lap never recorded that stop (missed by the 1-minute poll, or the lap ended early).
+  stopMinutes: (number | null)[]
+}
+
 const MIN_SAMPLES = 3
 // A bus that takes longer than this between two adjacent stops almost certainly wasn't
 // actually running straight between them (traffic-jam outlier, or the same busId picked up
 // a different, unrelated run) — excluded rather than skewing the median.
 const MAX_SEGMENT_GAP_MINUTES = 40
+// Same cap reused as "still the same lap" vs. "this bus went out of service / picked up an
+// unrelated run in between" when reconstructing individual cycles.
+const MAX_CYCLE_GAP_MINUTES = MAX_SEGMENT_GAP_MINUTES
+// A "cycle" that only ever recorded one stop isn't really a reconstructed lap, just noise.
+const MIN_STOPS_PER_CYCLE = 2
 
 const ATHENS_TIME_ZONE = 'America/New_York'
 
@@ -52,6 +70,14 @@ const TIME_FORMATTER = new Intl.DateTimeFormat('en-US', {
   hourCycle: 'h23',
 })
 
+// en-CA's format is plain YYYY-MM-DD, which is also what sorts correctly as a plain string.
+const DATE_FORMATTER = new Intl.DateTimeFormat('en-CA', {
+  timeZone: ATHENS_TIME_ZONE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+})
+
 const WEEKDAY_SHORT_TO_INDEX: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }
 
 function athensDayOfWeek(iso: string): number {
@@ -62,6 +88,10 @@ function athensDayOfWeek(iso: string): number {
 function athensMinuteOfDay(iso: string): number {
   const [hour, minute] = TIME_FORMATTER.format(new Date(iso)).split(':').map(Number)
   return hour * 60 + minute
+}
+
+function athensDateString(iso: string): string {
+  return DATE_FORMATTER.format(new Date(iso))
 }
 
 function median(values: number[]): number | null {
@@ -149,4 +179,78 @@ export function computeSegmentStats(rows: ArrivalRow[], stopOrder: RouteStop[]):
     })
   }
   return segments
+}
+
+// Splits each bus's arrival history into individual laps — a new cycle starts whenever the
+// next stop doesn't represent forward progress along the route (index went backward or
+// stayed put — the loop wrapped around to the start, or restarted) or the gap since the last
+// recorded stop is implausibly long (the bus went out of service, or this busId picked up an
+// unrelated run — see the module comment on cross-route busId reuse). Unlike
+// computeSegmentStats, a skipped stop doesn't end the cycle by itself — coverage is uneven
+// enough on some routes that requiring every single stop would fragment almost every lap.
+export function reconstructCycles(rows: ArrivalRow[], stopOrder: RouteStop[]): Cycle[] {
+  const stopIndex = new Map(stopOrder.map((stop, index) => [stop.id, index]))
+
+  const byBus = new Map<string, ArrivalRow[]>()
+  rows.forEach((row) => {
+    if (!stopIndex.has(row.stopId)) return
+    const list = byBus.get(row.busId) ?? []
+    list.push(row)
+    byBus.set(row.busId, list)
+  })
+
+  const cycles: Cycle[] = []
+
+  byBus.forEach((busRows, busId) => {
+    const sorted = [...busRows].sort((a, b) => a.arrivedAt.localeCompare(b.arrivedAt))
+    let stopMinutes: (number | null)[] | null = null
+    let firstIso = ''
+    let lastIndex = -1
+    let lastTimeMs = 0
+
+    const flush = () => {
+      if (stopMinutes && stopMinutes.filter((m) => m != null).length >= MIN_STOPS_PER_CYCLE) {
+        cycles.push({ busId, date: athensDateString(firstIso), stopMinutes })
+      }
+      stopMinutes = null
+      lastIndex = -1
+    }
+
+    sorted.forEach((row) => {
+      const index = stopIndex.get(row.stopId)!
+      const timeMs = new Date(row.arrivedAt).getTime()
+
+      if (stopMinutes && index === lastIndex) {
+        // Still dwelling at the same stop across polls — not a new stop reached.
+        lastTimeMs = timeMs
+        return
+      }
+
+      const gapMinutes = stopMinutes ? (timeMs - lastTimeMs) / 60_000 : 0
+      const continuesForward = stopMinutes != null && index > lastIndex && gapMinutes <= MAX_CYCLE_GAP_MINUTES
+
+      if (!continuesForward) {
+        flush()
+        stopMinutes = stopOrder.map(() => null)
+        firstIso = row.arrivedAt
+      }
+
+      stopMinutes![index] = athensMinuteOfDay(row.arrivedAt)
+      lastIndex = index
+      lastTimeMs = timeMs
+    })
+
+    flush()
+  })
+
+  return cycles.sort((a, b) => {
+    if (a.date !== b.date) return a.date.localeCompare(b.date)
+    const aStart = a.stopMinutes.find((m) => m != null) ?? 0
+    const bStart = b.stopMinutes.find((m) => m != null) ?? 0
+    return aStart - bStart
+  })
+}
+
+export function distinctAthensDates(rows: ArrivalRow[]): string[] {
+  return Array.from(new Set(rows.map((row) => athensDateString(row.arrivedAt)))).sort((a, b) => b.localeCompare(a))
 }

@@ -34,7 +34,10 @@
     "debugDataAge": "{{since}}부터 {{days}}일치 데이터 수집됨 — 더 쌓일수록 요일별 패턴이 정확해져요.",
     "debugStopScheduleTitle": "요일별 평균 도착 시각",
     "debugSegmentTitle": "구간별 평균 소요시간",
-    "debugNoSample": "데이터 부족"
+    "debugNoSample": "데이터 부족",
+    "debugDateSelect": "날짜",
+    "debugCyclesTitle": "개별 사이클(버스 운행 회차)",
+    "debugCycleSummary": "{{date}} — 버스 {{buses}}대, 총 {{count}}회 운행"
   },
   "community": {
     "boards": {

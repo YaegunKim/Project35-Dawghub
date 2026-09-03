@@ -57,14 +57,21 @@ describe('BusDataDebugPanel', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Bus data collection' }))
 
-    expect(await screen.findByText('Stop A')).toBeInTheDocument()
-    expect(screen.getByText('Stop B')).toBeInTheDocument()
+    // "Stop A"/"Stop B" each appear twice now: once in the weekday grid, once in the
+    // per-cycle grid below it.
+    expect(await screen.findAllByText('Stop A')).toHaveLength(2)
+    expect(screen.getAllByText('Stop B')).toHaveLength(2)
 
-    // Monday column should show the median arrival time for Stop A (11:00am).
-    expect(screen.getByText('11:00am')).toBeInTheDocument()
+    // Monday column should show the median arrival time for Stop A (11:00am) — the exact
+    // median/cycle-time computation itself is covered by busStats.test.ts; here we only check
+    // it made it into the DOM at all. It shows up several times (weekday grid + per-cycle grid).
+    expect(screen.getAllByText('11:00am').length).toBeGreaterThan(0)
 
     // Segment A -> B: 5 minutes, 3 samples.
     expect(screen.getByText('Stop A → Stop B')).toBeInTheDocument()
     expect(screen.getByText('~5 min (3)')).toBeInTheDocument()
+
+    // All 3 buses complete an A -> B lap on the same Athens-local date.
+    expect(screen.getByText('3 cycles across 3 buses on 2026-08-31')).toBeInTheDocument()
   })
 })

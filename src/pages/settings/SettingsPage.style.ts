@@ -150,6 +150,17 @@ export const S = {
     width: max-content;
     min-width: 100%;
   `,
+  DebugCycleGrid: styled.div<{ $columnCount: number }>`
+    display: grid;
+    grid-template-columns: minmax(140px, 1.5fr) repeat(${({ $columnCount }) => $columnCount}, minmax(56px, auto));
+    width: max-content;
+    min-width: 100%;
+  `,
+  DebugCycleSummary: styled.div`
+    padding: 8px 16px 0;
+    font-size: 12px;
+    color: var(--text-muted);
+  `,
   DebugScheduleHeaderCell: styled.div`
     padding: 8px 6px;
     font-size: 11px;
