@@ -8,9 +8,9 @@ import { client } from '../../lib/amplifyClient'
 import {
   computeSegmentStats,
   computeStopWeekdayStats,
-  distinctAthensDates,
   formatMinuteOfDay,
   reconstructCycles,
+  weekdayIndexFromDateString,
   type ArrivalRow,
 } from '../../lib/busStats'
 import { WEEKDAY_I18N_KEYS } from '../../lib/dining'
@@ -80,7 +80,7 @@ export function BusDataDebugPanel() {
   const { t } = useTranslation()
   const [expanded, setExpanded] = useState(false)
   const [selectedRoute, setSelectedRoute] = useState<string | null>(null)
-  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [selectedWeekday, setSelectedWeekday] = useState<number | null>(null)
 
   const statsQuery = useQuery({
     queryKey: ['busStopArrivalStats'],
@@ -111,12 +111,23 @@ export function BusDataDebugPanel() {
   const stopStats = useMemo(() => computeStopWeekdayStats(routeRows, routeStopOrder), [routeRows, routeStopOrder])
   const segmentStats = useMemo(() => computeSegmentStats(routeRows, routeStopOrder), [routeRows, routeStopOrder])
 
-  const availableDates = useMemo(() => distinctAthensDates(routeRows), [routeRows])
-  const activeDate = selectedDate ?? availableDates[0] ?? null
-
   const allCycles = useMemo(() => reconstructCycles(routeRows, routeStopOrder), [routeRows, routeStopOrder])
-  const cyclesForDate = useMemo(() => allCycles.filter((cycle) => cycle.date === activeDate), [allCycles, activeDate])
-  const busesForDate = useMemo(() => new Set(cyclesForDate.map((cycle) => cycle.busId)).size, [cyclesForDate])
+
+  // Every individual cycle collected so far, grouped by weekday rather than by one specific
+  // calendar date — this is what actually answers "for each bus, each stop, each weekday,
+  // what time did it arrive," since a weekday-level median would hide the real spread across
+  // however many same-weekday instances have been logged.
+  const availableWeekdays = useMemo(
+    () => Array.from(new Set(allCycles.map((cycle) => weekdayIndexFromDateString(cycle.date)))).sort((a, b) => a - b),
+    [allCycles],
+  )
+  const activeWeekday = selectedWeekday ?? availableWeekdays[0] ?? null
+
+  const cyclesForWeekday = useMemo(
+    () => allCycles.filter((cycle) => weekdayIndexFromDateString(cycle.date) === activeWeekday),
+    [allCycles, activeWeekday],
+  )
+  const busesForWeekday = useMemo(() => new Set(cyclesForWeekday.map((cycle) => cycle.busId)).size, [cyclesForWeekday])
 
   return (
     <S.Section>
@@ -180,7 +191,7 @@ export function BusDataDebugPanel() {
                     value={activeRoute ?? ''}
                     onChange={(event) => {
                       setSelectedRoute(event.target.value)
-                      setSelectedDate(null)
+                      setSelectedWeekday(null)
                     }}
                   >
                     {statsQuery.data.routeCounts.map(({ routeName }) => (
@@ -232,33 +243,39 @@ export function BusDataDebugPanel() {
                     </S.DebugSegmentList>
 
                     <S.SectionTitle>{t('settings.debugCyclesTitle')}</S.SectionTitle>
-                    {availableDates.length > 0 && activeDate && (
+                    {availableWeekdays.length > 0 && activeWeekday != null && (
                       <>
                         <S.DebugRouteSelectRow>
-                          <S.RowLabel>{t('settings.debugDateSelect')}</S.RowLabel>
-                          <Select value={activeDate} onChange={(event) => setSelectedDate(event.target.value)}>
-                            {availableDates.map((date) => (
-                              <option key={date} value={date}>
-                                {date}
+                          <S.RowLabel>{t('settings.debugWeekdaySelect')}</S.RowLabel>
+                          <Select value={activeWeekday} onChange={(event) => setSelectedWeekday(Number(event.target.value))}>
+                            {availableWeekdays.map((day) => (
+                              <option key={day} value={day}>
+                                {t(`schedule.days.${WEEKDAY_I18N_KEYS[day]}`)}
                               </option>
                             ))}
                           </Select>
                         </S.DebugRouteSelectRow>
 
                         <S.DebugCycleSummary>
-                          {t('settings.debugCycleSummary', { count: cyclesForDate.length, buses: busesForDate, date: activeDate })}
+                          {t('settings.debugCycleSummary', {
+                            count: cyclesForWeekday.length,
+                            buses: busesForWeekday,
+                            weekday: t(`schedule.days.${WEEKDAY_I18N_KEYS[activeWeekday]}`),
+                          })}
                         </S.DebugCycleSummary>
 
                         <S.DebugScheduleScroll>
-                          <S.DebugCycleGrid $columnCount={cyclesForDate.length}>
+                          <S.DebugCycleGrid $columnCount={cyclesForWeekday.length}>
                             <S.DebugScheduleHeaderCell />
-                            {cyclesForDate.map((cycle, index) => {
+                            {cyclesForWeekday.map((cycle, index) => {
                               const startMinute = cycle.stopMinutes.find((m) => m != null) ?? null
                               return (
                                 <S.DebugScheduleHeaderCell
-                                  key={`${cycle.busId}-${index}`}
-                                  title={`Bus ${cycle.busId}${startMinute == null ? '' : `, started ${formatMinuteOfDay(startMinute)}`}`}
+                                  key={`${cycle.busId}-${cycle.date}-${index}`}
+                                  title={`Bus ${cycle.busId}, ${cycle.date}${startMinute == null ? '' : `, started ${formatMinuteOfDay(startMinute)}`}`}
                                 >
+                                  {cycle.date.slice(5).replace('-', '/')}
+                                  <br />
                                   {startMinute == null ? '—' : formatMinuteOfDay(startMinute)}
                                 </S.DebugScheduleHeaderCell>
                               )
@@ -266,10 +283,10 @@ export function BusDataDebugPanel() {
                             {routeStopOrder.map((stop, stopIndex) => (
                               <Fragment key={stop.id}>
                                 <S.DebugScheduleStopCell title={stop.name}>{stop.name}</S.DebugScheduleStopCell>
-                                {cyclesForDate.map((cycle, index) => {
+                                {cyclesForWeekday.map((cycle, index) => {
                                   const minute = cycle.stopMinutes[stopIndex]
                                   return (
-                                    <S.DebugScheduleTimeCell key={`${cycle.busId}-${index}-${stop.id}`}>
+                                    <S.DebugScheduleTimeCell key={`${cycle.busId}-${cycle.date}-${index}-${stop.id}`}>
                                       {minute == null ? '—' : formatMinuteOfDay(minute)}
                                     </S.DebugScheduleTimeCell>
                                   )

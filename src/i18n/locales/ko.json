@@ -35,9 +35,9 @@
     "debugStopScheduleTitle": "요일별 평균 도착 시각",
     "debugSegmentTitle": "구간별 평균 소요시간",
     "debugNoSample": "데이터 부족",
-    "debugDateSelect": "날짜",
+    "debugWeekdaySelect": "요일",
     "debugCyclesTitle": "개별 사이클(버스 운행 회차)",
-    "debugCycleSummary": "{{date}} — 버스 {{buses}}대, 총 {{count}}회 운행"
+    "debugCycleSummary": "지금까지 수집된 {{weekday}} 기록 — 버스 {{buses}}대, 총 {{count}}회 운행"
   },
   "community": {
     "boards": {

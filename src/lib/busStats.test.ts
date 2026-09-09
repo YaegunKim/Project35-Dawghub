@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest'
 import {
   computeSegmentStats,
   computeStopWeekdayStats,
-  distinctAthensDates,
   formatMinuteOfDay,
   reconstructCycles,
+  weekdayIndexFromDateString,
   type ArrivalRow,
 } from './busStats'
 
@@ -182,13 +182,9 @@ describe('reconstructCycles', () => {
   })
 })
 
-describe('distinctAthensDates', () => {
-  it('returns deduplicated Athens-local dates, most recent first', () => {
-    const rows: ArrivalRow[] = [
-      row({ arrivedAt: '2026-09-01T12:00:00.000Z' }),
-      row({ arrivedAt: '2026-09-01T13:00:00.000Z' }),
-      row({ arrivedAt: '2026-09-02T12:00:00.000Z' }),
-    ]
-    expect(distinctAthensDates(rows)).toEqual(['2026-09-02', '2026-09-01'])
+describe('weekdayIndexFromDateString', () => {
+  it('reads the weekday of a plain YYYY-MM-DD date regardless of the caller time zone', () => {
+    expect(weekdayIndexFromDateString('2026-08-31')).toBe(1) // Monday
+    expect(weekdayIndexFromDateString('2026-09-01')).toBe(2) // Tuesday
   })
 })

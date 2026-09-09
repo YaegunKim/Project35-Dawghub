@@ -94,6 +94,15 @@ function athensDateString(iso: string): string {
   return DATE_FORMATTER.format(new Date(iso))
 }
 
+// A Cycle's `date` is already a plain Athens-local YYYY-MM-DD calendar date (not an instant),
+// so recovering its weekday must not run back through a timezone conversion — parsing it as
+// UTC and reading getUTCDay() back out gives the same weekday no matter what timezone the
+// viewer's browser is in.
+export function weekdayIndexFromDateString(date: string): number {
+  const [year, month, day] = date.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day)).getUTCDay()
+}
+
 function median(values: number[]): number | null {
   if (values.length < MIN_SAMPLES) return null
   const sorted = [...values].sort((a, b) => a - b)
@@ -249,8 +258,4 @@ export function reconstructCycles(rows: ArrivalRow[], stopOrder: RouteStop[]): C
     const bStart = b.stopMinutes.find((m) => m != null) ?? 0
     return aStart - bStart
   })
-}
-
-export function distinctAthensDates(rows: ArrivalRow[]): string[] {
-  return Array.from(new Set(rows.map((row) => athensDateString(row.arrivedAt)))).sort((a, b) => b.localeCompare(a))
 }

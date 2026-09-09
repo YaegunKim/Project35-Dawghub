@@ -71,7 +71,7 @@ describe('BusDataDebugPanel', () => {
     expect(screen.getByText('Stop A → Stop B')).toBeInTheDocument()
     expect(screen.getByText('~5 min (3)')).toBeInTheDocument()
 
-    // All 3 buses complete an A -> B lap on the same Athens-local date.
-    expect(screen.getByText('3 cycles across 3 buses on 2026-08-31')).toBeInTheDocument()
+    // All 3 buses complete an A -> B lap, and all of it falls on a Monday so far.
+    expect(screen.getByText('3 cycles across 3 buses recorded on Mondays so far')).toBeInTheDocument()
   })
 })

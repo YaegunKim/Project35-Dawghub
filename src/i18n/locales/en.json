@@ -35,9 +35,9 @@
     "debugStopScheduleTitle": "Typical arrival time by weekday",
     "debugSegmentTitle": "Typical time between stops",
     "debugNoSample": "not enough data yet",
-    "debugDateSelect": "Date",
+    "debugWeekdaySelect": "Weekday",
     "debugCyclesTitle": "Individual cycles (bus laps)",
-    "debugCycleSummary": "{{count}} cycles across {{buses}} buses on {{date}}"
+    "debugCycleSummary": "{{count}} cycles across {{buses}} buses recorded on {{weekday}}s so far"
   },
   "community": {
     "boards": {
