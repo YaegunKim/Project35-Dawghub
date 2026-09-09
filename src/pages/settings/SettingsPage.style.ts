@@ -2,6 +2,7 @@ import styled from '@emotion/styled'
 import { radius } from '../../design-system/radius'
 import { motion } from '../../design-system/motion'
 import { state } from '../../design-system/colors'
+import { zIndex } from '../../design-system/zIndex'
 
 export const S = {
   Section: styled.section`
@@ -169,14 +170,25 @@ export const S = {
     text-align: center;
     border-bottom: 1px solid var(--border);
 
+    /* The blank corner cell is always the first one rendered — pin it in place so it stays
+       visible (instead of scrolling away with the rest of the header row) while the grid's
+       data columns scroll horizontally underneath it. */
     &:first-of-type {
+      position: sticky;
+      left: 0;
+      z-index: ${zIndex.raised};
       text-align: left;
       padding-left: 16px;
+      background: var(--bg);
     }
   `,
   DebugScheduleStopCell: styled.div`
+    position: sticky;
+    left: 0;
+    z-index: ${zIndex.raised};
     padding: 8px 6px 8px 16px;
     font-size: 12px;
+    background: var(--bg);
     border-bottom: 1px solid var(--border);
     overflow: hidden;
     text-overflow: ellipsis;
