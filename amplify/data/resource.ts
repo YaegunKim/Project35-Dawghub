@@ -9,12 +9,36 @@ import { findUserByEmailFn } from './find-user-by-email/resource'
 import { getFriendScheduleFn } from './get-friend-schedule/resource'
 
 const schema = a.schema({
+  // Board-specific fields below are all optional and only populated by the board that
+  // uses them (see ai/SPEC.md) — General/Housing/Classes/Events share this one model
+  // rather than one-per-board, since they're all fundamentally a title+body+comments
+  // discussion post with a few extra structured attributes layered on top. Buy & Sell
+  // is the exception (see MarketplaceListing below) — a listing's identity (price,
+  // photos, sold-status) and query pattern (filter by status/category, hide sold) is
+  // different in kind from a discussion feed, so it isn't just "Post with more fields."
   Post: a
     .model({
       board: a.enum(['GENERAL', 'HOUSING', 'CLASSES', 'BUY_SELL', 'EVENTS']),
       title: a.string().required(),
       body: a.string().required(),
       comments: a.hasMany('Comment', 'postId'),
+      // General: NOTICE | FREE_TALK | QNA | TIMETABLE. Housing: DORM_REVIEW | SUBLEASE | ROOMMATE_SEARCH.
+      category: a.string(),
+      // Classes only — validated client-side against searchUgaClasses results at post-creation time.
+      courseCode: a.string(),
+      // Housing DORM_REVIEW/SUBLEASE/ROOMMATE_SEARCH only — autocompleted from fetchUgaBuildings().
+      dormBuilding: a.string(),
+      // Housing SUBLEASE/ROOMMATE_SEARCH only.
+      moveInDate: a.date(),
+      moveOutDate: a.date(),
+      monthlyRent: a.float(),
+      // Events only.
+      eventDate: a.date(),
+      eventStartTime: a.string(),
+      eventEndTime: a.string(),
+      eventLocation: a.string(),
+      externalLink: a.url(),
+      tags: a.string().array(),
     })
     .authorization((allow) => [allow.owner(), allow.authenticated().to(['read'])]),
 
@@ -23,6 +47,19 @@ const schema = a.schema({
       postId: a.id().required(),
       post: a.belongsTo('Post', 'postId'),
       body: a.string().required(),
+    })
+    .authorization((allow) => [allow.owner(), allow.authenticated().to(['read'])]),
+
+  // A like on a Post — one row per (post, liker). The client sets `id` deterministically
+  // to `${postId}_${ownerIdentityHint}` at creation time (see src/lib/postLikes.ts) purely
+  // so "like" is naturally idempotent (create-if-absent, delete-to-unlike) without needing
+  // a separate composite-key secondary index just to check "did I already like this."
+  // likeCount is computed client-side from a list() query rather than a maintained
+  // aggregate field — General's like button is a lightweight, non-realtime signal, not a
+  // high-traffic counter that needs a streams-triggered aggregate.
+  PostLike: a
+    .model({
+      postId: a.id().required(),
     })
     .authorization((allow) => [allow.owner(), allow.authenticated().to(['read'])]),
 
