@@ -8,6 +8,7 @@ import { getFootballScheduleFn } from './get-football-schedule/resource'
 import { findUserByEmailFn } from './find-user-by-email/resource'
 import { getFriendScheduleFn } from './get-friend-schedule/resource'
 import { getCourseCatalogEntryFn } from './get-course-catalog-entry/resource'
+import { getThreadAnonLabelsFn } from './get-thread-anon-labels/resource'
 
 const schema = a.schema({
   // Board-specific fields below are all optional and only populated by the board that
@@ -306,6 +307,33 @@ const schema = a.schema({
     .returns(a.ref('CourseCatalogEntry'))
     .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(getCourseCatalogEntryFn)),
+
+  ThreadAnonLabel: a.customType({
+    commentId: a.string(),
+    // A plain ordinal (1, 2, 3, ...), not a pre-formatted string — the client renders
+    // it through i18n (e.g. "익명1" / "Anonymous 1") so the label stays translatable.
+    anonNumber: a.integer(),
+  }),
+
+  ThreadAnonLabelsResult: a.customType({
+    labels: a.ref('ThreadAnonLabel').array(),
+  }),
+
+  // Computes Everytime-style per-thread anonymous labels ("익명1", "익명2", ...) for every
+  // distinct commenter on a post, in order of first appearance. Deliberately NOT stored on
+  // Comment itself and NOT derivable client-side: a client only ever sees its own `owner`
+  // value on rows it can read, never enough to distinguish "commenter A twice" from
+  // "commenter A then B" across other users' rows. Instead this Lambda gets a scoped direct
+  // DynamoDB read grant on the Comment table (see backend.ts, same pattern as
+  // get-friend-schedule) and computes labels fresh on every call — cheap at this app's
+  // per-thread comment volume, and avoids ever writing/exposing a raw owner identity string
+  // to the client. See ai/TRD.md §4.5.
+  getThreadAnonLabels: a
+    .query()
+    .arguments({ postId: a.string().required() })
+    .returns(a.ref('ThreadAnonLabelsResult'))
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(getThreadAnonLabelsFn)),
 
   // Raw (bus, stop) proximity samples written every minute by log-bus-arrivals — one row
   // per poll a bus is within range of a stop, including repeats while it lingers. Building

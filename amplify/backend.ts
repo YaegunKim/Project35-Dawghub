@@ -6,6 +6,7 @@ import { storage } from './storage/resource'
 import { logBusArrivalsFn } from './data/log-bus-arrivals/resource'
 import { getFriendScheduleFn } from './data/get-friend-schedule/resource'
 import { findUserByEmailFn } from './data/find-user-by-email/resource'
+import { getThreadAnonLabelsFn } from './data/get-thread-anon-labels/resource'
 
 const backend = defineBackend({
   auth,
@@ -14,6 +15,7 @@ const backend = defineBackend({
   logBusArrivalsFn,
   getFriendScheduleFn,
   findUserByEmailFn,
+  getThreadAnonLabelsFn,
 })
 
 // log-bus-arrivals isn't wired to any query/mutation in the schema (it's schedule-triggered,
@@ -52,3 +54,14 @@ friendScheduleLambda.addEnvironment('FRIENDSHIP_TABLE_NAME', friendshipTable.tab
 const findUserByEmailLambda = backend.findUserByEmailFn.resources.lambda as LambdaFunction
 backend.auth.resources.userPool.grant(findUserByEmailLambda, 'cognito-idp:ListUsers')
 findUserByEmailLambda.addEnvironment('USERPOOL_ID', backend.auth.resources.userPool.userPoolId)
+
+// get-thread-anon-labels needs to read every commenter's `owner` value across an entire
+// thread to compute Everytime-style per-thread anonymous numbering (ai/TRD.md §4.5) — a
+// normal AppSync-authorized read only ever exposes the caller's own rows in that way, so
+// (same reasoning/pattern as get-friend-schedule above) grant this one Lambda's execution
+// role direct DynamoDB read access to the Comment table instead. It only ever returns a
+// derived ordinal, never the raw `owner` string, back to any client.
+const threadAnonLabelsLambda = backend.getThreadAnonLabelsFn.resources.lambda as LambdaFunction
+const commentTable = backend.data.resources.tables['Comment']
+commentTable.grantReadData(threadAnonLabelsLambda)
+threadAnonLabelsLambda.addEnvironment('COMMENT_TABLE_NAME', commentTable.tableName)
