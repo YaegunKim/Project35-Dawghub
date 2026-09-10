@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import 'maplibre-gl/dist/maplibre-gl.css'
+import '@maplibre/maplibre-gl-leaflet'
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png'
 import markerIcon from 'leaflet/dist/images/marker-icon.png'
 import markerShadow from 'leaflet/dist/images/marker-shadow.png'
@@ -40,12 +42,20 @@ import { Input } from '../../design-system/Input/Input'
 import { Modal } from '../../design-system/Modal/Modal'
 import { useFavorites } from '../../lib/useFavorites'
 import {
+  MAP_ATHENS_TRANSIT_FAVORITES_KEY,
   MAP_DINING_FAVORITES_KEY,
   MAP_GYM_FAVORITES_KEY,
   MAP_LIBRARY_FAVORITES_KEY,
   useBusLayerPrefs,
 } from '../../lib/mapLayerPrefs'
-import { fetchUgaBuses, fetchUgaRoutesAndStops, type PassioRoute } from '../../lib/passio'
+import {
+  computeStopArrivals,
+  fetchUgaBuses,
+  fetchUgaRoutesAndStops,
+  type PassioBus,
+  type PassioRoute,
+} from '../../lib/passio'
+import { fetchAthensBuses, fetchAthensRoutesAndStops, type AthensRoute } from '../../lib/athensTransit'
 import { haversineDistanceMeters } from '../../lib/geo'
 import {
   planTrip,
@@ -78,6 +88,7 @@ import { MapInfoPopup } from './popups/MapInfoPopup'
 import { MapDiningPopup } from './popups/MapDiningPopup'
 import { MapDormPopup } from './popups/MapDormPopup'
 import { MapAcademicPopup, type MapAcademicClass } from './popups/MapAcademicPopup'
+import { MapStopPopup } from './popups/MapStopPopup'
 import { brand, category } from '../../design-system/colors'
 import { S } from './MapPage.style'
 
@@ -92,7 +103,7 @@ L.Icon.Default.mergeOptions({
 
 const UGA_CENTER: [number, number] = [33.948, -83.3773]
 const BASE_ZOOM = 15
-// Close enough to read a single building clearly without the tiles pixelating (tile maxZoom is 20).
+// Close enough to read a single building clearly without the tiles pixelating (map's maxZoom is 19).
 const FOCUS_ZOOM = 18
 const FOCUS_FLY_DURATION_S = 1.2
 // A little over two ripple cycles (see .dawghub-ripple in GlobalStyles.tsx) so the marker is
@@ -108,7 +119,7 @@ function iconScaleForZoom(zoom: number) {
   return Math.min(MAX_ICON_SCALE, Math.max(MIN_ICON_SCALE, scale))
 }
 
-type LayerKey = 'bus' | 'library' | 'dining' | 'gym' | 'housing' | 'academics'
+type LayerKey = 'bus' | 'library' | 'dining' | 'gym' | 'housing' | 'academics' | 'athensTransit'
 
 const HOUSING_DOT_COLOR = category.housing
 const ACADEMICS_DOT_COLOR = category.academics
@@ -193,6 +204,23 @@ function busHeadingIcon(color: string, course: number) {
     className: '',
     iconSize: [32, 32],
     iconAnchor: [16, 16],
+  })
+}
+
+// Bare bus glyph in the stop's route color — same "icon, no background chip" language as
+// themedIcon (library/dining/gym). `scale` comes from iconScaleForZoom so it grows/shrinks
+// continuously with the map's zoom level, matching how OSM's own bus-stop icon scales on the
+// raster basemap.
+function stopMarkerIcon(color: string, scale: number) {
+  const size = Math.round(7 * scale)
+  const svgHtml = renderFaIcon(faBus, {
+    styles: { color, width: `${size}px`, height: `${size}px`, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))' },
+  }).html[0]
+  return L.divIcon({
+    html: `<div style="display:flex;align-items:center;justify-content:center;width:${size}px;height:${size}px;">${svgHtml}</div>`,
+    className: '',
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   })
 }
 
@@ -369,6 +397,10 @@ export function MapPage() {
     gym: true,
     housing: true,
     academics: true,
+    // Off by default, unlike the others — this is a separate city agency's whole bus system
+    // (18 routes, 500+ stops) layered on top of an already-dense UGA bus view, and its data
+    // isn't even fetched until a user opts in (see setAthensTransitActive).
+    athensTransit: false,
   })
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [activeModal, setActiveModal] = useState<LayerKey | null>(null)
@@ -377,6 +409,8 @@ export function MapPage() {
   const diningPrefs = useFavorites(MAP_DINING_FAVORITES_KEY)
   const gymPrefs = useFavorites(MAP_GYM_FAVORITES_KEY)
   const busPrefs = useBusLayerPrefs()
+  const athensTransitPrefs = useFavorites(MAP_ATHENS_TRANSIT_FAVORITES_KEY)
+  const [athensRouteNames, setAthensRouteNames] = useState<string[]>([])
 
   const [myDormBuilding, setMyDormBuildingState] = useState<string | null>(null)
   const [housingBuildingNames, setHousingBuildingNames] = useState<string[]>([])
@@ -428,8 +462,21 @@ export function MapPage() {
     applyLibraryFilter: (selected: string[]) => void
     applyDiningFilter: (selected: string[]) => void
     applyGymFilter: (selected: string[]) => void
-    applyAcademicMarkers: (entries: { location?: string | null; courseCode: string; day: string; startTime: string; endTime: string }[], selected: string[]) => void
+    applyAcademicMarkers: (
+      entries: {
+        location?: string | null
+        locationLat?: number | null
+        locationLng?: number | null
+        courseCode: string
+        day: string
+        startTime: string
+        endTime: string
+      }[],
+      selected: string[],
+    ) => void
     applyBusFilter: (disabledRoutes: string[], hideAll: boolean, operatingOnly: boolean) => void
+    applyAthensTransitFilter: (selected: string[]) => void
+    setAthensTransitActive: (active: boolean) => void
     setMyDorm: (buildingName: string | null) => void
     setDirectionsMarkers: (origin: LatLng | null, destination: LatLng | null) => void
     drawTripPlan: (plan: TripPlan | null, selected: 'walk-only' | 'walk-bus') => void
@@ -453,6 +500,14 @@ export function MapPage() {
   useEffect(() => {
     mapActionsRef.current?.applyBusFilter(busPrefs.disabledRoutes, busPrefs.hideAll, busPrefs.operatingOnly)
   }, [busPrefs.disabledRoutes, busPrefs.hideAll, busPrefs.operatingOnly])
+
+  useEffect(() => {
+    mapActionsRef.current?.applyAthensTransitFilter(athensTransitPrefs.favorites)
+  }, [athensTransitPrefs.favorites])
+
+  useEffect(() => {
+    mapActionsRef.current?.setAthensTransitActive(visible.athensTransit)
+  }, [visible.athensTransit])
 
   useEffect(() => {
     mapActionsRef.current?.applyAcademicMarkers(classEntriesQuery.data ?? [], selectedAcademicBuildings)
@@ -529,11 +584,12 @@ export function MapPage() {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
 
-    const map = L.map(containerRef.current, { zoomControl: false }).setView(UGA_CENTER, BASE_ZOOM)
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>, &copy; OpenStreetMap contributors',
-      maxZoom: 20,
-    }).addTo(map)
+    const map = L.map(containerRef.current, { zoomControl: false, maxZoom: 19 }).setView(UGA_CENTER, BASE_ZOOM)
+    // Vector basemap (OpenFreeMap's "liberty" style, free/keyless) instead of a raster tile
+    // provider — lets applyBasemapLayerVisibility (below) selectively show/hide individual
+    // style layers (footpaths, roads, building/POI labels) client-side, which a pre-rendered
+    // raster image can't do.
+    L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/liberty' }).addTo(map)
 
     L.polygon(UGA_CAMPUS_BOUNDARY, {
       color: category.campusBoundary,
@@ -750,6 +806,15 @@ export function MapPage() {
     const liveBusLayer = L.layerGroup()
     const busGroup = L.layerGroup([routesLayer, stopsLayer, liveBusLayer]).addTo(map)
 
+    // Athens Transit (the city's own bus system — see athensTransit.ts) — NOT added to the
+    // map here, unlike every other layer group below, because visible.athensTransit starts
+    // false. It's populated lazily by setAthensTransitActive the first time a user actually
+    // turns it on (see mapActionsRef.current below), not at mount.
+    const athensRoutesLayer = L.layerGroup()
+    const athensStopsLayer = L.layerGroup()
+    const athensLiveBusLayer = L.layerGroup()
+    const athensTransitGroup = L.layerGroup([athensRoutesLayer, athensStopsLayer, athensLiveBusLayer])
+
     const libraryLayer = L.layerGroup().addTo(map)
     const diningLayer = L.layerGroup().addTo(map)
     const gymLayer = L.layerGroup().addTo(map)
@@ -766,6 +831,7 @@ export function MapPage() {
       gym: gymLayer,
       housing: housingLayer,
       academics: academicsLayer,
+      athensTransit: athensTransitGroup,
     }
 
     mapRef.current = map
@@ -776,7 +842,12 @@ export function MapPage() {
     const diningMarkers: { name: string; marker: L.Marker }[] = []
     const gymMarkers: { name: string; marker: L.Marker }[] = []
     const routeEntries: { name: string; polylines: L.Polyline[] }[] = []
-    const stopMarkers: { name: string; marker: L.CircleMarker }[] = []
+    const stopMarkers: { name: string; marker: L.Marker; color: string }[] = []
+    const athensRouteMarkers: { name: string; marker: L.Layer }[] = []
+    map.on('zoom', () => {
+      const scale = iconScaleForZoom(map.getZoom())
+      stopMarkers.forEach(({ marker, color }) => marker.setIcon(stopMarkerIcon(color, scale)))
+    })
 
     let dormMarker: L.Marker | null = null
 
@@ -846,16 +917,179 @@ export function MapPage() {
       applyBuildingFilter(academicMarkers, academicsLayer, selected)
     }
 
+    // Mirrors currentDisabledRoutes' pattern above — applyAthensTransitFilter is called with
+    // the current selection every time it changes (see the useEffect on athensTransitPrefs.favorites),
+    // and this closure variable lets loadAthensTransit re-apply that same current selection to
+    // routes that don't exist yet at the time of that call (data loads lazily, after mount).
+    let currentAthensSelected: string[] = []
+
+    function applyAthensTransitFilter(selected: string[]) {
+      currentAthensSelected = selected
+      applyBuildingFilter(athensRouteMarkers, athensRoutesLayer, selected)
+    }
+
+    function athensRouteLabel(route: AthensRoute) {
+      return `${route.shortName} · ${route.longName}`
+    }
+
+    // Route/stop shapes barely change and are fetched once, lazily, the first time a user
+    // actually turns this layer on (see setAthensTransitActive below) — not at mount like
+    // every other layer's data, since most students riding only the UGA campus buses will
+    // never load this ~190KB snapshot at all.
+    let athensLoaded = false
+    let athensRoutesData: AthensRoute[] = []
+    const athensBusMarkers = new Map<string, L.Marker>()
+    let athensPollHandle: ReturnType<typeof setInterval> | null = null
+
+    async function loadAthensTransit() {
+      if (athensLoaded) return
+      athensLoaded = true
+      try {
+        const { routes, stops } = await fetchAthensRoutesAndStops()
+        if (cancelled) return
+        athensRoutesData = routes
+
+        routes.forEach((route) => {
+          const label = athensRouteLabel(route)
+          route.segments.forEach((segment) => {
+            const polyline = L.polyline(segment, { color: route.color, weight: 3, opacity: 0.6 }).bindPopup(label)
+            athensRouteMarkers.push({ name: label, marker: polyline })
+          })
+        })
+        stops.forEach((stop) => {
+          L.circleMarker([stop.latitude, stop.longitude], {
+            radius: 3,
+            color: category.athensTransit,
+            fillColor: category.athensTransit,
+            fillOpacity: 0.8,
+            weight: 1,
+            bubblingMouseEvents: false,
+          })
+            .bindPopup(stop.name)
+            .addTo(athensStopsLayer)
+        })
+
+        setAthensRouteNames(routes.map(athensRouteLabel))
+        applyAthensTransitFilter(currentAthensSelected)
+        startAthensPolling()
+      } catch {
+        athensLoaded = false // Let a future toggle-on retry instead of failing silently forever.
+      }
+    }
+
+    async function pollAthensBuses() {
+      try {
+        const buses = await fetchAthensBuses()
+        if (cancelled) return
+
+        const seenIds = new Set<string>()
+        buses.forEach((bus) => {
+          seenIds.add(bus.id)
+          const route = athensRoutesData.find((candidate) => candidate.id === bus.routeId)
+          const color = route?.color ?? category.athensTransit
+          const popupLabel = route ? athensRouteLabel(route) : 'Athens Transit'
+          const target = L.latLng(bus.latitude, bus.longitude)
+          const existing = athensBusMarkers.get(bus.id)
+
+          if (existing) {
+            existing.setIcon(busHeadingIcon(color, bus.bearing))
+            existing.setPopupContent(popupLabel)
+            animateMarkerTo(existing, target, BUS_ANIMATION_MS, () => cancelled)
+          } else {
+            const marker = L.marker(target, { icon: busHeadingIcon(color, bus.bearing) }).bindPopup(popupLabel)
+            marker.addTo(athensLiveBusLayer)
+            athensBusMarkers.set(bus.id, marker)
+          }
+        })
+
+        athensBusMarkers.forEach((marker, id) => {
+          if (!seenIds.has(id)) {
+            athensLiveBusLayer.removeLayer(marker)
+            athensBusMarkers.delete(id)
+          }
+        })
+      } catch {
+        // Transient failure — keep the last known bus positions on screen.
+      }
+    }
+
+    function startAthensPolling() {
+      if (athensPollHandle) return
+      pollAthensBuses()
+      athensPollHandle = setInterval(pollAthensBuses, BUS_POLL_INTERVAL_MS)
+    }
+
+    function stopAthensPolling() {
+      if (athensPollHandle) {
+        clearInterval(athensPollHandle)
+        athensPollHandle = null
+      }
+    }
+
+    // A hidden layer's bus positions going stale doesn't matter, so polling simply pauses
+    // while off instead of tracking anything to resume precisely — turning it back on jumps
+    // straight to a fresh poll.
+    function setAthensTransitActive(active: boolean) {
+      if (active) {
+        loadAthensTransit()
+        startAthensPolling()
+      } else {
+        stopAthensPolling()
+      }
+    }
+
     // Set once fetchUgaBuildings() resolves in the Promise.all below — kept outside React
     // state since it only ever feeds this imperative Leaflet code, never rendered directly.
     let loadedBuildings: UgaBuilding[] = []
+    // Candidate building set from the previous applyAcademicMarkers call — null until the
+    // first call with buildings actually loaded, so that first call only seeds the baseline
+    // instead of treating every already-persisted candidate as "newly added" (see below).
+    let previousAcademicBuildingNames: Set<string> | null = null
 
     // Rebuilds "my academic buildings" markers from scratch every time it's called — driven
     // reactively by classEntriesQuery (see the useEffect above), not a one-off computation at
     // mount, so adding/removing a class on the Schedule page (which writes into that same
     // query's cache) is reflected here without needing to fully reload the map.
+    // A "Set location" tap on the map (see SchedulePage's handlePickLocationOnMap) saves real
+    // coordinates but a generic location label ("Selected location", not a building name) —
+    // findBuildingByName alone would never match that text, so a class added this way silently
+    // never got a marker. Snapping the tapped point to whichever building is actually closest
+    // (within a building-footprint-sized radius, not campus-wide) covers that path in addition
+    // to the free-text/autocomplete one.
+    const PINNED_LOCATION_MAX_BUILDING_DISTANCE_METERS = 200
+    function findBuildingForEntry(entry: {
+      location?: string | null
+      locationLat?: number | null
+      locationLng?: number | null
+    }): UgaBuilding | undefined {
+      if (entry.locationLat != null && entry.locationLng != null) {
+        let nearest: UgaBuilding | undefined
+        let nearestDistance = Infinity
+        loadedBuildings.forEach((building) => {
+          const distance = haversineDistanceMeters(
+            { lat: entry.locationLat!, lng: entry.locationLng! },
+            { lat: building.latitude, lng: building.longitude },
+          )
+          if (distance < nearestDistance) {
+            nearestDistance = distance
+            nearest = building
+          }
+        })
+        if (nearest && nearestDistance <= PINNED_LOCATION_MAX_BUILDING_DISTANCE_METERS) return nearest
+      }
+      return entry.location ? findBuildingByName(loadedBuildings, entry.location) : undefined
+    }
+
     function applyAcademicMarkers(
-      entries: { location?: string | null; courseCode: string; day: string; startTime: string; endTime: string }[],
+      entries: {
+        location?: string | null
+        locationLat?: number | null
+        locationLng?: number | null
+        courseCode: string
+        day: string
+        startTime: string
+        endTime: string
+      }[],
       selected: string[],
     ) {
       academicMarkers.forEach(({ marker }) => academicsLayer.removeLayer(marker))
@@ -864,13 +1098,39 @@ export function MapPage() {
 
       const entriesByBuilding = new Map<string, MapAcademicClass[]>()
       entries.forEach((entry) => {
-        if (!entry.location) return
-        const building = findBuildingByName(loadedBuildings, entry.location)
+        const building = findBuildingForEntry(entry)
         if (!building) return
         const list = entriesByBuilding.get(building.name) ?? []
         list.push({ courseCode: entry.courseCode, day: entry.day, startTime: entry.startTime, endTime: entry.endTime })
         entriesByBuilding.set(building.name, list)
       })
+
+      // Keep the "my academic buildings" checklist itself in sync with the schedule, not just
+      // the markers on screen: once the user has ever unchecked one building, `selected` turns
+      // from "empty = show everything" into an explicit whitelist (see applyBuildingFilter) —
+      // a whitelist that never grows/shrinks again would silently hide a class added afterward,
+      // and leave a stale, marker-less entry checked after its last class is removed. Diffing
+      // against the candidate set from the *previous* call (not against `selected` itself, so a
+      // building the user deliberately unchecked stays unchecked) adds newly-appeared buildings
+      // and prunes ones that no longer have any class.
+      const newBuildingNames = new Set(entriesByBuilding.keys())
+      let effectiveSelected = selected
+      if (previousAcademicBuildingNames === null) {
+        previousAcademicBuildingNames = newBuildingNames
+      } else {
+        const added = Array.from(newBuildingNames).filter((name) => !previousAcademicBuildingNames!.has(name))
+        previousAcademicBuildingNames = newBuildingNames
+        if (selected.length > 0) {
+          const pruned = selected.filter((name) => newBuildingNames.has(name))
+          const next = [...pruned, ...added.filter((name) => !pruned.includes(name))]
+          const changed = next.length !== selected.length || next.some((name, index) => name !== selected[index])
+          if (changed) {
+            effectiveSelected = next
+            setSelectedAcademicBuildings(next)
+            updateMapPreference({ myAcademicBuildings: next })
+          }
+        }
+      }
 
       // Only buildings where the user actually has a class are ever created here — the "my
       // academic buildings" checklist filters which of those are visible, but every marker
@@ -900,7 +1160,7 @@ export function MapPage() {
         })
 
       setAcademicCandidates(Array.from(entriesByBuilding.keys()).sort())
-      applyAcademicsFilter(selected)
+      applyAcademicsFilter(effectiveSelected)
     }
 
     let currentDisabledRoutes: string[] = busPrefs.disabledRoutes
@@ -908,6 +1168,10 @@ export function MapPage() {
     let currentOperatingOnly: boolean = busPrefs.operatingOnly
     const currentRunningRoutes = new Set<string>()
     const busRouteById = new Map<string, string>()
+    // Read by each stop popup's getArrivals (see MapStopPopup) to compute a live ETA —
+    // updated at the top of every pollBuses tick, so a popup left open keeps tracking real
+    // bus movement without needing its own separate fetch.
+    let latestBuses: PassioBus[] = []
 
     // Overrides the normal layer-prefs visibility while a trip is on screen: 'hide-all' for a
     // walk-only option (no bus should be visible at all — nothing to disambiguate), or a
@@ -926,6 +1190,17 @@ export function MapPage() {
         if (directionsBusFocus === 'hide-all') return false
         if (directionsBusFocus) return name === directionsBusFocus.routeName
         return prefsShowRoute(name)
+      }
+      // Stops skip the "currently running" half of prefsShowRoute — a stop's routeName often
+      // comes back blank or spelled slightly differently from the live-bus feed's route name
+      // (see PassioStop.routeName / fetchUgaRoutesAndStops), so gating it the same way as
+      // routes made real, existing stops vanish whenever "show only currently running routes"
+      // was on, with no way to tell it apart from a genuine bug. hideAll and an explicit
+      // per-route uncheck still hide it — only the running/not-running distinction is skipped.
+      const stopVisible = (name: string) => {
+        if (directionsBusFocus === 'hide-all') return false
+        if (directionsBusFocus) return name === directionsBusFocus.routeName
+        return !currentHideAll && !currentDisabledRoutes.includes(name)
       }
       const focusedRoute = directionsBusFocus && directionsBusFocus !== 'hide-all' ? directionsBusFocus.routeName : null
 
@@ -952,7 +1227,7 @@ export function MapPage() {
       })
 
       stopMarkers.forEach(({ name, marker }) => {
-        const shouldShow = routeVisible(name)
+        const shouldShow = stopVisible(name)
         if (shouldShow) {
           if (!stopsLayer.hasLayer(marker)) marker.addTo(stopsLayer)
         } else {
@@ -1152,6 +1427,8 @@ export function MapPage() {
       applyGymFilter,
       applyAcademicMarkers,
       applyBusFilter,
+      applyAthensTransitFilter,
+      setAthensTransitActive,
       setMyDorm: (buildingName) => {
         updateMapPreference({ myDormBuilding: buildingName }).then((pref) => {
           refreshDormHighlight(pref.myDormBuilding)
@@ -1320,15 +1597,15 @@ export function MapPage() {
         })
 
         stops.forEach((stop) => {
-          const marker = L.circleMarker([stop.latitude, stop.longitude], {
-            radius: 3,
-            color: stop.color,
-            fillColor: stop.color,
-            fillOpacity: 0.8,
-            weight: 1,
+          const marker = L.marker([stop.latitude, stop.longitude], {
+            icon: stopMarkerIcon(stop.color, iconScaleForZoom(map.getZoom())),
             bubblingMouseEvents: false,
-          }).bindPopup(stop.name)
-          stopMarkers.push({ name: stop.routeName, marker })
+          })
+          bindReactPopup(
+            marker,
+            <MapStopPopup stopName={stop.name} getArrivals={() => computeStopArrivals(stop, routes, latestBuses)} />,
+          )
+          stopMarkers.push({ name: stop.routeName, marker, color: stop.color })
         })
 
         applyBusFilter(currentDisabledRoutes, currentHideAll, currentOperatingOnly)
@@ -1345,6 +1622,7 @@ export function MapPage() {
       try {
         const buses = await fetchUgaBuses()
         if (cancelled) return
+        latestBuses = buses
 
         const seenIds = new Set<string>()
         currentRunningRoutes.clear()
@@ -1389,6 +1667,7 @@ export function MapPage() {
     return () => {
       cancelled = true
       clearInterval(interval)
+      stopAthensPolling()
       if (rippleTimeout) clearTimeout(rippleTimeout)
       if (watchId !== null) navigator.geolocation.clearWatch(watchId)
       window.removeEventListener('deviceorientationabsolute', handleOrientation)
@@ -1429,6 +1708,10 @@ export function MapPage() {
       : selectedAcademicBuildings.length === 0
         ? t('map.showAll')
         : t('map.selectedCount', { count: selectedAcademicBuildings.length })
+  const athensTransitSubtitle =
+    athensTransitPrefs.favorites.length === 0
+      ? t('map.showAll')
+      : t('map.selectedCount', { count: athensTransitPrefs.favorites.length })
 
   const drawerRows: { key: LayerKey; icon: IconDefinition; color: string; label: string; subtitle: string }[] = [
     {
@@ -1459,6 +1742,13 @@ export function MapPage() {
       color: ACADEMICS_DOT_COLOR,
       label: t('map.legend.academics'),
       subtitle: academicsSubtitle,
+    },
+    {
+      key: 'athensTransit',
+      icon: faBus,
+      color: category.athensTransit,
+      label: t('map.legend.athensTransit'),
+      subtitle: athensTransitSubtitle,
     },
   ]
 
@@ -2104,6 +2394,22 @@ export function MapPage() {
           }}
           onClose={() => setActiveModal(null)}
           emptyMessage={t('map.noAcademicCandidates')}
+          showLabel={t('map.showLayer')}
+        />
+      )}
+
+      {activeModal === 'athensTransit' && (
+        <LayerChecklistModal
+          title={t('map.legend.athensTransit')}
+          active={visible.athensTransit}
+          onToggleActive={() => toggleLayer('athensTransit')}
+          names={athensRouteNames}
+          selected={athensTransitPrefs.favorites}
+          onToggleName={(name) =>
+            athensTransitPrefs.setFavorites(toggleInEffectiveList(name, athensRouteNames, athensTransitPrefs.favorites))
+          }
+          onClose={() => setActiveModal(null)}
+          emptyMessage={t('map.noRoutesYet')}
           showLabel={t('map.showLayer')}
         />
       )}

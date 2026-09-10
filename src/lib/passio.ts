@@ -160,6 +160,73 @@ export type PassioStop = {
   routeName: string
 }
 
+// No real transit-prediction API exists for UGA's Passio system (confirmed: it only exposes
+// live vehicle positions + static routes/stops) — also used by directions.ts's bus-leg
+// duration estimate, so it's a one-constant swap once BusStopArrival has enough history for
+// real per-segment averages.
+export const AVERAGE_BUS_SPEED_METERS_PER_SECOND = 5.5 // ~12 mph, in-town shuttle with stops
+
+export type StopArrival = {
+  route: PassioRoute
+  // null = route serves this stop but has no live bus on it right now (matches
+  // "not currently running" elsewhere in the bus layer, e.g. BusLayerPrefs.operatingOnly).
+  etaSeconds: number | null
+}
+
+function nearestPolylineIndex(point: [number, number], flatPoints: [number, number][]): number {
+  let bestIndex = 0
+  let bestDistance = Infinity
+  flatPoints.forEach(([lat, lng], index) => {
+    const distance = haversineDistanceMeters({ lat: point[0], lng: point[1] }, { lat, lng })
+    if (distance < bestDistance) {
+      bestDistance = distance
+      bestIndex = index
+    }
+  })
+  return bestIndex
+}
+
+// Routes are closed loops, so a bus already past a stop on this pass still reaches it —
+// just by continuing on to the end of the trace and wrapping back around to index 0, rather
+// than "backing up" to a smaller index. Summing real consecutive-point distances (not a
+// straight line from the bus to the stop) avoids the wrong-direction mistake called out in
+// PassioRoute.stops' own comment — a bus that looks close as the crow flies can actually be
+// on the far side of the loop, close to finishing an entire lap before it gets there.
+function distanceAlongLoopMeters(flatPoints: [number, number][], fromIndex: number, toIndex: number): number {
+  const indexes: number[] = []
+  for (let i = fromIndex; i !== toIndex; i = (i + 1) % flatPoints.length) indexes.push(i)
+  indexes.push(toIndex)
+
+  let total = 0
+  for (let i = 1; i < indexes.length; i++) {
+    const [lat1, lng1] = flatPoints[indexes[i - 1]]
+    const [lat2, lng2] = flatPoints[indexes[i]]
+    total += haversineDistanceMeters({ lat: lat1, lng: lng1 }, { lat: lat2, lng: lng2 })
+  }
+  return total
+}
+
+// Which routes actually serve this stop (via PassioRoute.stops, not the unreliable
+// PassioStop.routeName — see the comment on PassioRoute.stops), and for each, the nearest
+// live bus's estimated time to reach it by walking its remaining distance along the route's
+// real GPS trace rather than a straight line (see distanceAlongLoopMeters).
+export function computeStopArrivals(stop: PassioStop, routes: PassioRoute[], buses: PassioBus[]): StopArrival[] {
+  return routes
+    .filter((route) => route.stops.some((routeStop) => routeStop.id === stop.id))
+    .map((route) => {
+      const stopEntry = route.stops.find((routeStop) => routeStop.id === stop.id)!
+      const flatPoints = route.segments.flat()
+      const etaOptions = buses
+        .filter((bus) => bus.route === route.name)
+        .map((bus) => {
+          const busIndex = nearestPolylineIndex([bus.latitude, bus.longitude], flatPoints)
+          const distanceMeters = distanceAlongLoopMeters(flatPoints, busIndex, stopEntry.polylineIndex)
+          return distanceMeters / AVERAGE_BUS_SPEED_METERS_PER_SECOND
+        })
+      return { route, etaSeconds: etaOptions.length > 0 ? Math.min(...etaOptions) : null }
+    })
+}
+
 export async function fetchUgaRoutesAndStops(): Promise<{
   routes: PassioRoute[]
   stops: PassioStop[]

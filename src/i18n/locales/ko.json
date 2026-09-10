@@ -133,7 +133,8 @@
       "dining": "학식당",
       "gym": "체육관",
       "housing": "기숙사",
-      "academics": "강의동"
+      "academics": "강의동",
+      "athensTransit": "애선스 시내버스"
     },
     "showLayer": "이 레이어 표시",
     "showAll": "전체 표시 중",
@@ -149,7 +150,9 @@
       "operatingOnly": "운영 중인 노선만 표시",
       "allOn": "전체 노선 표시",
       "allOff": "전체 노선 숨기기",
-      "perRoute": "노선별 표시"
+      "perRoute": "노선별 표시",
+      "noRoutesAtStop": "이 정류장에 서는 노선이 없어요.",
+      "arrivalEtaMinutes": "약 {{count}}분"
     },
     "directions": {
       "button": "경로찾기",

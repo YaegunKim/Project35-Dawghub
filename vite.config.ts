@@ -10,12 +10,20 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
+  worker: {
+    format: 'es',
+  },
+  optimizeDeps: {
+    exclude: ['maplibre-gl'],
+  },
   build: {
     rollupOptions: {
       output: {
         manualChunks(id: string) {
           if (id.includes('node_modules')) {
+            if (id.includes('maplibre-gl')) return 'maplibre'
             if (id.includes('leaflet')) return 'leaflet'
+            if (id.includes('gtfs-realtime-bindings') || id.includes('protobufjs')) return 'gtfs-realtime'
             if (id.includes('aws-amplify') || id.includes('@aws-amplify')) return 'amplify'
             if (id.includes('@fortawesome')) return 'fontawesome'
           }

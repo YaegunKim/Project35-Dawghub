@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from 'react'
 export const MAP_LIBRARY_FAVORITES_KEY = 'dawghub:map:library'
 export const MAP_DINING_FAVORITES_KEY = 'dawghub:map:dining'
 export const MAP_GYM_FAVORITES_KEY = 'dawghub:map:gym'
+export const MAP_ATHENS_TRANSIT_FAVORITES_KEY = 'dawghub:map:athensTransit'
 
 type BusLayerPrefs = {
   disabledRoutes: string[]

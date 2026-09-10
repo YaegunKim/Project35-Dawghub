@@ -133,7 +133,8 @@
       "dining": "Dining hall",
       "gym": "Gym",
       "housing": "Housing",
-      "academics": "Academic buildings"
+      "academics": "Academic buildings",
+      "athensTransit": "Athens Transit"
     },
     "showLayer": "Show this layer",
     "showAll": "Showing all",
@@ -149,7 +150,9 @@
       "operatingOnly": "Show only currently running routes",
       "allOn": "Show all routes",
       "allOff": "Hide all routes",
-      "perRoute": "Show/hide by route"
+      "perRoute": "Show/hide by route",
+      "noRoutesAtStop": "No routes serve this stop.",
+      "arrivalEtaMinutes": "~{{count}} min"
     },
     "directions": {
       "button": "Directions",

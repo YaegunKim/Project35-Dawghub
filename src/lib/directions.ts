@@ -1,6 +1,6 @@
 import { client } from './amplifyClient'
 import { haversineDistanceMeters, type LatLng } from './geo'
-import type { PassioRoute, RouteStop } from './passio'
+import { AVERAGE_BUS_SPEED_METERS_PER_SECOND, type PassioRoute, type RouteStop } from './passio'
 
 export type { LatLng }
 
@@ -57,8 +57,8 @@ const MAX_ROUTE_COMBOS_TO_EVALUATE = 3
 // No real transit-prediction API exists for UGA's Passio system (confirmed: it only exposes
 // live vehicle positions + static routes/stops), and the BusStopArrival log table doesn't
 // have enough history yet for per-segment averages — so the bus leg's duration is a rough
-// distance/speed estimate, isolated here so it's a one-function swap once real stats exist.
-const AVERAGE_BUS_SPEED_METERS_PER_SECOND = 5.5 // ~12 mph, in-town shuttle with stops
+// distance/speed estimate. AVERAGE_BUS_SPEED_METERS_PER_SECOND lives in passio.ts (also used
+// by computeStopArrivals there) so it's a one-constant swap once real stats exist.
 const BUS_WAIT_ESTIMATE_SECONDS = 5 * 60
 
 export async function fetchWalkingRoute(from: LatLng, to: LatLng): Promise<WalkingRoute> {

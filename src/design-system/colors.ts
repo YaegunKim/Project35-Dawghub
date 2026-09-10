@@ -41,6 +41,7 @@ export const category = {
   gym: '#16a34a',
   housing: '#6b7280',
   academics: '#6b7280',
+  athensTransit: '#4338ca',
   myDorm: { fill: '#f59e0b', border: '#78350f', bg: '#fef3c7', text: '#92400e' },
   myAcademic: { fill: '#7c3aed', border: '#4c1d95' },
   directionsWalk: '#0d9488',

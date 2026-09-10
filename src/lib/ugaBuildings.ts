@@ -51,14 +51,90 @@ export function fetchUgaBuildings(): Promise<UgaBuilding[]> {
   return Promise.resolve(ALL_BUILDINGS)
 }
 
+// The registrar's course-search location strings (ClassEntry.location, e.g. "Journalism
+// 0501") append a trailing room number after the building name — the three checks above
+// only catch a building name that appears somewhere in the full string, not one that's a
+// mere *prefix* of it, so "Journalism Building" never matched "Journalism 0501" even though
+// the intent is obvious. Stripping that trailing token and retrying with a prefix check
+// covers this without touching the exact/substring checks (which still run first).
+function stripTrailingRoomToken(normalized: string): string {
+  return normalized.replace(/\s+[\w-]*\d[\w-]*$/, '').trim()
+}
+
+// Manually confirmed mappings for registrar location strings whose abbreviation scheme
+// diverges too far from the ArcGIS building name for any generic text match to bridge —
+// "Cntr"/"Ads"/"Rsrch"/"Inst" are abbreviated completely differently (or not at all) on the
+// ArcGIS side. Sourced by cross-checking every distinct MEETING_TIME.BUILDING_DESC value in
+// UGA's real Schedule-of-Classes CSV (apps.reg.uga.edu/soc — the same feed search-uga-classes
+// reads) against the ArcGIS building list, so this covers real registrar abbreviations rather
+// than ones guessed in the abstract. Keys are lowercase and are checked against both the full
+// registrar string and its room-number-stripped form.
+const BUILDING_NAME_ALIASES: Record<string, string> = {
+  'rhodes cntr ads -b': 'Rhodes Animal Science Center - B',
+  'rhodes cntr ads -c': 'Rhodes Animal Science Center - C',
+  'inst plaza': 'Instructional Plaza',
+  'boyd research & education ctr': 'Boyd Rsrch and Edu Ctr',
+  // Poultry Science's teaching space is physically inside Conner Hall, not one of ArcGIS's
+  // many separate standalone "Poultry Science ___" buildings (those are the ag-research farm
+  // buildings out at the poultry farm) — not derivable from the name, confirmed by the user.
+  'poultry science bldg.': 'Conner Hall',
+  '105 bowstrom rd': '105 Bowstrom Road',
+  'consumer rsch cntr': 'Housing and Consumer Research Center',
+  'driftmier eng ctr': 'Driftmier Engineering Center',
+  'family sci ctr i': 'Family Science Center 1',
+  'geography geology': 'Geography and Geology',
+  'jackson st bldg': 'Jackson Street Building',
+  'marine sci - dance': 'Marine Science / Dance',
+  'military,army rotc': 'Military Building Army ROTC',
+  'ramsey stu ctr pa': 'Ramsey Center',
+  'rutherford hal new': 'Rutherford Hall',
+  'schwab financial planning cntr': 'Charles Schwab Financial Planning Center',
+  'child devel. lab': 'Child Development Laboratory',
+  'music building': 'Hugh Hodgson School of Music',
+  'riverbend rsch s': 'Riverbend Research Lab South',
+  'robt c wilson phar': 'R. C. Wilson Pharmacy',
+  'thomas st sculp': 'Thomas Street Sculpture',
+  'thomas st., south': 'Thomas Street South',
+  'vet med - 1': 'College of Veterinary Medicine 1',
+  'jewelry&metalwork': 'Jewelry & Metalwork Art Studios',
+  'performng arts ctr': 'Performing Arts',
+  'ga mus of art pvac': 'Georgia Museum of Art',
+  'life sci f.davison': 'Davison Life Sciences Complex',
+}
+
+// A handful of registrar building strings differ from the ArcGIS name only in punctuation
+// (e.g. "Zell B Miller Learning Center" vs. "Zell B. Miller Learning Center") — stripping
+// periods/commas from both sides is safe precisely because it's applied symmetrically, unlike
+// a one-sided guess.
+function stripPunctuation(value: string): string {
+  return value.replace(/[.,]/g, '').replace(/\s+/g, ' ').trim()
+}
+
 export function findBuildingByName(buildings: UgaBuilding[], query: string): UgaBuilding | undefined {
   const normalized = query.trim().toLowerCase()
   if (!normalized) return undefined
 
-  return (
+  const withoutRoom = stripTrailingRoomToken(normalized)
+  const aliasTarget = BUILDING_NAME_ALIASES[normalized] ?? BUILDING_NAME_ALIASES[withoutRoom]
+  const aliased = aliasTarget ? buildings.find((building) => building.name === aliasTarget) : undefined
+  if (aliased) return aliased
+
+  const direct =
     buildings.find((building) => building.name.toLowerCase() === normalized) ??
     buildings.find((building) => building.name.toLowerCase().includes(normalized)) ??
     buildings.find((building) => normalized.includes(building.name.toLowerCase()))
+  if (direct) return direct
+
+  const normalizedNoPunct = stripPunctuation(normalized)
+  const noPunctMatch = buildings.find((building) => stripPunctuation(building.name.toLowerCase()) === normalizedNoPunct)
+  if (noPunctMatch) return noPunctMatch
+
+  if (withoutRoom === normalized || !withoutRoom) return undefined
+
+  return (
+    buildings.find((building) => building.name.toLowerCase() === withoutRoom) ??
+    buildings.find((building) => building.name.toLowerCase().startsWith(withoutRoom)) ??
+    buildings.find((building) => withoutRoom.includes(building.name.toLowerCase()))
   )
 }
 
