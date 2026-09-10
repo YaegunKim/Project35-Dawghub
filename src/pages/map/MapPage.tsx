@@ -20,7 +20,6 @@ import {
   faBookOpenReader,
   faBus,
   faChevronRight,
-  faDog,
   faDumbbell,
   faEye,
   faEyeSlash,
@@ -261,27 +260,43 @@ function routeCodeMarkerIcon(color: string, code: string) {
   })
 }
 
-// White/generic on a normal day; flips to the brand red + a "Game Day!" tag underneath once
-// isFootballGameDay is true. A generic dog glyph (not a drawing of UGA's actual mascot) —
-// same trademark-avoidance reasoning as the app's own logo (see CLAUDE.md).
+// The same bulldog mark as design-system/Brand/Logo.tsx (inlined as raw markup — a divIcon
+// only takes an HTML string, not a React component). `background` is the only thing that
+// varies: white normally, brand red on a game day, so this doubles as the marker's own badge
+// rather than needing a separate wrapping disc.
+function bulldogLogoMarkSvg(background: string) {
+  return `<svg width="100%" height="100%" viewBox="0 0 512 512" role="img" aria-hidden="true">
+    <rect width="512" height="512" rx="120" fill="${background}" />
+    <ellipse cx="184" cy="198" rx="42" ry="60" transform="rotate(-30 184 198)" fill="${brand.white}" stroke="${brand.black}" stroke-width="10" />
+    <ellipse cx="328" cy="198" rx="42" ry="60" transform="rotate(30 328 198)" fill="${brand.white}" stroke="${brand.black}" stroke-width="10" />
+    <ellipse cx="256" cy="302" rx="158" ry="118" fill="${brand.white}" stroke="${brand.black}" stroke-width="11" />
+    <path d="M192,235 Q256,213 320,235" fill="none" stroke="${brand.black}" stroke-width="7" stroke-linecap="round" />
+    <path d="M202,256 Q256,240 310,256" fill="none" stroke="${brand.black}" stroke-width="7" stroke-linecap="round" />
+    <circle cx="201" cy="282" r="15" fill="${brand.black}" />
+    <circle cx="311" cy="282" r="15" fill="${brand.black}" />
+    <ellipse cx="256" cy="360" rx="108" ry="58" fill="${brand.white}" stroke="${brand.black}" stroke-width="10" />
+    <ellipse cx="256" cy="342" rx="26" ry="19" fill="${brand.black}" />
+    <path d="M232,354 Q206,378 180,384" fill="none" stroke="${brand.black}" stroke-width="7" stroke-linecap="round" />
+    <path d="M280,354 Q306,378 332,384" fill="none" stroke="${brand.black}" stroke-width="7" stroke-linecap="round" />
+  </svg>`
+}
+
+// White normally; flips to brand red + a "Game Day!" tag underneath once isFootballGameDay
+// is true.
 function footballIcon(gameDay: boolean) {
-  const badgeSize = 28
+  const badgeSize = 22
   const badgeColor = gameDay ? brand.primary : brand.white
-  const glyphColor = gameDay ? brand.white : brand.primary
-  const dogSvgHtml = renderFaIcon(faDog, {
-    styles: { color: glyphColor, width: '15px', height: '15px' },
-  }).html[0]
   const label = gameDay
     ? `<div style="margin-top:2px;background:${brand.primary};color:${brand.white};font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,0.3);">${i18n.t('map.football.gameDayBadge')}</div>`
     : ''
   return L.divIcon({
     html: `<div style="display:flex;flex-direction:column;align-items:center;">
-      <div style="width:${badgeSize}px;height:${badgeSize}px;border-radius:50%;background:${badgeColor};border:2px solid ${brand.primary};display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.35);">${dogSvgHtml}</div>
+      <div style="width:${badgeSize}px;height:${badgeSize}px;border-radius:50%;overflow:hidden;border:2px solid ${brand.primary};box-shadow:0 1px 3px rgba(0,0,0,0.35);">${bulldogLogoMarkSvg(badgeColor)}</div>
       ${label}
     </div>`,
     className: '',
-    iconSize: [90, badgeSize + 20],
-    iconAnchor: [45, badgeSize / 2],
+    iconSize: [80, badgeSize + 20],
+    iconAnchor: [40, badgeSize / 2],
   })
 }
 
