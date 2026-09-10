@@ -63,7 +63,124 @@
     "postFailed": "Couldn't post — try again.",
     "postValidation": "Please fill in both a title and a message.",
     "commentFailed": "Couldn't post your comment — try again.",
-    "commentValidation": "Please write a comment first."
+    "commentValidation": "Please write a comment first.",
+    "general": {
+      "category": {
+        "all": "All",
+        "notice": "Notice",
+        "freeTalk": "Free talk",
+        "qna": "Q&A",
+        "timetable": "Timetable"
+      },
+      "anonymousAuthor": "Anonymous",
+      "anonymousNumbered": "Anonymous {{number}}",
+      "like": "Like",
+      "scrap": "Save",
+      "scrapped": "Saved",
+      "likeFailed": "Couldn't update your like — try again."
+    },
+    "housing": {
+      "openHousingSite": "Open UGA Housing ↗",
+      "openStarRez": "Open my StarRez portal ↗",
+      "externalNotice": "Opens UGA's own site in a new tab — DawgHub never sees your UGA password.",
+      "type": {
+        "discussion": "Discussion",
+        "dormReview": "Dorm review",
+        "sublease": "Sublease / roommate search"
+      },
+      "dormBuildingLabel": "Dorm / hall",
+      "dormBuildingPlaceholder": "Search for a hall...",
+      "moveInDateLabel": "Move-in date",
+      "moveOutDateLabel": "Move-out date",
+      "monthlyRentLabel": "Monthly rent ($)"
+    },
+    "classes": {
+      "attachCourse": "Attach a course (optional)",
+      "courseSearchPlaceholder": "Search course code (e.g. CSCI 4060)",
+      "filterByCourse": "Filter by course code",
+      "filterPlaceholder": "e.g. CSCI 4060",
+      "viewCourse": "View course",
+      "sectionsHeading": "Sections this term",
+      "noSections": "Not offered this term.",
+      "catalogHeading": "Catalog description",
+      "creditHours": "Credit hours",
+      "prerequisites": "Prerequisites",
+      "noCatalogEntry": "Couldn't load the catalog description.",
+      "goToSchedule": "Go to Schedule to add this class"
+    },
+    "buySell": {
+      "category": {
+        "all": "All",
+        "textbooks": "Textbooks",
+        "furniture": "Furniture",
+        "electronics": "Electronics",
+        "clothing": "Clothing",
+        "tickets": "Tickets",
+        "other": "Other"
+      },
+      "condition": {
+        "new": "New",
+        "likeNew": "Like new",
+        "good": "Good",
+        "fair": "Fair"
+      },
+      "status": {
+        "active": "Active",
+        "reserved": "Reserved",
+        "sold": "Sold"
+      },
+      "showSold": "Show sold too",
+      "priceLabel": "Price ($)",
+      "titlePlaceholder": "What are you selling?",
+      "descriptionPlaceholder": "Describe the item's condition, size, etc.",
+      "photosLabel": "Photos (up to 6)",
+      "addPhoto": "Add photo",
+      "createListing": "Post listing",
+      "contactSeller": "Contact seller",
+      "contactRevealed": "Email the seller:",
+      "markActive": "Mark active",
+      "markReserved": "Mark reserved",
+      "markSold": "Mark sold",
+      "deleteListing": "Delete listing",
+      "editListing": "Edit listing",
+      "empty": "No listings yet. Be the first to post one!",
+      "createFailed": "Couldn't post your listing — try again.",
+      "uploadFailed": "Couldn't upload your photos — try again.",
+      "updateFailed": "Couldn't update this listing — try again.",
+      "deleteFailed": "Couldn't delete this listing — try again.",
+      "undoDelete": "Undo",
+      "validation": "Please fill in a title, description, and price."
+    },
+    "events": {
+      "freeFoodFilter": "🍕 Free food",
+      "tags": {
+        "freeFood": "Free food",
+        "club": "Club",
+        "academic": "Academic",
+        "athletics": "Athletics",
+        "greekLife": "Greek life",
+        "other": "Other"
+      },
+      "openHandshake": "Open Handshake ↗",
+      "dateLabel": "Date",
+      "startTimeLabel": "Start time",
+      "endTimeLabel": "End time (optional)",
+      "locationLabel": "Location (optional)",
+      "externalLinkLabel": "External link (optional)",
+      "externalLinkPlaceholder": "Handshake, GroupMe, a signup form...",
+      "showPast": "Show past events",
+      "pastDateValidation": "Pick a date that hasn't passed yet.",
+      "calendar": {
+        "classesBegin": "Classes begin",
+        "laborDay": "Labor Day (no classes)",
+        "fallBreak": "Fall break (no classes)",
+        "thanksgivingBreak": "Thanksgiving break (no classes)",
+        "lastDayOfClasses": "Last day of classes",
+        "finalExamsBegin": "Final exams begin",
+        "mlkDay": "MLK Day (no classes)",
+        "springBreak": "Spring break (no classes)"
+      }
+    }
   },
   "schedule": {
     "courseCode": "Course code (e.g. CSCI 4300)",
@@ -139,6 +256,7 @@
     },
     "showLayer": "Show this layer",
     "showAll": "Showing all",
+    "showNone": "Nothing shown yet",
     "notSet": "Not set",
     "selectedCount": "{{count}} selected",
     "noAcademicCandidates": "None of your classes are matched to a building yet.",
@@ -153,7 +271,10 @@
       "allOff": "Hide all routes",
       "perRoute": "Show/hide by route",
       "noRoutesAtStop": "No routes serve this stop.",
-      "arrivalEtaMinutes": "~{{count}} min"
+      "arrivalEtaMinutes": "~{{count}} min",
+      "back": "Back to routes",
+      "favorite": "Favorite this route",
+      "busesActive": "{{count}} buses active"
     },
     "directions": {
       "button": "Directions",

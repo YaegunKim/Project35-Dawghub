@@ -63,7 +63,124 @@
     "postFailed": "게시하지 못했어요 — 다시 시도해주세요.",
     "postValidation": "제목과 내용을 모두 입력해주세요.",
     "commentFailed": "댓글을 남기지 못했어요 — 다시 시도해주세요.",
-    "commentValidation": "댓글 내용을 입력해주세요."
+    "commentValidation": "댓글 내용을 입력해주세요.",
+    "general": {
+      "category": {
+        "all": "전체",
+        "notice": "공지",
+        "freeTalk": "자유",
+        "qna": "질문",
+        "timetable": "시간표"
+      },
+      "anonymousAuthor": "익명",
+      "anonymousNumbered": "익명{{number}}",
+      "like": "좋아요",
+      "scrap": "스크랩",
+      "scrapped": "스크랩됨",
+      "likeFailed": "좋아요 처리에 실패했어요 — 다시 시도해 주세요."
+    },
+    "housing": {
+      "openHousingSite": "UGA 기숙사 홈페이지 열기 ↗",
+      "openStarRez": "내 StarRez 포털 열기 ↗",
+      "externalNotice": "UGA 공식 사이트가 새 탭에서 열려요 — DawgHub는 여러분의 UGA 비밀번호를 절대 보지 않아요.",
+      "type": {
+        "discussion": "자유글",
+        "dormReview": "기숙사 후기",
+        "sublease": "서브리스/룸메이트 구하기"
+      },
+      "dormBuildingLabel": "기숙사/건물",
+      "dormBuildingPlaceholder": "건물 이름을 검색해 보세요...",
+      "moveInDateLabel": "입주일",
+      "moveOutDateLabel": "퇴거일",
+      "monthlyRentLabel": "월세 ($)"
+    },
+    "classes": {
+      "attachCourse": "수업 태그하기 (선택)",
+      "courseSearchPlaceholder": "과목 코드로 검색 (예: CSCI 4060)",
+      "filterByCourse": "과목 코드로 필터링",
+      "filterPlaceholder": "예: CSCI 4060",
+      "viewCourse": "수업 정보 보기",
+      "sectionsHeading": "이번 학기 개설 분반",
+      "noSections": "이번 학기에는 개설되지 않았어요.",
+      "catalogHeading": "강의계획서 설명",
+      "creditHours": "학점",
+      "prerequisites": "선수과목",
+      "noCatalogEntry": "강의계획서 정보를 불러오지 못했어요.",
+      "goToSchedule": "시간표 탭에서 이 수업 추가하기"
+    },
+    "buySell": {
+      "category": {
+        "all": "전체",
+        "textbooks": "교재",
+        "furniture": "가구",
+        "electronics": "전자제품",
+        "clothing": "의류",
+        "tickets": "티켓",
+        "other": "기타"
+      },
+      "condition": {
+        "new": "새 상품",
+        "likeNew": "거의 새것",
+        "good": "양호",
+        "fair": "사용감 있음"
+      },
+      "status": {
+        "active": "판매중",
+        "reserved": "예약중",
+        "sold": "판매완료"
+      },
+      "showSold": "판매완료도 보기",
+      "priceLabel": "가격 ($)",
+      "titlePlaceholder": "무엇을 판매하시나요?",
+      "descriptionPlaceholder": "상태, 사이즈 등을 설명해 주세요.",
+      "photosLabel": "사진 (최대 6장)",
+      "addPhoto": "사진 추가",
+      "createListing": "게시하기",
+      "contactSeller": "판매자에게 연락하기",
+      "contactRevealed": "판매자 이메일:",
+      "markActive": "판매중으로 변경",
+      "markReserved": "예약중으로 변경",
+      "markSold": "판매완료로 변경",
+      "deleteListing": "게시글 삭제",
+      "editListing": "게시글 수정",
+      "empty": "아직 등록된 물품이 없어요. 첫 물품을 올려보세요!",
+      "createFailed": "게시글 등록에 실패했어요 — 다시 시도해 주세요.",
+      "uploadFailed": "사진 업로드에 실패했어요 — 다시 시도해 주세요.",
+      "updateFailed": "게시글 수정에 실패했어요 — 다시 시도해 주세요.",
+      "deleteFailed": "게시글 삭제에 실패했어요 — 다시 시도해 주세요.",
+      "undoDelete": "실행 취소",
+      "validation": "제목, 설명, 가격을 모두 입력해 주세요."
+    },
+    "events": {
+      "freeFoodFilter": "🍕 무료 음식",
+      "tags": {
+        "freeFood": "무료 음식",
+        "club": "동아리",
+        "academic": "학사",
+        "athletics": "스포츠",
+        "greekLife": "그릭 라이프",
+        "other": "기타"
+      },
+      "openHandshake": "Handshake 열기 ↗",
+      "dateLabel": "날짜",
+      "startTimeLabel": "시작 시간",
+      "endTimeLabel": "종료 시간 (선택)",
+      "locationLabel": "장소 (선택)",
+      "externalLinkLabel": "외부 링크 (선택)",
+      "externalLinkPlaceholder": "Handshake, GroupMe, 신청 폼 등",
+      "showPast": "지난 이벤트 보기",
+      "pastDateValidation": "이미 지난 날짜는 선택할 수 없어요.",
+      "calendar": {
+        "classesBegin": "개강",
+        "laborDay": "노동절 (휴강)",
+        "fallBreak": "가을 방학 (휴강)",
+        "thanksgivingBreak": "추수감사절 방학 (휴강)",
+        "lastDayOfClasses": "수업 마지막 날",
+        "finalExamsBegin": "기말고사 시작",
+        "mlkDay": "MLK Day (휴강)",
+        "springBreak": "봄 방학 (휴강)"
+      }
+    }
   },
   "schedule": {
     "courseCode": "과목 코드 (예: CSCI 4300)",
@@ -139,6 +256,7 @@
     },
     "showLayer": "이 레이어 표시",
     "showAll": "전체 표시 중",
+    "showNone": "아직 표시된 노선 없음",
     "notSet": "설정 안 함",
     "selectedCount": "{{count}}개 선택됨",
     "noAcademicCandidates": "아직 시간표와 매칭된 건물이 없어요.",
@@ -153,7 +271,10 @@
       "allOff": "전체 노선 숨기기",
       "perRoute": "노선별 표시",
       "noRoutesAtStop": "이 정류장에 서는 노선이 없어요.",
-      "arrivalEtaMinutes": "약 {{count}}분"
+      "arrivalEtaMinutes": "약 {{count}}분",
+      "back": "노선 목록으로",
+      "favorite": "이 노선 즐겨찾기",
+      "busesActive": "버스 {{count}}대 운행 중"
     },
     "directions": {
       "button": "경로찾기",
