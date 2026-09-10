@@ -7,6 +7,12 @@ import { Skeleton } from '../design-system/Skeleton/Skeleton'
 const CommunityPage = lazy(() => import('../pages/community/CommunityPage').then((m) => ({ default: m.CommunityPage })))
 const BoardPage = lazy(() => import('../pages/community/BoardPage').then((m) => ({ default: m.BoardPage })))
 const PostDetailPage = lazy(() => import('../pages/community/PostDetailPage').then((m) => ({ default: m.PostDetailPage })))
+const BuySellBoardPage = lazy(() =>
+  import('../pages/community/BuySellBoardPage').then((m) => ({ default: m.BuySellBoardPage })),
+)
+const BuySellDetailPage = lazy(() =>
+  import('../pages/community/BuySellDetailPage').then((m) => ({ default: m.BuySellDetailPage })),
+)
 const SchedulePage = lazy(() => import('../pages/schedule/SchedulePage').then((m) => ({ default: m.SchedulePage })))
 const MapPage = lazy(() => import('../pages/map/MapPage').then((m) => ({ default: m.MapPage })))
 const DiningPage = lazy(() => import('../pages/dining/DiningPage').then((m) => ({ default: m.DiningPage })))
@@ -41,6 +47,8 @@ function AppRoutes({ userEmail, onSignOut }: { userEmail?: string; onSignOut?: (
         <Routes>
           <Route path="/" element={<Navigate to="/community" replace />} />
           <Route path="/community" element={<CommunityPage />} />
+          <Route path="/community/buySell" element={<BuySellBoardPage />} />
+          <Route path="/community/buySell/:listingId" element={<BuySellDetailPage />} />
           <Route path="/community/:boardId" element={<BoardPage />} />
           <Route path="/community/:boardId/:postId" element={<PostDetailPage />} />
           <Route path="/schedule" element={<SchedulePage />} />
