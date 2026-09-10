@@ -4,6 +4,7 @@ import { searchUgaClassesFn } from './search-uga-classes/resource'
 import { getProfessorRatingFn } from './get-professor-rating/resource'
 import { getProfessorReviewsFn } from './get-professor-reviews/resource'
 import { getWalkingRouteFn } from './get-walking-route/resource'
+import { getFootballScheduleFn } from './get-football-schedule/resource'
 import { findUserByEmailFn } from './find-user-by-email/resource'
 import { getFriendScheduleFn } from './get-friend-schedule/resource'
 
@@ -168,6 +169,27 @@ const schema = a.schema({
     .returns(a.ref('WalkingRouteResult'))
     .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(getWalkingRouteFn)),
+
+  FootballGame: a.customType({
+    gameId: a.string(),
+    opponent: a.string(),
+    isHome: a.boolean(),
+    startTimeEpochMs: a.float(),
+    gameState: a.string(),
+    period: a.string(),
+    clock: a.string(),
+    teamScore: a.integer(),
+    opponentScore: a.integer(),
+  }),
+
+  // Proxies data.ncaa.com's public scoreboard JSON (see get-football-schedule/handler.ts) —
+  // has to run server-side since that endpoint sends no CORS headers for a direct browser call.
+  getFootballSchedule: a
+    .query()
+    .arguments({ year: a.integer().required() })
+    .returns(a.ref('FootballGame').array())
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(getFootballScheduleFn)),
 
   FindUserResult: a.customType({
     found: a.boolean(),

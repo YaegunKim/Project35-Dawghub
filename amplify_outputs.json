@@ -1006,6 +1006,74 @@
             }
           }
         },
+        "FootballGame": {
+          "name": "FootballGame",
+          "fields": {
+            "gameId": {
+              "name": "gameId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "opponent": {
+              "name": "opponent",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "isHome": {
+              "name": "isHome",
+              "isArray": false,
+              "type": "Boolean",
+              "isRequired": false,
+              "attributes": []
+            },
+            "startTimeEpochMs": {
+              "name": "startTimeEpochMs",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "gameState": {
+              "name": "gameState",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "period": {
+              "name": "period",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "clock": {
+              "name": "clock",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "teamScore": {
+              "name": "teamScore",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "opponentScore": {
+              "name": "opponentScore",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            }
+          }
+        },
         "FindUserResult": {
           "name": "FindUserResult",
           "fields": {
@@ -1240,6 +1308,23 @@
               "name": "toLng",
               "isArray": false,
               "type": "Float",
+              "isRequired": true
+            }
+          }
+        },
+        "getFootballSchedule": {
+          "name": "getFootballSchedule",
+          "isArray": true,
+          "type": {
+            "nonModel": "FootballGame"
+          },
+          "isRequired": false,
+          "isArrayNullable": true,
+          "arguments": {
+            "year": {
+              "name": "year",
+              "isArray": false,
+              "type": "Int",
               "isRequired": true
             }
           }

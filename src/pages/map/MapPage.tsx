@@ -20,6 +20,7 @@ import {
   faBookOpenReader,
   faBus,
   faChevronRight,
+  faDog,
   faDumbbell,
   faEye,
   faEyeSlash,
@@ -73,6 +74,13 @@ import {
   findBuildingByName,
   type UgaBuilding,
 } from '../../lib/ugaBuildings'
+import {
+  fetchGeorgiaFootballSchedule,
+  getCurrentFootballSeasonYear,
+  isFootballGameDay,
+  pickRelevantGame,
+  type FootballGame,
+} from '../../lib/footballSchedule'
 import { fetchLibraryHoursToday } from '../../lib/libraryHours'
 import { getGymHoursTodayByBuildingName } from '../../lib/gymHours'
 import { getDiningHallByBuildingName } from '../../lib/diningHours'
@@ -88,6 +96,7 @@ import { MapInfoPopup } from './popups/MapInfoPopup'
 import { MapDiningPopup } from './popups/MapDiningPopup'
 import { MapDormPopup } from './popups/MapDormPopup'
 import { MapAcademicPopup, type MapAcademicClass } from './popups/MapAcademicPopup'
+import { MapFootballPopup } from './popups/MapFootballPopup'
 import { MapStopPopup } from './popups/MapStopPopup'
 import { brand, category } from '../../design-system/colors'
 import { S } from './MapPage.style'
@@ -102,6 +111,9 @@ L.Icon.Default.mergeOptions({
 })
 
 const UGA_CENTER: [number, number] = [33.948, -83.3773]
+// Verified via Nominatim (OSM way 598413258) rather than assumed.
+const SANFORD_STADIUM_COORDS: [number, number] = [33.9497855, -83.3732093]
+const FOOTBALL_POLL_INTERVAL_MS = 15000
 const BASE_ZOOM = 15
 // Close enough to read a single building clearly without the tiles pixelating (map's maxZoom is 19).
 const FOCUS_ZOOM = 18
@@ -244,6 +256,30 @@ function routeCodeMarkerIcon(color: string, code: string) {
     className: '',
     iconSize: [22, 22],
     iconAnchor: [11, 11],
+  })
+}
+
+// White/generic on a normal day; flips to the brand red + a "Game Day!" tag underneath once
+// isFootballGameDay is true. A generic dog glyph (not a drawing of UGA's actual mascot) —
+// same trademark-avoidance reasoning as the app's own logo (see CLAUDE.md).
+function footballIcon(gameDay: boolean) {
+  const badgeSize = 28
+  const badgeColor = gameDay ? brand.primary : brand.white
+  const glyphColor = gameDay ? brand.white : brand.primary
+  const dogSvgHtml = renderFaIcon(faDog, {
+    styles: { color: glyphColor, width: '15px', height: '15px' },
+  }).html[0]
+  const label = gameDay
+    ? `<div style="margin-top:2px;background:${brand.primary};color:${brand.white};font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,0.3);">${i18n.t('map.football.gameDayBadge')}</div>`
+    : ''
+  return L.divIcon({
+    html: `<div style="display:flex;flex-direction:column;align-items:center;">
+      <div style="width:${badgeSize}px;height:${badgeSize}px;border-radius:50%;background:${badgeColor};border:2px solid ${brand.primary};display:flex;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,0.35);">${dogSvgHtml}</div>
+      ${label}
+    </div>`,
+    className: '',
+    iconSize: [90, badgeSize + 20],
+    iconAnchor: [45, badgeSize / 2],
   })
 }
 
@@ -466,6 +502,20 @@ export function MapPage() {
     },
   })
 
+  // Schedule is stable once published, so a long staleTime is enough on its own — but during
+  // a live game the score/clock inside that same payload need to stay fresh, so refetchInterval
+  // switches to a short poll only while `gameState === 'live'` shows up in the cached data, and
+  // turns back off (no interval) the rest of the time.
+  const footballScheduleQuery = useQuery({
+    queryKey: ['footballSchedule', getCurrentFootballSeasonYear(Date.now())],
+    queryFn: () => fetchGeorgiaFootballSchedule(getCurrentFootballSeasonYear(Date.now())),
+    staleTime: 60 * 60 * 1000,
+    refetchInterval: (query) => {
+      const games = query.state.data as FootballGame[] | undefined
+      return games?.some((g) => g.gameState === 'live') ? FOOTBALL_POLL_INTERVAL_MS : false
+    },
+  })
+
   const mapActionsRef = useRef<{
     applyLibraryFilter: (selected: string[]) => void
     applyDiningFilter: (selected: string[]) => void
@@ -491,6 +541,7 @@ export function MapPage() {
     setPickMode: (mode: 'origin' | 'destination' | 'return' | null) => void
     startDirectionsTo: (point: { lat: number; lng: number; label: string }) => void
     focusOnPoint: (point: { lat: number; lng: number }) => void
+    applyFootballMarker: (games: FootballGame[]) => void
   } | null>(null)
 
   useEffect(() => {
@@ -524,6 +575,10 @@ export function MapPage() {
     // page) before the map's own building fetch finished, this effect would fire once too
     // early with no buildings to match against and never get a second chance to run.
   }, [classEntriesQuery.data, selectedAcademicBuildings, buildingsLoadedTick])
+
+  useEffect(() => {
+    mapActionsRef.current?.applyFootballMarker(footballScheduleQuery.data ?? [])
+  }, [footballScheduleQuery.data])
 
   useEffect(() => {
     mapActionsRef.current?.setDirectionsMarkers(originPoint, destinationPoint)
@@ -881,6 +936,35 @@ export function MapPage() {
       const scale = iconScaleForZoom(map.getZoom())
       stopMarkers.forEach(({ marker, color }) => marker.setIcon(stopMarkerIcon(color, scale)))
     })
+
+    let footballMarker: L.Marker | null = null
+
+    // Not part of the layer drawer / layersRef toggle system — this is a single fixed landmark
+    // (same "always on" treatment as the campus boundary polygon), not a whole category of
+    // markers a user would want to hide.
+    function applyFootballMarker(games: FootballGame[]) {
+      const now = Date.now()
+      const gameDay = isFootballGameDay(games, now)
+      const relevantGame = pickRelevantGame(games, now)
+      if (!footballMarker) {
+        footballMarker = L.marker(SANFORD_STADIUM_COORDS, { icon: footballIcon(gameDay) }).addTo(map)
+      } else {
+        footballMarker.setIcon(footballIcon(gameDay))
+      }
+      bindReactPopup(
+        footballMarker,
+        <MapFootballPopup
+          game={relevantGame}
+          onDirections={() =>
+            startDirectionsTo({
+              lat: SANFORD_STADIUM_COORDS[0],
+              lng: SANFORD_STADIUM_COORDS[1],
+              label: i18n.t('map.football.stadiumName'),
+            })
+          }
+        />,
+      )
+    }
 
     let dormMarker: L.Marker | null = null
 
@@ -1482,7 +1566,10 @@ export function MapPage() {
       },
       startDirectionsTo,
       focusOnPoint,
+      applyFootballMarker,
     }
+
+    applyFootballMarker([])
 
     // Apply the Dining tab's pending "See Location"/"Get Directions" navigation intent (if
     // any) now that startDirectionsTo/focusOnPoint exist, then scrub it from router state so

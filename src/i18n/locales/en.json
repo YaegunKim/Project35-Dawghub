@@ -186,6 +186,14 @@
       "navWalkToDestination": "Walk to {{destination}}",
       "navTotalRemaining": "{{duration}} total",
       "recenter": "Re-center on my location"
+    },
+    "football": {
+      "stadiumName": "Sanford Stadium",
+      "gameDayBadge": "Game Day!",
+      "noUpcomingGame": "No upcoming game scheduled",
+      "vsOpponent": "vs {{opponent}}",
+      "atOpponent": "@ {{opponent}}",
+      "live": "LIVE"
     }
   },
   "friends": {

@@ -186,6 +186,14 @@
       "navWalkToDestination": "{{destination}}까지 도보",
       "navTotalRemaining": "총 {{duration}}",
       "recenter": "내 위치로 다시 맞추기"
+    },
+    "football": {
+      "stadiumName": "샌포드 스타디움",
+      "gameDayBadge": "Game Day!",
+      "noUpcomingGame": "예정된 경기가 없습니다",
+      "vsOpponent": "vs {{opponent}}",
+      "atOpponent": "@ {{opponent}}",
+      "live": "LIVE"
     }
   },
   "friends": {
