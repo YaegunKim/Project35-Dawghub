@@ -137,17 +137,20 @@ const BOOK_OPEN_READER_ICON = findIconDefinition({ prefix: 'fas', iconName: 'boo
 const DUMBBELL_ICON_DEF = findIconDefinition({ prefix: 'fas', iconName: 'dumbbell' })
 const UTENSILS_ICON_DEF = findIconDefinition({ prefix: 'fas', iconName: 'utensils' })
 
-// Bare icon in its category color — no background chip. A drop-shadow (not a shape) keeps
-// it legible over busy map tiles without adding back the circle.
+// Icon in its category color, on a faint off-white disc with a hairline border in that same
+// color — the disc's own box-shadow (not a filter on the glyph) keeps it legible over busy
+// map tiles.
 function themedIcon(definition: IconDefinition, color: string) {
+  const glyphSize = 11
+  const discSize = 20
   const svgHtml = renderFaIcon(definition, {
-    styles: { color, width: '16px', height: '16px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.45))' },
+    styles: { color, width: `${glyphSize}px`, height: `${glyphSize}px` },
   }).html[0]
   return L.divIcon({
-    html: `<div style="display:flex;align-items:center;justify-content:center;width:16px;height:16px;">${svgHtml}</div>`,
+    html: `<div style="display:flex;align-items:center;justify-content:center;width:${discSize}px;height:${discSize}px;border-radius:50%;background:#f5f5f7;border:0.1px solid ${color};box-shadow:0 1px 3px rgba(0,0,0,0.3);">${svgHtml}</div>`,
     className: '',
-    iconSize: [16, 16],
-    iconAnchor: [8, 8],
+    iconSize: [discSize, discSize],
+    iconAnchor: [discSize / 2, discSize / 2],
   })
 }
 
@@ -591,10 +594,35 @@ export function MapPage() {
 
     const map = L.map(containerRef.current, { zoomControl: false, maxZoom: 19 }).setView(UGA_CENTER, BASE_ZOOM)
     // Vector basemap (OpenFreeMap's "liberty" style, free/keyless) instead of a raster tile
-    // provider — lets applyBasemapLayerVisibility (below) selectively show/hide individual
-    // style layers (footpaths, roads, building/POI labels) client-side, which a pre-rendered
-    // raster image can't do.
-    L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/liberty' }).addTo(map)
+    // provider — lets us selectively show/hide individual style layers (footpaths, roads,
+    // building/POI labels) client-side, which a pre-rendered raster image can't do.
+    const basemapLayer = L.maplibreGL({ style: 'https://tiles.openfreemap.org/styles/liberty' }).addTo(map)
+    // Hide the basemap's own bus-stop icons+labels now that our own stop markers
+    // (stopMarkerIcon) cover the same spot with a live-arrivals popup the basemap's static
+    // label can't offer. Two separate style layers render a bus stop, so both need to be dealt
+    // with: "poi_transit" (bus/rail/airport's own dedicated label style — turned off outright,
+    // since this app has no rail/airport stops to preserve it for) AND the generic
+    // rank-tiered POI layers poi_r1/poi_r7/poi_r20 (every other POI class, restaurants/shops/
+    // parks/etc. included — icon-image keys off the same "class" field, so "bus" renders there
+    // too; a per-layer filter excluding class "bus" removes just that, not the whole layer).
+    // `once('load', ...)` because the style loads asynchronously and setLayoutProperty/setFilter
+    // throw if called before it's ready.
+    basemapLayer.getMaplibreMap().once('load', (event) => {
+      const glMap = event.target
+      if (glMap.getLayer('poi_transit')) glMap.setLayoutProperty('poi_transit', 'visibility', 'none')
+      ;(['poi_r1', 'poi_r7', 'poi_r20'] as const).forEach((layerId) => {
+        const existingFilter = glMap.getFilter(layerId)
+        // MapLibre's own FilterSpecification type doesn't allow nesting a filter expression
+        // (itself validly typed as FilterSpecification) as an element of a new "all" — the cast
+        // works around that type-only restriction; nesting "all" inside "all" is valid at runtime.
+        if (existingFilter) {
+          glMap.setFilter(
+            layerId,
+            ['all', existingFilter, ['!=', ['get', 'class'], 'bus']] as unknown as Parameters<typeof glMap.setFilter>[1],
+          )
+        }
+      })
+    })
 
     L.polygon(UGA_CAMPUS_BOUNDARY, {
       color: category.campusBoundary,
@@ -847,7 +875,7 @@ export function MapPage() {
     const diningMarkers: { name: string; marker: L.Marker }[] = []
     const gymMarkers: { name: string; marker: L.Marker }[] = []
     const routeEntries: { name: string; polylines: L.Polyline[] }[] = []
-    const stopMarkers: { name: string; marker: L.Marker; color: string }[] = []
+    const stopMarkers: { routeNames: string[]; marker: L.Marker; color: string }[] = []
     const athensRouteMarkers: { name: string; marker: L.Layer }[] = []
     map.on('zoom', () => {
       const scale = iconScaleForZoom(map.getZoom())
@@ -1205,16 +1233,14 @@ export function MapPage() {
         if (directionsBusFocus) return name === directionsBusFocus.routeName
         return prefsShowRoute(name)
       }
-      // Stops skip the "currently running" half of prefsShowRoute — a stop's routeName often
-      // comes back blank or spelled slightly differently from the live-bus feed's route name
-      // (see PassioStop.routeName / fetchUgaRoutesAndStops), so gating it the same way as
-      // routes made real, existing stops vanish whenever "show only currently running routes"
-      // was on, with no way to tell it apart from a genuine bug. hideAll and an explicit
-      // per-route uncheck still hide it — only the running/not-running distinction is skipped.
-      const stopVisible = (name: string) => {
+      // A stop is shown if any route that actually serves it (per PassioRoute.stops
+      // membership — see stopMarkers.push below, not the unreliable PassioStop.routeName tag)
+      // is currently visible — so it follows hideAll/per-route disable/operating-only exactly
+      // like the routes themselves, just OR'd across every route touching that stop.
+      const stopVisible = (routeNames: string[]) => {
         if (directionsBusFocus === 'hide-all') return false
-        if (directionsBusFocus) return name === directionsBusFocus.routeName
-        return !currentHideAll && !currentDisabledRoutes.includes(name)
+        if (directionsBusFocus) return routeNames.includes(directionsBusFocus.routeName)
+        return routeNames.some((name) => prefsShowRoute(name))
       }
       const focusedRoute = directionsBusFocus && directionsBusFocus !== 'hide-all' ? directionsBusFocus.routeName : null
 
@@ -1240,8 +1266,8 @@ export function MapPage() {
         })
       })
 
-      stopMarkers.forEach(({ name, marker }) => {
-        const shouldShow = stopVisible(name)
+      stopMarkers.forEach(({ routeNames, marker }) => {
+        const shouldShow = stopVisible(routeNames)
         if (shouldShow) {
           if (!stopsLayer.hasLayer(marker)) marker.addTo(stopsLayer)
         } else {
@@ -1619,7 +1645,8 @@ export function MapPage() {
             marker,
             <MapStopPopup stopName={stop.name} getArrivals={() => computeStopArrivals(stop, routes, latestBuses)} />,
           )
-          stopMarkers.push({ name: stop.routeName, marker, color: stop.color })
+          const routeNames = routes.filter((route) => route.stops.some((rs) => rs.id === stop.id)).map((route) => route.name)
+          stopMarkers.push({ routeNames, marker, color: stop.color })
         })
 
         applyBusFilter(currentDisabledRoutes, currentHideAll, currentOperatingOnly)

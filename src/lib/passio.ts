@@ -53,7 +53,6 @@ type RawStop = {
   color?: string
   latitude: number
   longitude: number
-  routeName?: string
 }
 
 type RawRoutePoint = { lat: string; lng: string }
@@ -83,10 +82,10 @@ export type PassioRoute = {
   code: string
   segments: [number, number][][]
   // Ordered list of stops this route actually visits, resolved from Passio's own per-route
-  // stop sequence (data.routes[id] beyond the [name, color] header) rather than PassioStop's
-  // routeName tag — most stops are "owned" by one route in that tag but are visited by
-  // several others too (confirmed: none of Central East's 19 real stops are tagged
-  // routeName "Central East"), so routeName alone can't tell you what a route stops at.
+  // stop sequence (data.routes[id] beyond the [name, color] header) rather than Passio's raw
+  // per-stop routeName tag — most stops are "owned" by one route in that tag but are visited
+  // by several others too (confirmed: none of Central East's 19 real stops are tagged
+  // routeName "Central East"), so that tag alone can't tell you what a route stops at.
   stops: RouteStop[]
 }
 
@@ -157,7 +156,6 @@ export type PassioStop = {
   color: string
   latitude: number
   longitude: number
-  routeName: string
 }
 
 // No real transit-prediction API exists for UGA's Passio system (confirmed: it only exposes
@@ -206,10 +204,10 @@ function distanceAlongLoopMeters(flatPoints: [number, number][], fromIndex: numb
   return total
 }
 
-// Which routes actually serve this stop (via PassioRoute.stops, not the unreliable
-// PassioStop.routeName — see the comment on PassioRoute.stops), and for each, the nearest
-// live bus's estimated time to reach it by walking its remaining distance along the route's
-// real GPS trace rather than a straight line (see distanceAlongLoopMeters).
+// Which routes actually serve this stop (via PassioRoute.stops — see its own comment for why),
+// and for each, the nearest live bus's estimated time to reach it by walking its remaining
+// distance along the route's real GPS trace rather than a straight line (see
+// distanceAlongLoopMeters).
 export function computeStopArrivals(stop: PassioStop, routes: PassioRoute[], buses: PassioBus[]): StopArrival[] {
   return routes
     .filter((route) => route.stops.some((routeStop) => routeStop.id === stop.id))
@@ -289,7 +287,6 @@ export async function fetchUgaRoutesAndStops(): Promise<{
     color: stop.color ?? brand.primary,
     latitude: stop.latitude,
     longitude: stop.longitude,
-    routeName: stop.routeName?.trim() ?? '',
   }))
 
   return { routes, stops }

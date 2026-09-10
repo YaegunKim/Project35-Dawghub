@@ -82,9 +82,9 @@ export async function fetchWalkingRoute(from: LatLng, to: LatLng): Promise<Walki
 }
 
 // Nearest in-radius stops *on this specific route's own real stop sequence* — not a flat,
-// route-tagged stop list. Passio's PassioStop.routeName only reflects one "owning" route per
-// physical stop, but most routes actually run through stops owned by others (confirmed: not
-// one of Central East's 19 real stops is tagged routeName "Central East"), so route.stops
+// route-tagged stop list. Passio's own per-stop routeName tag only reflects one "owning" route
+// per physical stop, but most routes actually run through stops owned by others (confirmed:
+// not one of Central East's 19 real stops is tagged routeName "Central East"), so route.stops
 // (src/lib/passio.ts, resolved from Passio's own per-route stop sequence) is the only
 // reliable source of "does this route stop near here."
 function candidateStopsOnRoute(point: LatLng, route: PassioRoute): { stopIndex: number; stop: RouteStop; distance: number }[] {

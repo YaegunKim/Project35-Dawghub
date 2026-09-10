@@ -124,6 +124,13 @@ pwa-assets.config.ts          # PWA icon generation config (@vite-pwa/assets-gen
 - **When you change the OG share image**: edit `public/brand/og-source.svg` → `pnpm assets:og`.
 - **Do not use UGA's official logos ("Power G", the arch wordmark, the mascot character) as-is in the logo** — they are trademark-protected. Reference only the brand color (`brand.primary` #BA0C2F) and a generic bulldog motif, drawn as an original.
 
+### UGA trademark/copyright notes (why the rule above exists)
+
+- UGA holds registered trademarks on both wordmarks ("University of Georgia", "Georgia", "UGA", "Bulldog(s)", "Dawg(s)", "Hairy Dawg", "Between The Hedges", etc.) and logo marks. These split into two owners: **athletic marks** (oval "G", Bulldog Head, Standing Bulldog, "Super G") belong to the UGA Athletic Association and are licensed only through georgiadogs.com/sports/licensing; **academic marks** (the Arch, etc.) go through the Division of Marketing and Communications (brand.uga.edu).
+- Notably, the bulldog mascot illustrations themselves are **not formally registered trademarks**, but UGA's own guidance still requires prior approval from the Trademarks Manager before use — so lack-of-registration doesn't mean free-to-use.
+- UGA does actively enforce this (e.g. required a sitting Georgia governor to stop using the university logo on bumper stickers without permission), so treat it as a real constraint, not boilerplate.
+- What's actually safe to use in this app: the brand color alone (not trademarked) and an **original** bulldog drawing that doesn't copy any specific official mark's silhouette/pose (same standard already applied to `Logo.tsx`/`logo.svg`).
+
 ---
 
 ## Per-page docs
