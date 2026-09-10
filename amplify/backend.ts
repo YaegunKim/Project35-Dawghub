@@ -2,6 +2,7 @@ import { defineBackend } from '@aws-amplify/backend'
 import type { Function as LambdaFunction } from 'aws-cdk-lib/aws-lambda'
 import { auth } from './auth/resource'
 import { data } from './data/resource'
+import { storage } from './storage/resource'
 import { logBusArrivalsFn } from './data/log-bus-arrivals/resource'
 import { getFriendScheduleFn } from './data/get-friend-schedule/resource'
 import { findUserByEmailFn } from './data/find-user-by-email/resource'
@@ -9,6 +10,7 @@ import { findUserByEmailFn } from './data/find-user-by-email/resource'
 const backend = defineBackend({
   auth,
   data,
+  storage,
   logBusArrivalsFn,
   getFriendScheduleFn,
   findUserByEmailFn,
