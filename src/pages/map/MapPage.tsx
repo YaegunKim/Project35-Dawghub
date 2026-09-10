@@ -113,6 +113,11 @@ const MIN_ICON_SCALE = 0.6
 const MAX_ICON_SCALE = 1.6
 const BUS_POLL_INTERVAL_MS = 8000
 const BUS_ANIMATION_MS = 6000
+// Background tabs get their setInterval throttled by the browser, so the gap since the last
+// poll can end up far longer than BUS_POLL_INTERVAL_MS once the tab is foregrounded again —
+// animating a marker across however far the bus actually moved in that gap over the usual
+// BUS_ANIMATION_MS would look like it's racing across campus. Past this gap, snap instead.
+const BUS_STALE_JUMP_THRESHOLD_MS = BUS_POLL_INTERVAL_MS * 2
 
 function iconScaleForZoom(zoom: number) {
   const scale = 2 ** (zoom - BASE_ZOOM)
@@ -940,6 +945,7 @@ export function MapPage() {
     let athensRoutesData: AthensRoute[] = []
     const athensBusMarkers = new Map<string, L.Marker>()
     let athensPollHandle: ReturnType<typeof setInterval> | null = null
+    let lastAthensPollAt: number | null = null
 
     async function loadAthensTransit() {
       if (athensLoaded) return
@@ -982,6 +988,10 @@ export function MapPage() {
         const buses = await fetchAthensBuses()
         if (cancelled) return
 
+        const now = Date.now()
+        const shouldAnimate = lastAthensPollAt != null && now - lastAthensPollAt < BUS_STALE_JUMP_THRESHOLD_MS
+        lastAthensPollAt = now
+
         const seenIds = new Set<string>()
         buses.forEach((bus) => {
           seenIds.add(bus.id)
@@ -994,7 +1004,11 @@ export function MapPage() {
           if (existing) {
             existing.setIcon(busHeadingIcon(color, bus.bearing))
             existing.setPopupContent(popupLabel)
-            animateMarkerTo(existing, target, BUS_ANIMATION_MS, () => cancelled)
+            if (shouldAnimate) {
+              animateMarkerTo(existing, target, BUS_ANIMATION_MS, () => cancelled)
+            } else {
+              existing.setLatLng(target)
+            }
           } else {
             const marker = L.marker(target, { icon: busHeadingIcon(color, bus.bearing) }).bindPopup(popupLabel)
             marker.addTo(athensLiveBusLayer)
@@ -1617,12 +1631,17 @@ export function MapPage() {
       })
 
     const busMarkers = new Map<string, L.Marker>()
+    let lastUgaPollAt: number | null = null
 
     async function pollBuses() {
       try {
         const buses = await fetchUgaBuses()
         if (cancelled) return
         latestBuses = buses
+
+        const now = Date.now()
+        const shouldAnimate = lastUgaPollAt != null && now - lastUgaPollAt < BUS_STALE_JUMP_THRESHOLD_MS
+        lastUgaPollAt = now
 
         const seenIds = new Set<string>()
         currentRunningRoutes.clear()
@@ -1637,7 +1656,11 @@ export function MapPage() {
           if (existing) {
             existing.setIcon(busHeadingIcon(bus.color, bus.course))
             existing.setPopupContent(bus.route || 'DawgHub Bus')
-            animateMarkerTo(existing, target, BUS_ANIMATION_MS, () => cancelled)
+            if (shouldAnimate) {
+              animateMarkerTo(existing, target, BUS_ANIMATION_MS, () => cancelled)
+            } else {
+              existing.setLatLng(target)
+            }
           } else {
             const marker = L.marker(target, { icon: busHeadingIcon(bus.color, bus.course) }).bindPopup(
               bus.route || 'DawgHub Bus',
@@ -1664,10 +1687,21 @@ export function MapPage() {
     pollBuses()
     const interval = setInterval(pollBuses, BUS_POLL_INTERVAL_MS)
 
+    // Coming back from a backgrounded tab shouldn't wait up to BUS_POLL_INTERVAL_MS for the
+    // next scheduled tick — poll immediately so the snap-instead-of-animate gap check above
+    // sees a fresh position right away instead of the map sitting on stale ones a while longer.
+    function handleVisibilityChange() {
+      if (document.visibilityState !== 'visible') return
+      pollBuses()
+      if (athensPollHandle) pollAthensBuses()
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
     return () => {
       cancelled = true
       clearInterval(interval)
       stopAthensPolling()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
       if (rippleTimeout) clearTimeout(rippleTimeout)
       if (watchId !== null) navigator.geolocation.clearWatch(watchId)
       window.removeEventListener('deviceorientationabsolute', handleOrientation)
