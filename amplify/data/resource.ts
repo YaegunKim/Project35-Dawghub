@@ -63,6 +63,23 @@ const schema = a.schema({
     })
     .authorization((allow) => [allow.owner(), allow.authenticated().to(['read'])]),
 
+  MarketplaceListing: a
+    .model({
+      title: a.string().required(),
+      description: a.string().required(),
+      price: a.float().required(),
+      category: a.enum(['TEXTBOOKS', 'FURNITURE', 'ELECTRONICS', 'CLOTHING', 'TICKETS', 'OTHER']),
+      condition: a.enum(['NEW', 'LIKE_NEW', 'GOOD', 'FAIR']),
+      status: a.enum(['ACTIVE', 'RESERVED', 'SOLD']),
+      // S3 object keys (Amplify Storage, amplify/storage/resource.ts), not full URLs —
+      // resolved to a displayable URL client-side via getUrl().
+      photoKeys: a.string().array(),
+      // Denormalized at creation time, same pattern as Friendship.senderEmail/recipientEmail —
+      // lets "Contact seller" reveal an email without a second privileged lookup.
+      sellerEmail: a.string().required(),
+    })
+    .authorization((allow) => [allow.owner(), allow.authenticated().to(['read'])]),
+
   ClassEntry: a
     .model({
       courseCode: a.string().required(),
