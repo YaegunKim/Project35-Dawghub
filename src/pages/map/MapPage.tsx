@@ -25,6 +25,7 @@ import {
   faEye,
   faEyeSlash,
   faGear,
+  faGraduationCap,
   faHouse,
   faLayerGroup,
   faLocationCrosshairs,
@@ -143,7 +144,6 @@ const ACADEMICS_DOT_COLOR = category.academics
 const BUILDING_DOT_RADIUS = 2
 const MY_DORM_COLOR = category.myDorm.fill
 const MY_ACADEMIC_COLOR = category.myAcademic.fill
-const MY_ACADEMIC_BORDER = category.myAcademic.border
 
 const BOOK_OPEN_READER_ICON = findIconDefinition({ prefix: 'fas', iconName: 'book-open-reader' })
 const DUMBBELL_ICON_DEF = findIconDefinition({ prefix: 'fas', iconName: 'dumbbell' })
@@ -182,6 +182,8 @@ const DINING_DOT = dotMarkerIcon(category.dining)
 const GYM_ICON = themedIcon(DUMBBELL_ICON_DEF, category.gym)
 const GYM_DOT = dotMarkerIcon(category.gym)
 const HOUSE_ICON = themedIcon(faHouse, MY_DORM_COLOR)
+const MY_ACADEMIC_ICON = themedIcon(faGraduationCap, MY_ACADEMIC_COLOR)
+const MY_ACADEMIC_DOT = dotMarkerIcon(MY_ACADEMIC_COLOR)
 
 function userLocationIcon(heading: number | null) {
   const cone =
@@ -925,7 +927,7 @@ export function MapPage() {
     mapRef.current = map
 
     const housingMarkers: { name: string; marker: L.CircleMarker }[] = []
-    const academicMarkers: { name: string; marker: L.CircleMarker }[] = []
+    const academicMarkers: { name: string; marker: L.Marker }[] = []
     const libraryMarkers: { name: string; marker: L.Marker }[] = []
     const diningMarkers: { name: string; marker: L.Marker }[] = []
     const gymMarkers: { name: string; marker: L.Marker }[] = []
@@ -1218,8 +1220,12 @@ export function MapPage() {
       }[],
       selected: string[],
     ) {
+      const stalePreviousMarkers = new Set(academicMarkers.map(({ marker }) => marker))
       academicMarkers.forEach(({ marker }) => academicsLayer.removeLayer(marker))
       academicMarkers.length = 0
+      const survivingZoomAwareMarkers = zoomAwareMarkers.filter((entry) => !stalePreviousMarkers.has(entry.marker))
+      zoomAwareMarkers.length = 0
+      zoomAwareMarkers.push(...survivingZoomAwareMarkers)
       if (loadedBuildings.length === 0) return
 
       const entriesByBuilding = new Map<string, MapAcademicClass[]>()
@@ -1264,14 +1270,7 @@ export function MapPage() {
       loadedBuildings
         .filter((building) => entriesByBuilding.has(building.name))
         .forEach((building) => {
-          const marker = L.circleMarker([building.latitude, building.longitude], {
-            radius: 6,
-            color: MY_ACADEMIC_BORDER,
-            fillColor: MY_ACADEMIC_COLOR,
-            weight: 2,
-            fillOpacity: 0.95,
-            bubblingMouseEvents: false,
-          })
+          const marker = L.marker([building.latitude, building.longitude], { icon: MY_ACADEMIC_ICON })
           bindReactPopup(
             marker,
             <MapAcademicPopup
@@ -1283,10 +1282,12 @@ export function MapPage() {
             />,
           )
           academicMarkers.push({ name: building.name, marker })
+          zoomAwareMarkers.push({ marker, fullIcon: MY_ACADEMIC_ICON, dotIcon: MY_ACADEMIC_DOT })
         })
 
       setAcademicCandidates(Array.from(entriesByBuilding.keys()).sort())
       applyAcademicsFilter(effectiveSelected)
+      updateMarkerDetail()
     }
 
     let currentDisabledRoutes: string[] = busPrefs.disabledRoutes
