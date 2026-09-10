@@ -40,6 +40,7 @@
     "debugCycleSummary": "지금까지 수집된 {{weekday}} 기록 — 버스 {{buses}}대, 총 {{count}}회 운행"
   },
   "community": {
+    "tagline": "멍! 오늘 캠퍼스에서는 무슨 일이 있을까요?",
     "boards": {
       "general": "자유게시판",
       "housing": "주거",
@@ -47,7 +48,15 @@
       "buySell": "중고거래",
       "events": "이벤트"
     },
+    "boardSubtitles": {
+      "general": "공지 · 자유 · 질문",
+      "housing": "기숙사 후기 · 서브리스 · StarRez",
+      "classes": "수업 검색 · 교수님 평점",
+      "buySell": "교재 · 가구 · 티켓",
+      "events": "캠퍼스 행사 · 무료 음식"
+    },
     "back": "게시판 목록으로",
+    "newPost": "새 글 작성",
     "titlePlaceholder": "제목",
     "bodyPlaceholder": "무슨 얘기를 나눠볼까요?",
     "post": "게시하기",

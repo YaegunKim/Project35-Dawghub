@@ -40,6 +40,7 @@
     "debugCycleSummary": "{{count}} cycles across {{buses}} buses recorded on {{weekday}}s so far"
   },
   "community": {
+    "tagline": "Woof! What's happening around campus today?",
     "boards": {
       "general": "General",
       "housing": "Housing",
@@ -47,7 +48,15 @@
       "buySell": "Buy & Sell",
       "events": "Events"
     },
+    "boardSubtitles": {
+      "general": "Notices, free talk, Q&A",
+      "housing": "Dorm reviews, subleases, StarRez",
+      "classes": "Course search, professor ratings",
+      "buySell": "Textbooks, furniture, tickets",
+      "events": "Campus events, free food"
+    },
     "back": "Back to boards",
+    "newPost": "New post",
     "titlePlaceholder": "Title",
     "bodyPlaceholder": "What's on your mind?",
     "post": "Post",
