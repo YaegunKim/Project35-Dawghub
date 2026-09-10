@@ -7,6 +7,7 @@ import { getWalkingRouteFn } from './get-walking-route/resource'
 import { getFootballScheduleFn } from './get-football-schedule/resource'
 import { findUserByEmailFn } from './find-user-by-email/resource'
 import { getFriendScheduleFn } from './get-friend-schedule/resource'
+import { getCourseCatalogEntryFn } from './get-course-catalog-entry/resource'
 
 const schema = a.schema({
   // Board-specific fields below are all optional and only populated by the board that
@@ -286,6 +287,25 @@ const schema = a.schema({
     .returns(a.ref('FriendClassEntry').array())
     .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(getFriendScheduleFn)),
+
+  CourseCatalogEntry: a.customType({
+    found: a.boolean(),
+    courseCode: a.string(),
+    creditHours: a.string(),
+    description: a.string(),
+    prerequisites: a.string(),
+  }),
+
+  // Proxies bulletin.uga.edu's course catalog (credit hours / description / prerequisites)
+  // from the server — same "unofficial, undocumented, can break silently" category as
+  // searchUgaClasses' reg.uga.edu CSV and getProfessorRating's RMP call above. See
+  // ai/TRD.md §4.4 and get-course-catalog-entry/handler.ts.
+  getCourseCatalogEntry: a
+    .query()
+    .arguments({ courseCode: a.string().required() })
+    .returns(a.ref('CourseCatalogEntry'))
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(getCourseCatalogEntryFn)),
 
   // Raw (bus, stop) proximity samples written every minute by log-bus-arrivals — one row
   // per poll a bus is within range of a stop, including repeats while it lingers. Building
