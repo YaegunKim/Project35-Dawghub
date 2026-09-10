@@ -86,7 +86,7 @@ import { fetchLibraryHoursToday } from '../../lib/libraryHours'
 import { getGymHoursTodayByBuildingName } from '../../lib/gymHours'
 import { getDiningHallByBuildingName } from '../../lib/diningHours'
 import type { MapLocationState } from '../../lib/mapNavigation'
-import { UGA_CAMPUS_BOUNDARY } from '../../lib/campusBoundary'
+import { UGA_CAMPUS_BOUNDARIES } from '../../lib/campusBoundary'
 import { fetchMapPreference, updateMapPreference } from '../../lib/mapPreferences'
 import { client } from '../../lib/amplifyClient'
 import { queryClient } from '../../lib/queryClient'
@@ -681,14 +681,21 @@ export function MapPage() {
       })
     })
 
-    L.polygon(UGA_CAMPUS_BOUNDARY, {
-      color: category.campusBoundary,
-      weight: 2,
-      opacity: 0.6,
-      fill: false,
-      dashArray: '6 4',
-      interactive: false,
-    }).addTo(map)
+    UGA_CAMPUS_BOUNDARIES.forEach((campus) => {
+      // interactive: true (unlike every other decorative-only layer here) so hovering the
+      // outline shows which campus it is — needed now that most of these are far from Athens,
+      // where a stray dashed line has no other context to explain itself.
+      L.polygon(campus.rings, {
+        color: category.campusBoundary,
+        weight: 2,
+        opacity: 0.6,
+        fill: false,
+        dashArray: '6 4',
+        interactive: true,
+      })
+        .bindTooltip(campus.name, { sticky: true })
+        .addTo(map)
+    })
 
     L.control.zoom({ position: 'bottomright' }).addTo(map)
 
