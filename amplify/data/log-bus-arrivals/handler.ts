@@ -119,11 +119,11 @@ function distanceMeters(lat1: number, lng1: number, lat2: number, lng2: number):
   return 2 * earthRadiusMeters * Math.asin(Math.sqrt(a))
 }
 
-// Runs every minute (see resource.ts). Writes one row per (bus, stop) pair currently within
-// range — including repeats while a bus lingers at a stop across several polls. Deduping
-// into discrete "visits" happens later at stats time (cluster consecutive rows per
-// bus+stop), not here, so this stays a dumb append-only writer with no read-before-write.
-export const handler: EventBridgeHandler<'Scheduled Event', null, void> = async () => {
+// Writes one row per (bus, stop) pair currently within range — including repeats while a bus
+// lingers at a stop across several polls. Deduping into discrete "visits" happens later at
+// stats time (cluster consecutive rows per bus+stop), not here, so this stays a dumb
+// append-only writer with no read-before-write.
+async function pollOnce(): Promise<void> {
   const [buses, stops] = await Promise.all([fetchBuses(), fetchStops()])
   if (buses.length === 0 || stops.length === 0) return
 
@@ -158,4 +158,26 @@ export const handler: EventBridgeHandler<'Scheduled Event', null, void> = async 
   results.forEach((result) => {
     if (result.status === 'rejected') console.error(result.reason)
   })
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+// EventBridge only triggers this once a minute (see resource.ts — its schedule rate can't go
+// below 1 minute), but a bus can pass clean through a stop's ARRIVAL_RADIUS_METERS between two
+// 1-minute-apart polls without ever being caught. Polling a few times per invocation, spaced
+// out, gets a finer-grained sample without needing a faster trigger.
+const POLL_COUNT = 3
+const POLL_INTERVAL_MS = 20_000
+
+export const handler: EventBridgeHandler<'Scheduled Event', null, void> = async () => {
+  for (let i = 0; i < POLL_COUNT; i++) {
+    try {
+      await pollOnce()
+    } catch (error) {
+      console.error(error)
+    }
+    if (i < POLL_COUNT - 1) await sleep(POLL_INTERVAL_MS)
+  }
 }
