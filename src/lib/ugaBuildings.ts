@@ -41,6 +41,180 @@ const MANUAL_BUILDINGS: UgaBuilding[] = [
     latitude: 33.93908655,
     longitude: -83.37082376,
   },
+  // UGA's regional/research campuses (Griffin, Tifton, Gwinnett, Skidaway) have no GIS layer
+  // of their own — fetch-uga-buildings.mjs only queries OUA/UGA_CampusMap_Base, which is
+  // Athens-only, and ATHENS_BOUNDS would exclude these coordinates from it even if it did
+  // return them. Found via each campus's own class-location strings in the real Schedule of
+  // Classes feed (search-uga-classes), then geocoded by street address (OpenStreetMap
+  // Nominatim) — approximate at the campus/building level, not surveyed footprints.
+  {
+    name: 'Griffin Student Learning Center',
+    buildingUse: 'Academics',
+    // 1109 Experiment Street, Griffin, GA 30223 (UGA Griffin Campus's main address —
+    // the SLC itself has no separately geocodable address).
+    latitude: 33.2634067,
+    longitude: -84.2848812,
+  },
+  {
+    name: 'Tifton Horticulture Building',
+    buildingUse: 'Academics',
+    // Research Way, Tifton, GA 31793 (per tifton.caes.uga.edu's own facilities page).
+    latitude: 31.4762501,
+    longitude: -83.5250331,
+  },
+  {
+    name: 'NESPAL',
+    buildingUse: 'Academics',
+    // 2353 Rainwater Road, Tifton, GA 31793 (National Environmentally Sound Production
+    // Agriculture Laboratory, also on the Tifton campus).
+    latitude: 31.4750133,
+    longitude: -83.5273456,
+  },
+  {
+    name: 'UGA Gwinnett Campus',
+    buildingUse: 'Academics',
+    // 2530 Sever Road NW, Lawrenceville, GA 30043 (per gwinnett.uga.edu's contact page).
+    latitude: 33.9982576,
+    longitude: -84.0728697,
+  },
+  {
+    name: 'Skidaway Marine Extension',
+    buildingUse: 'Academics',
+    // No independently geocodable address for the Marine Extension building itself —
+    // anchored to the Skidaway Institute of Oceanography, which shares the same small
+    // island/road with UGA Marine Extension's Aquarium a few hundred meters away.
+    latitude: 31.9883637,
+    longitude: -81.0216933,
+  },
+  {
+    name: 'Flynt Building',
+    buildingUse: 'Academics',
+    // Griffin campus, "faces Experiment Street" (architects.uga.edu) — no separately
+    // geocodable address, anchored to the same campus coordinate as the Griffin Student
+    // Learning Center above.
+    latitude: 33.2634067,
+    longitude: -84.2848812,
+  },
+  {
+    name: 'H. H. Tift Building',
+    buildingUse: 'Academics',
+    // Tifton campus, "along Research Way ... south of the Old Administration Building"
+    // (architects.uga.edu) — same Research Way block as Tifton Horticulture Building above,
+    // no more precise address available.
+    latitude: 31.4762501,
+    longitude: -83.5250331,
+  },
+  {
+    name: 'Environmental Health Sciences',
+    buildingUse: 'Academics',
+    // South Campus, "adjacent to the Forestry Building" (architects.uga.edu's historic-
+    // preservation page for this building) — anchored to Forestry Resources 1's GIS
+    // coordinate, its nearest confirmed neighbor. The 150 E Green St address that turns up
+    // in general search results is the College of Public Health's administrative/mailing
+    // address, not this building's physical footprint (Green St is a different part of
+    // campus entirely from the Forestry/South Campus cluster this building sits in).
+    latitude: 33.94408307,
+    longitude: -83.37467331,
+  },
+  {
+    name: 'West Campus Dining, Learning and Well-being Center',
+    buildingUse: 'Student Life',
+    // Opened Aug. 2026, too new for the GIS layer — UGA Today describes it as at "East
+    // Cloverhurst Avenue and University Court," the same intersection Hillside Dining
+    // Commons above is anchored to (they're both on that block).
+    latitude: 33.9491,
+    longitude: -83.3802,
+  },
+  {
+    name: 'Athena Studios',
+    buildingUse: 'Academics',
+    // 900 Athena Drive, Athens, GA — the Grady College film/TV production partner
+    // facility; geocoded directly (OpenStreetMap has it as a named POI at this address).
+    latitude: 33.9703186,
+    longitude: -83.3168255,
+  },
+  {
+    name: 'Redding Building',
+    buildingUse: 'Academics',
+    // 325 Woodroof Dr, Griffin, GA — a distinct street from the Griffin Student Learning
+    // Center/Flynt Building anchor above, so geocoded separately rather than reused.
+    latitude: 33.2637529,
+    longitude: -84.2888615,
+  },
+  {
+    name: 'Broad Street Studios',
+    buildingUse: 'Academics',
+    // 225 W. Broad St, Athens, GA — Lamar Dodd School of Art's Broad St. Studio building
+    // (art.uga.edu/location/225-w-broad-st-athens-ga-30602). Both "Broad St Studio 1" and
+    // "Broad St Studio 2" registrar strings anchor here — same building, different rooms.
+    latitude: 33.9566197,
+    longitude: -83.3786563,
+  },
+  {
+    name: 'Strength Lab',
+    buildingUse: 'Academics',
+    // STRENGTH Laboratory (Structural Engineering Testing Hub), at the Whitehall
+    // Engineering Education and Research Campus, 1151 E. Whitehall Rd, Athens — a newer,
+    // separate engineering complex from Driftmier Engineering Center/Annex above, not a
+    // typo for the same place (geocoded independently, ~3.5km apart).
+    latitude: 33.9056443,
+    longitude: -83.3613251,
+  },
+  {
+    name: 'I-STEM 1',
+    buildingUse: 'Academics',
+    // "At the corner of Cedar Street and East Campus Road" (news.uga.edu/meet-the-i-stem-
+    // complex) — anchored to ArcGIS's "Computing Services" building, which sits on that
+    // same corner.
+    latitude: 33.94518817,
+    longitude: -83.37185316,
+  },
+  {
+    name: 'I-STEM 2',
+    buildingUse: 'Academics',
+    // "Right off East Campus Road" near Davison Life Sciences (same source as I-STEM 1
+    // above) — anchored to Davison Life Sciences Complex's GIS coordinate as its nearest
+    // confirmed neighbor.
+    latitude: 33.94320559,
+    longitude: -83.37235379,
+  },
+  {
+    name: 'UGA Pharmacy Program (Augusta)',
+    buildingUse: 'Academics',
+    // "HM Pharmacy GRU" / "HM-1200" — UGA College of Pharmacy's facility on the Augusta
+    // University Health Sciences campus (formerly Georgia Regents University, hence "GRU"),
+    // 1120 15th Street, Augusta, GA — an out-of-Athens partner site, not a UGA-owned campus,
+    // included anyway per the same "accurate location for every campus" request as the
+    // regional campuses above.
+    latitude: 33.4694103,
+    longitude: -81.9884196,
+  },
+  {
+    name: 'A.B.E.L. Building',
+    buildingUse: 'Academics',
+    // Aquatic Biotechnology and Environmental Laboratory, Building #2580 — absent from both
+    // the GIS layer and UGA's own August 2023 building-index PDF (which jumps straight from
+    // #2440 to #2600), so anchored to Whitehall Forest, the research site Warnell's own page
+    // names it as being located at (alongside the Whitehall Fisheries Lab).
+    latitude: 33.891783,
+    longitude: -83.360968,
+  },
+  {
+    name: 'Livestock Instructional Arena',
+    buildingUse: 'Academics',
+    // 2600 S Milledge Ave, Athens, GA — confirmed by the user; geocoded directly
+    // (OpenStreetMap has it as a named POI, "UGA Livestock Instructional Arena").
+    latitude: 33.8975541,
+    longitude: -83.3681851,
+  },
+  {
+    name: 'Support Services Building',
+    buildingUse: 'Support',
+    // "Facilities Services (Physical Plant Facilities, Support Services Building)", UGA
+    // #4492 (architects.uga.edu) — 1180 East Broad Street, Athens, GA; geocoded directly.
+    latitude: 33.958688,
+    longitude: -83.3653021,
+  },
 ]
 
 const ALL_BUILDINGS: UgaBuilding[] = [...GIS_BUILDINGS, ...MANUAL_BUILDINGS]
@@ -100,6 +274,58 @@ const BUILDING_NAME_ALIASES: Record<string, string> = {
   'performng arts ctr': 'Performing Arts',
   'ga mus of art pvac': 'Georgia Museum of Art',
   'life sci f.davison': 'Davison Life Sciences Complex',
+  // Brown Hall itself is a residence hall (no classes held there) — confirmed by the user.
+  'joe brown': 'Joseph E. Brown Hall',
+  'founders house': 'Founders Garden House',
+  // 270 River Rd, Athens, GA 30602 — the Lamar Dodd School of Art's main academic
+  // building, per art.uga.edu/about/facilities/main-art-building (the school also uses a
+  // few smaller satellite studios elsewhere, which have their own separate GIS entries).
+  'main art building': 'Lamar Dodd School of Art',
+  'griffin slc': 'Griffin Student Learning Center',
+  'horticulture bldg': 'Tifton Horticulture Building',
+  'skidaway mar ext': 'Skidaway Marine Extension',
+  // Center for Applied Genetic Technologies, 111 Riverbend Rd — same coordinates as ArcGIS's
+  // "CAGTECH" entry (confirmed by geocoding that address) and UGA's own August 2023 building
+  // index (#2438 CAGTECH).
+  'c a g t': 'CAGTECH',
+  // Center for Applied Isotope Studies, 120 Riverbend Rd — same coordinates as ArcGIS's
+  // "Center for Applied Isotope Studies" entry (confirmed the same way; also #2127 in the
+  // building index).
+  'c a i s': 'Center for Applied Isotope Studies',
+  'dlw center': 'West Campus Dining, Learning and Well-being Center',
+  'h. h. tift bldg': 'H. H. Tift Building',
+  'enviro health sci': 'Environmental Health Sciences',
+  'georgia center c.e': 'Georgia Center for Cont Ed',
+  'golf driv rng bld': 'Driving Range Building',
+  // ArcGIS has no separate point for the Annex specifically (only the main "Business
+  // Services" building), so this anchors to that adjacent building instead — confirmed by
+  // the user as being in the same Spring Street area.
+  'bus. service annex': 'Business Services',
+  'spec coll library': 'Richard B. Russell Jr. Special Collections',
+  // Renamed at some point — ArcGIS still calls it "Computing Services", the registrar feed
+  // (and Waze/UGA's own a-z location page) still calls it "Statistics & Computer Services".
+  'stat/computer srvs': 'Computing Services',
+  'broad st studio 1': 'Broad Street Studios',
+  'broad st studio 2': 'Broad Street Studios',
+  'hm pharmacy gru': 'UGA Pharmacy Program (Augusta)',
+  'a b e l': 'A.B.E.L. Building',
+  'livest ins arena': 'Livestock Instructional Arena',
+  // Renamed from "Moore College" to "Moore Hall" in 2021 (honors.uga.edu) — same building,
+  // not to be confused with the separate "Moore-Rooker Hall".
+  'moore college': 'Moore Hall',
+  // "Ads" here is "Animal Dairy Science" (the Edgar L. Rhodes Center For Animal and Dairy
+  // Science), the same Rhodes complex as the "-B"/"-C" aliases above — the trailing wing
+  // letter is missing from this particular registrar string (cut off after the dash), so
+  // this defaults to wing A rather than being verifiably exact.
+  'animal dairy sci -': 'Rhodes Animal Science Center - A',
+  // "Ps" = Physical Services, not the "PS - Public Service" fund group it first looked like —
+  // confirmed via architects.uga.edu's own page for UGA #4492.
+  'ps service bldg a': 'Support Services Building',
+  // "Greenhouse Plants Agronomy" and "Greenhouse Plant Pathology" are two separate ArcGIS
+  // names, but their closest pair of points is only ~14m apart — the same small greenhouse
+  // row on South Campus — so which one "P Agy" abbreviates doesn't actually matter for
+  // marker placement; picking one arbitrarily.
+  'greenhse res p agy': 'Greenhouse Plants Agronomy',
 }
 
 // A handful of registrar building strings differ from the ArcGIS name only in punctuation
