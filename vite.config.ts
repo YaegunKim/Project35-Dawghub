@@ -1,9 +1,27 @@
-import { readFileSync } from 'node:fs'
-import { defineConfig } from 'vite'
+import { copyFileSync, readFileSync } from 'node:fs'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'))
+
+// maplibre-gl's own bundled code loads its render worker via
+// `new Worker(new URL('maplibre-gl-worker.mjs', import.meta.url))`, resolved relative to
+// wherever its chunk ends up being served from. Vite's worker-detection rewrites that
+// reference to /assets/maplibre-gl-worker.mjs at build time but — since maplibre-gl is
+// excluded from dep pre-bundling (see optimizeDeps.exclude below) and only pulled in via
+// manualChunks — never actually emits the file into dist/, so every production build 404s
+// on it (masked as a "text/html" MIME error by Amplify's SPA fallback) and the map never
+// loads. Dev mode never hits this, since Vite resolves worker imports straight from
+// node_modules at request time. Copy the file in ourselves as the fix.
+function copyMaplibreWorkerPlugin(): Plugin {
+  return {
+    name: 'copy-maplibre-worker',
+    closeBundle() {
+      copyFileSync('node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs', 'dist/assets/maplibre-gl-worker.mjs')
+    },
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -33,6 +51,9 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    // Registered before VitePWA so the copied worker file exists in time to be swept into
+    // its precache manifest too (offline PWA support for the map).
+    copyMaplibreWorkerPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['brand/logo.svg', 'favicon.ico', 'apple-touch-icon-180x180.png'],
