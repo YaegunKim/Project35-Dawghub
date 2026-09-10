@@ -47,6 +47,42 @@ export const category = {
   directionsWalk: '#0d9488',
   directionsOrigin: '#16a34a',
   directionsDestination: '#dc2626',
+  // Each Community board gets its own accent color (like Everytime/Karrot's per-section
+  // color identity) so the board list and each board's own chrome read as visually
+  // distinct areas of the app, not one undifferentiated gray forum shell.
+  community: {
+    general: brand.primary,
+    housing: '#D97706',
+    classes: '#2563EB',
+    buySell: '#16A34A',
+    events: '#7C3AED',
+  },
+  // Buy & Sell listing category chips (ai/SPEC.md §4.1).
+  marketplace: {
+    textbooks: '#3B82F6',
+    furniture: '#F59E0B',
+    electronics: '#8B5CF6',
+    clothing: '#EC4899',
+    tickets: '#10B981',
+    other: '#6B7280',
+  },
+  // Events board tag chips (ai/SPEC.md §5.1) — freeFood is deliberately the most
+  // saturated/warm color since it's surfaced as the single most prominent filter.
+  eventTag: {
+    freeFood: '#F97316',
+    club: '#8B5CF6',
+    academic: '#3B82F6',
+    athletics: '#DC2626',
+    greekLife: '#EC4899',
+    other: '#6B7280',
+  },
+  // General board category badges (ai/SPEC.md §1.1).
+  generalCategory: {
+    notice: '#DC2626',
+    freeTalk: '#6B7280',
+    qna: '#3B82F6',
+    timetable: '#10B981',
+  },
   courses: [
     '#3B82F6',
     '#10B981',
