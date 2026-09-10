@@ -116,7 +116,8 @@
     },
     "deletedToast": "{{course}} 삭제됨.",
     "undo": "실행 취소",
-    "deleteFailed": "수업을 삭제하지 못했어요 — 다시 시도해주세요."
+    "deleteFailed": "수업을 삭제하지 못했어요 — 다시 시도해주세요.",
+    "seeDifferentTime": "다른 시간 보기"
   },
   "map": {
     "placeholder": "UGA 버스 실시간 위치",

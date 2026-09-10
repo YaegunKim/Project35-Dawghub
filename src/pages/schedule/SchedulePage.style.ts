@@ -250,14 +250,34 @@ export const S = {
   MeetingRow: styled.div`
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 6px;
+    justify-content: space-between;
+    gap: 8px;
     padding: 6px 10px;
     border-radius: 8px;
     background: var(--bg);
     font-size: 12px;
     line-height: 1.2;
     color: var(--text);
+  `,
+  MeetingInfo: styled.div`
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+  `,
+  SeeOtherTimesToggle: styled.button`
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    align-self: flex-start;
+    padding: 4px 2px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
   `,
   MeetingTime: styled.span`
     font-weight: 600;

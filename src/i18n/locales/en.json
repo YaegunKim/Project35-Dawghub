@@ -116,7 +116,8 @@
     },
     "deletedToast": "Removed {{course}}.",
     "undo": "Undo",
-    "deleteFailed": "Couldn't remove the class — try again."
+    "deleteFailed": "Couldn't remove the class — try again.",
+    "seeDifferentTime": "See different time"
   },
   "map": {
     "placeholder": "Live UGA bus locations",

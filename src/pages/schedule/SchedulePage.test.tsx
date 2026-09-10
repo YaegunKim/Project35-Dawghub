@@ -1,11 +1,22 @@
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { screen } from '@testing-library/react'
+import * as reactRouterDom from 'react-router-dom'
+import { screen, within } from '@testing-library/react'
 import { renderWithProviders } from '../../test/renderWithProviders'
 import { SchedulePage } from './SchedulePage'
 import type { Schema } from '../../../amplify/data/resource'
 
 type ClassEntry = Schema['ClassEntry']['type']
+
+const navigateSpy = vi.fn()
+
+// Mirrors DiningQuickActions.test.tsx's pattern — keeps useLocation (used by the pick-
+// location-on-map return flow) real, only swaps useNavigate for a spy so "Get Directions"
+// can be asserted without a /map route actually being mounted in this test.
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof reactRouterDom>()
+  return { ...actual, useNavigate: () => navigateSpy }
+})
 
 let deleteImpl: () => Promise<{ errors?: unknown[] }>
 
@@ -52,6 +63,7 @@ function entry(overrides: Partial<ClassEntry>): ClassEntry {
 describe('SchedulePage delete + undo', () => {
   beforeEach(() => {
     deleteImpl = async () => ({})
+    navigateSpy.mockClear()
   })
 
   it('removes the class immediately and offers an undo toast', async () => {
@@ -118,5 +130,68 @@ describe('SchedulePage grid layout', () => {
     expect(widthA).toBe('calc(50% - 4px)')
     expect(widthB).toBe('calc(50% - 4px)')
     expect(getComputedStyle(blockA).left).not.toBe(getComputedStyle(blockB).left)
+  })
+})
+
+describe('SchedulePage meeting detail — "See different time" + Get Directions', () => {
+  beforeEach(() => {
+    navigateSpy.mockClear()
+  })
+
+  it('shows only the tapped day up front, behind a "See different time" toggle for the rest', async () => {
+    mockEntries = [
+      entry({ id: 'e1', day: 'MON', location: 'Conner Hall 0104' }),
+      entry({ id: 'e2', day: 'WED', startTime: '13:00', endTime: '14:00', location: 'Journalism Building' }),
+    ]
+    renderWithProviders(<SchedulePage />)
+
+    const monBlock = (await screen.findAllByText('CSCI4300'))[0]
+    await userEvent.click(monBlock)
+    const detailBody = (await screen.findByRole('button', { name: 'Remove class' })).closest('div') as HTMLElement
+
+    // MON (the tapped block) is shown up front, in full.
+    expect(within(detailBody).getByText('Conner Hall 0104')).toBeInTheDocument()
+    expect(within(detailBody).getByRole('button', { name: 'Directions' })).toBeInTheDocument()
+    // WED isn't listed until the toggle is opened.
+    expect(within(detailBody).queryByText('Journalism Building')).not.toBeInTheDocument()
+    expect(within(detailBody).getAllByRole('button', { name: 'Directions' })).toHaveLength(1)
+
+    await userEvent.click(within(detailBody).getByText('See different time'))
+
+    expect(within(detailBody).getByText('Journalism Building')).toBeInTheDocument()
+    // Both days' details (and Directions buttons) are visible at once once opened.
+    expect(within(detailBody).getByText('Conner Hall 0104')).toBeInTheDocument()
+    expect(within(detailBody).getAllByRole('button', { name: 'Directions' })).toHaveLength(2)
+  })
+
+  it('does not show the "See different time" toggle for a course that only meets once', async () => {
+    mockEntries = [entry({ location: 'Conner Hall 0104' })]
+    renderWithProviders(<SchedulePage />)
+
+    await userEvent.click(await screen.findByText('CSCI4300'))
+
+    expect(screen.queryByText('See different time')).not.toBeInTheDocument()
+  })
+
+  it('navigates to /map with a directions intent when Get Directions is clicked', async () => {
+    mockEntries = [entry({ location: 'Conner Hall 0104' })]
+    renderWithProviders(<SchedulePage />)
+
+    await userEvent.click(await screen.findByText('CSCI4300'))
+    await userEvent.click(await screen.findByRole('button', { name: 'Directions' }))
+
+    expect(navigateSpy).toHaveBeenCalledTimes(1)
+    const [path, options] = navigateSpy.mock.calls[0]
+    expect(path).toBe('/map')
+    expect(options.state.mapIntent).toMatchObject({ type: 'directions', label: 'Conner Hall' })
+  })
+
+  it('does not show a Directions button for a meeting with no location', async () => {
+    mockEntries = [entry({ location: null })]
+    renderWithProviders(<SchedulePage />)
+
+    await userEvent.click(await screen.findByText('CSCI4300'))
+
+    expect(screen.queryByRole('button', { name: 'Directions' })).not.toBeInTheDocument()
   })
 })

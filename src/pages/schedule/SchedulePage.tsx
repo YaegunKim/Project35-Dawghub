@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCircleInfo, faChevronDown } from '@fortawesome/free-solid-svg-icons'
+import { faCircleInfo, faChevronDown, faChevronUp } from '@fortawesome/free-solid-svg-icons'
 import { Button } from '../../design-system/Button/Button'
 import { Input } from '../../design-system/Input/Input'
 import { Select } from '../../design-system/Select/Select'
@@ -21,8 +21,9 @@ import { UGA_SUBJECTS } from '../../lib/ugaSubjects'
 import { CLASS_ENTRIES_KEY } from '../../lib/queryKeys'
 import { DAYS, PX_PER_HOUR, DEFAULT_START_HOUR, DEFAULT_END_HOUR, toMinutes, colorForCourse, formatHour, layoutDay } from '../../lib/scheduleGrid'
 import type { Day, LaidOutEntry } from '../../lib/scheduleGrid'
-import type { ScheduleDraft } from '../../lib/scheduleLocationPick'
+import { buildClassMapIntent, type ScheduleDraft } from '../../lib/scheduleLocationPick'
 import type { MapLocationState, MapPickIntent, MapPickResultState } from '../../lib/mapNavigation'
+import { MapDirectionsButton } from '../map/popups/MapDirectionsButton'
 import type { Schema } from '../../../amplify/data/resource'
 import { S } from './SchedulePage.style'
 
@@ -257,6 +258,12 @@ export function SchedulePage() {
   const [showSearch, setShowSearch] = useState(false)
   const [showFabMenu, setShowFabMenu] = useState(false)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  // The detail modal always shows the tapped block's own day/time/location up front; every
+  // other day this course meets is tucked behind a "See different time" disclosure instead of
+  // always being listed, so a 3x/week course doesn't clutter the modal with times the user
+  // didn't ask about. Reset to closed whenever a different block is opened (see the effect
+  // below).
+  const [showOtherMeetings, setShowOtherMeetings] = useState(false)
   const [courseCode, setCourseCode] = useState('')
   const [title, setTitle] = useState('')
   const [day, setDay] = useState<Day>('MON')
@@ -348,6 +355,11 @@ export function SchedulePage() {
     ? entries
         .filter((entry) => entry.courseCode === selectedEntry.courseCode)
         .sort((a, b) => DAYS.indexOf(a.day as Day) - DAYS.indexOf(b.day as Day) || a.startTime.localeCompare(b.startTime))
+    : []
+  // Every other day this same course meets, besides the one the user actually tapped in the
+  // grid — shown only behind the "See different time" disclosure (see the modal below).
+  const otherMeetingEntries = selectedEntry
+    ? selectedCourseEntries.filter((entry) => entry.id !== selectedEntry.id)
     : []
 
   async function handleSubmit(event: FormEvent) {
@@ -509,6 +521,19 @@ export function SchedulePage() {
     fetchProfessorRatings(visibleMeetings)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchResults, visibleCount])
+
+  // Opening the detail modal for a different block (or closing it, selectedId -> null) should
+  // always start with other-times collapsed, not whatever was left open on the previously
+  // opened block.
+  useEffect(() => {
+    setShowOtherMeetings(false)
+  }, [selectedId])
+
+  async function handleGetDirections(entry: { location?: string | null; locationLat?: number | null; locationLng?: number | null }) {
+    const intent = await buildClassMapIntent(entry, 'directions')
+    if (!intent) return
+    navigate('/map', { state: { mapIntent: intent } satisfies MapLocationState })
+  }
 
   function fetchProfessorRatings(meetings: ClassMeeting[]) {
     const instructors = new Map<string, { firstName: string; lastName: string }>()
@@ -706,6 +731,25 @@ export function SchedulePage() {
           </S.MeetingRow>
         ))}
       </S.MeetingList>
+    )
+  }
+
+  // A single meeting's full detail — day, time, location, and (when there's a location to go
+  // to) a Get Directions button — used both for the tapped block itself and for any other day
+  // revealed via "See different time" in the detail modal below.
+  function renderMeetingDetailRow(entry: ClassEntry) {
+    const hasLocation = Boolean(entry.location) || (entry.locationLat != null && entry.locationLng != null)
+    return (
+      <S.MeetingRow key={entry.id}>
+        <S.MeetingInfo>
+          <S.DayChip>{t(`schedule.daysShort.${entry.day as Day}`)}</S.DayChip>
+          <S.MeetingTime>
+            {entry.startTime}–{entry.endTime}
+          </S.MeetingTime>
+          {entry.location && <S.MeetingLocationText>{entry.location}</S.MeetingLocationText>}
+        </S.MeetingInfo>
+        {hasLocation && <MapDirectionsButton onClick={() => handleGetDirections(entry)} />}
+      </S.MeetingRow>
     )
   }
 
@@ -1097,15 +1141,14 @@ export function SchedulePage() {
             </S.PanelHeader>
 
             <S.MeetingList>
-              {selectedCourseEntries.map((entry) => (
-                <S.MeetingRow key={entry.id}>
-                  <S.DayChip>{t(`schedule.daysShort.${entry.day as Day}`)}</S.DayChip>
-                  <S.MeetingTime>
-                    {entry.startTime}–{entry.endTime}
-                  </S.MeetingTime>
-                  {entry.location && <S.MeetingLocationText>{entry.location}</S.MeetingLocationText>}
-                </S.MeetingRow>
-              ))}
+              {renderMeetingDetailRow(selectedEntry)}
+              {otherMeetingEntries.length > 0 && (
+                <S.SeeOtherTimesToggle type="button" onClick={() => setShowOtherMeetings((value) => !value)}>
+                  {t('schedule.seeDifferentTime')}
+                  <FontAwesomeIcon icon={showOtherMeetings ? faChevronUp : faChevronDown} />
+                </S.SeeOtherTimesToggle>
+              )}
+              {showOtherMeetings && otherMeetingEntries.map((entry) => renderMeetingDetailRow(entry))}
             </S.MeetingList>
 
             <Button type="button" variant="danger" onClick={() => handleDelete(selectedEntry.courseCode)}>
