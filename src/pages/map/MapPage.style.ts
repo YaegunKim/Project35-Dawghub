@@ -44,10 +44,12 @@ export const S = {
     right: ${spacing.base};
     z-index: ${zIndex.overlay};
   `,
-  // Standalone equivalent of DirectionsPickToast for pick-mode flows that aren't nested
-  // inside DirectionsTopBar (e.g. Schedule's "set location" — see the 'return' pickingFor
-  // case) — DirectionsPickToast's own positioning depends on DirectionsTopBar being its
-  // containing block, so it can't be reused outside that panel.
+  // Top-anchored, viewport-relative pick-mode hint — used for every "tap a spot on the map"
+  // flow (Schedule's "set location" via the 'return' pickingFor case, and Directions' own
+  // origin/destination picking). Deliberately not nested inside DirectionsBottomSheet: that
+  // sheet is bottom-docked with overflow-y:auto, so an absolutely-positioned child trying to
+  // float above it would get clipped by the sheet's own scroll container — anchoring to the
+  // top of the screen instead avoids that entirely.
   PickToast: styled.div`
     position: absolute;
     top: max(${spacing.base}, env(safe-area-inset-top));
@@ -87,67 +89,102 @@ export const S = {
     align-items: center;
     gap: ${spacing.sm};
   `,
-  BusPanel: styled.div`
+  // Docked to the bottom edge — same shape as DirectionsBottomSheet (see MapPage.md: nothing
+  // in this app floats a full-width bar over the map, so an always-open corner list was
+  // replaced with "small button + a sheet that only appears once opened"). Pulled up from a
+  // closed default (no routes drawn until opened or favorited — see mapLayerPrefs.ts) rather
+  // than the old vertical badge strip that showed every route at once.
+  BusSheet: styled.div`
     position: absolute;
-    top: calc(${spacing.base} + 44px + ${spacing.sm});
-    left: ${spacing.base};
-    z-index: ${zIndex.overlay};
-    width: 44px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: ${zIndex.overlay + 50};
+    max-height: 42vh;
     display: flex;
     flex-direction: column;
+    gap: ${spacing.sm};
+    padding: ${spacing.base};
+    padding-bottom: max(${spacing.base}, env(safe-area-inset-bottom));
+    border-top-left-radius: ${radius.lg};
+    border-top-right-radius: ${radius.lg};
+    background: var(--bg);
+    box-shadow: ${shadow.sheetUp};
+    animation: ${slideUp} ${motion.duration.base} ${motion.easing.standard};
+    overflow-y: auto;
+  `,
+  BusSheetDetailHeader: styled.div`
+    display: flex;
     align-items: center;
     gap: ${spacing.sm};
-    animation: ${dropIn} ${motion.duration.base} ${motion.easing.standard};
   `,
-  BusRouteGrid: styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: ${spacing.xs};
+  BusSheetDetailTitle: styled.h2`
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   `,
-  BusRouteBadge: styled.button<{ $background: string; $enabled: boolean; $operating: boolean }>`
-    position: relative;
+  // Reused for both the list view's per-row star and the detail view's header star — filled
+  // accent color once favorited, muted otherwise (same on/off opacity language the old
+  // BusRouteBadge used for enabled/disabled routes).
+  BusFavoriteButton: styled.button<{ $active: boolean }>`
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 32px;
+    height: 32px;
     flex-shrink: 0;
     border: none;
-    border-radius: 50%;
-    font-size: 10px;
-    font-weight: 700;
-    color: ${brand.white};
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-    background-color: ${({ $background }) => $background};
-    background-image: ${({ $operating }) =>
-      $operating
-        ? 'none'
-        : 'repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.65) 0, rgba(255, 255, 255, 0.65) 1px, transparent 1px, transparent 5px)'};
-    opacity: ${({ $enabled }) => ($enabled ? 1 : 0.35)};
+    background: transparent;
+    color: ${({ $active }) => ($active ? 'var(--accent)' : 'var(--text-muted)')};
+    font-size: 16px;
     cursor: pointer;
-    transition:
-      opacity ${motion.duration.fast} ${motion.easing.standard},
-      transform ${motion.duration.fast} ${motion.easing.standard};
-
-    &:active {
-      transform: scale(0.92);
-    }
+    transition: color ${motion.duration.fast} ${motion.easing.standard};
   `,
-  BusSettingsButton: styled.button`
-    display: inline-flex;
+  // A plain div, not DrawerRow — DrawerRow is itself a <button>, and this row needs a
+  // separately-clickable favorite star next to the "open this route" button, which HTML
+  // doesn't allow nesting inside another button.
+  BusSheetRouteRow: styled.div`
+    display: flex;
+    align-items: center;
+    gap: ${spacing.sm};
+  `,
+  BusSheetRouteRowButton: styled.button`
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: ${spacing.md};
+    padding: ${spacing.md} 0;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  `,
+  BusSheetStatusLine: styled.div`
+    font-size: 13px;
+    color: var(--text-muted);
+  `,
+  BusSheetSettingsRow: styled.button`
+    display: flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
-    flex-shrink: 0;
+    gap: ${spacing.sm};
+    margin-top: ${spacing.xs};
+    padding-top: ${spacing.md};
     border: none;
     border-top: 1px solid var(--border);
-    border-radius: 0;
-    padding-top: ${spacing.sm};
     background: transparent;
     color: var(--text-muted);
     font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
     transition: color ${motion.duration.fast} ${motion.easing.standard};
 
@@ -369,32 +406,12 @@ export const S = {
     right: ${spacing.base};
     z-index: ${zIndex.overlay};
   `,
-  // Docked full-width across the top of the map, like Google Maps' search bar — the
-  // origin/destination inputs need to stay reachable while the user pans/zooms to pick a
-  // point, which a corner panel would get in the way of. It sits above the corner buttons
-  // (Layers/Directions toggle/Bus) rather than beside them, so those are hidden while open
-  // (see MapPage.tsx) instead of fighting for the same top strip. Padding is deliberately
-  // tight (sm, not base) and there's no title row — swap/close live inline next to the
-  // fields instead of a separate header — to keep as much of the map visible as possible.
-  DirectionsTopBar: styled.div`
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: ${zIndex.overlay + 50};
-    display: flex;
-    flex-direction: column;
-    gap: ${spacing.sm};
-    padding: ${spacing.sm} ${spacing.base};
-    padding-top: max(${spacing.sm}, env(safe-area-inset-top));
-    border-bottom-left-radius: ${radius.lg};
-    border-bottom-right-radius: ${radius.lg};
-    background: var(--bg);
-    box-shadow: ${shadow.md};
-    animation: ${dropIn} ${motion.duration.base} ${motion.easing.standard};
-  `,
-  // Docked to the bottom edge, sheet-style — mirrors Google Maps surfacing route options
-  // beneath the map rather than in the same panel as the from/to search fields.
+  // Docked to the bottom edge, like the bus sheet — carries both the origin/destination
+  // input fields (shown as soon as Directions opens) and, once a search runs, the results
+  // list/nav HUD beneath them, all in one scrollable sheet instead of a separate top bar +
+  // bottom sheet pair. Bottom-docked rather than top like Google/Naver Maps' own directions
+  // panels, matching every other panel in this app (bus sheet, layer drawer) instead of
+  // being the one exception pinned to the top.
   DirectionsBottomSheet: styled.div`
     position: absolute;
     left: 0;
@@ -542,40 +559,6 @@ export const S = {
       opacity: 0.5;
       cursor: not-allowed;
     }
-  `,
-  // A toast anchored just below the top bar (not inline within it) so picking a point on the
-  // map doesn't push the bar's own height around — DirectionsTopBar is itself
-  // position:absolute, which makes it the containing block for this child's top:100%.
-  DirectionsPickToast: styled.div`
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: ${spacing.sm};
-    z-index: ${zIndex.overlay + 50};
-    display: flex;
-    align-items: center;
-    gap: ${spacing.sm};
-    padding: ${spacing.sm} ${spacing.md};
-    border-radius: ${radius.pill};
-    background: var(--text);
-    color: var(--bg);
-    font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-    box-shadow: ${shadow.md};
-    animation: ${dropIn} ${motion.duration.fast} ${motion.easing.standard};
-  `,
-  DirectionsPickToastCancel: styled.button`
-    border: none;
-    background: none;
-    padding: 0;
-    color: inherit;
-    font: inherit;
-    font-weight: 700;
-    text-decoration: underline;
-    cursor: pointer;
-    flex-shrink: 0;
   `,
   // A small centered bar at the top of the sheet — purely decorative (the sheet itself
   // doesn't drag), but it's the visual shorthand people already read as "bottom sheet" from

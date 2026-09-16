@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
@@ -19,6 +19,7 @@ import {
   faArrowsUpDown,
   faBookOpenReader,
   faBus,
+  faChevronLeft,
   faChevronRight,
   faDog,
   faDumbbell,
@@ -34,6 +35,7 @@ import {
   faPersonWalking,
   faPlay,
   faRoute,
+  faStar,
   faUtensils,
   faXmark,
 } from '@fortawesome/free-solid-svg-icons'
@@ -50,14 +52,15 @@ import {
   MAP_LIBRARY_FAVORITES_KEY,
   useBusLayerPrefs,
 } from '../../lib/mapLayerPrefs'
+import { computeStopArrivals, fetchUgaBuses, fetchUgaRoutesAndStops, type PassioBus, type PassioRoute } from '../../lib/passio'
 import {
-  computeStopArrivals,
-  fetchUgaBuses,
-  fetchUgaRoutesAndStops,
-  type PassioBus,
-  type PassioRoute,
-} from '../../lib/passio'
-import { fetchAthensBuses, fetchAthensRoutesAndStops, type AthensRoute } from '../../lib/athensTransit'
+  campusRelevantAthensRouteIds as computeCampusRelevantAthensRouteIds,
+  fetchAthensBuses,
+  fetchAthensRoutesAndStops,
+  type AthensBus,
+  type AthensRoute,
+  type AthensStop,
+} from '../../lib/athensTransit'
 import { haversineDistanceMeters } from '../../lib/geo'
 import {
   planTrip,
@@ -93,6 +96,8 @@ import { queryClient } from '../../lib/queryClient'
 import { CLASS_ENTRIES_KEY } from '../../lib/queryKeys'
 import i18n from '../../i18n'
 import { bindReactPopup } from './reactPopup'
+import { BuildingAutocomplete } from './BuildingAutocomplete'
+import { BusRouteStopTimeline } from './BusRouteStopTimeline'
 import { MapInfoPopup } from './popups/MapInfoPopup'
 import { MapDiningPopup } from './popups/MapDiningPopup'
 import { MapDormPopup } from './popups/MapDormPopup'
@@ -132,9 +137,31 @@ const BUS_ANIMATION_MS = 6000
 // BUS_ANIMATION_MS would look like it's racing across campus. Past this gap, snap instead.
 const BUS_STALE_JUMP_THRESHOLD_MS = BUS_POLL_INTERVAL_MS * 2
 
+// A stable empty-array fallback for athensRoutesQuery.data?.routes — `?? []` alone would
+// create a brand-new array every render before the query resolves, which then makes any
+// effect depending on that value (see the busSheetFocus-mirroring effect below) re-run every
+// render instead of only when the actual route list changes.
+const EMPTY_ATHENS_ROUTES: AthensRoute[] = []
+const EMPTY_ATHENS_STOPS: AthensStop[] = []
+
 function iconScaleForZoom(zoom: number) {
   const scale = 2 ** (zoom - BASE_ZOOM)
   return Math.min(MAX_ICON_SCALE, Math.max(MIN_ICON_SCALE, scale))
+}
+
+// How relevant a route is to a location, for the bus sheet's list sort — the closest the
+// route's real path ever comes to that point, not the nearest stop (works identically for
+// UGA's PassioRoute and Athens's AthensRoute, both just [number, number][][] segments, so one
+// function covers the merged list without needing Athens's per-route stop data it doesn't have).
+function nearestDistanceToRouteMeters(point: LatLng, segments: [number, number][][]): number {
+  let best = Infinity
+  segments.forEach((segment) => {
+    segment.forEach(([lat, lng]) => {
+      const distance = haversineDistanceMeters(point, { lat, lng })
+      if (distance < best) best = distance
+    })
+  })
+  return best
 }
 
 type LayerKey = 'bus' | 'library' | 'dining' | 'gym' | 'housing' | 'academics' | 'athensTransit'
@@ -431,11 +458,13 @@ export function MapPage() {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<L.Map | null>(null)
   const layersRef = useRef<Record<LayerKey, L.LayerGroup> | null>(null)
-  // Read at fitBounds time so a drawn trip isn't centered under the docked top bar/bottom
-  // sheet — both refs are stable across renders, so the mount-only map effect can close over
-  // them and still see each one's current rendered height.
-  const topBarRef = useRef<HTMLDivElement>(null)
+  // Read at fitBounds time so a drawn trip isn't centered under the docked bottom sheet — the
+  // ref is stable across renders, so the mount-only map effect can close over it and still see
+  // its current rendered height.
   const bottomSheetRef = useRef<HTMLDivElement>(null)
+  // Same idea, for the bus sheet's own docked height — read when a route/stop is focused so
+  // the fitted/flown-to bounds aren't centered under the sheet.
+  const busSheetRef = useRef<HTMLDivElement>(null)
   const [visible, setVisible] = useState<Record<LayerKey, boolean>>({
     bus: true,
     library: true,
@@ -467,6 +496,16 @@ export function MapPage() {
   const [runningRoutes, setRunningRoutes] = useState<Set<string>>(new Set())
   const [busSettingsOpen, setBusSettingsOpen] = useState(false)
   const [routes, setRoutes] = useState<PassioRoute[]>([])
+  const [liveBuses, setLiveBuses] = useState<PassioBus[]>([])
+  const [athensLiveBuses, setAthensLiveBuses] = useState<AthensBus[]>([])
+  // Which UGA route's detail view is open inside the bus sheet — null shows the merged list.
+  // Not persisted: transient browsing state, unlike favoriteRoutes.
+  const [selectedBusRoute, setSelectedBusRoute] = useState<string | null>(null)
+  const [selectedAthensRoute, setSelectedAthensRoute] = useState<string | null>(null)
+  // Set when a stop row is tapped inside a route's detail view — flies the map there and shows
+  // every route serving that stop (see focusStop in the map-mount effect), not just the one
+  // currently selected. Cleared on going back to the list or closing the sheet.
+  const [focusedStopId, setFocusedStopId] = useState<string | null>(null)
   const [allBuildingNames, setAllBuildingNames] = useState<string[]>([])
 
   const [directionsPanelOpen, setDirectionsPanelOpen] = useState(false)
@@ -518,6 +557,33 @@ export function MapPage() {
     },
   })
 
+  // Route metadata for the bus sheet's merged UGA+Athens list — decoupled from
+  // loadAthensTransit (the imperative Leaflet setup in the map-mount effect, which also builds
+  // route/stop markers and starts live polling): that stays lazy until a route is actually
+  // shown on the map, but the *list* needs route names/colors the moment the sheet opens, or
+  // there'd be nothing to tap to trigger that activation in the first place. Cheap either way —
+  // fetchAthensRoutesAndStops is a local dynamic import, not a network call.
+  const athensRoutesQuery = useQuery({
+    queryKey: ['athensRoutesAndStops'],
+    queryFn: fetchAthensRoutesAndStops,
+    staleTime: 30 * 60_000,
+    enabled: busPrefs.panelOpen,
+  })
+  const athensRoutes = athensRoutesQuery.data?.routes ?? EMPTY_ATHENS_ROUTES
+  const athensStops = athensRoutesQuery.data?.stops ?? EMPTY_ATHENS_STOPS
+
+  // Which Athens Transit routes actually reach campus — real point-in-polygon membership against
+  // the surveyed OpenStreetMap campus boundary, not an approximated radius (see
+  // campusRelevantAthensRouteIds in athensTransit.ts, unit-tested there directly since it's pure
+  // data, not something a Playwright/mocked-map test can exercise). A route that qualifies is
+  // kept whole — every stop it serves city-wide, not just its campus-adjacent stops — since a
+  // rider needs the real route to know where it actually goes. Recomputed only when the
+  // underlying route/stop data actually changes, not every render.
+  const campusRelevantAthensRouteIds = useMemo(
+    () => computeCampusRelevantAthensRouteIds(athensRoutes, athensStops),
+    [athensRoutes, athensStops],
+  )
+
   const mapActionsRef = useRef<{
     applyLibraryFilter: (selected: string[]) => void
     applyDiningFilter: (selected: string[]) => void
@@ -534,9 +600,14 @@ export function MapPage() {
       }[],
       selected: string[],
     ) => void
-    applyBusFilter: (disabledRoutes: string[], hideAll: boolean, operatingOnly: boolean) => void
+    applyBusFilter: (disabledRoutes: string[], hideAll: boolean, operatingOnly: boolean, favoriteRoutes: string[]) => void
+    setBusSheetFocus: (routeName: string | null) => void
+    focusRouteBounds: (routeName: string) => void
+    focusStop: (stopId: string) => void
+    setStopFocus: (routeNames: string[] | null) => void
     applyAthensTransitFilter: (selected: string[]) => void
     setAthensTransitActive: (active: boolean) => void
+    focusAthensRoute: (routeLabel: string | null) => void
     setMyDorm: (buildingName: string | null) => void
     setDirectionsMarkers: (origin: LatLng | null, destination: LatLng | null) => void
     drawTripPlan: (plan: TripPlan | null, selected: 'walk-only' | 'walk-bus') => void
@@ -559,8 +630,13 @@ export function MapPage() {
   }, [gymPrefs.favorites])
 
   useEffect(() => {
-    mapActionsRef.current?.applyBusFilter(busPrefs.disabledRoutes, busPrefs.hideAll, busPrefs.operatingOnly)
-  }, [busPrefs.disabledRoutes, busPrefs.hideAll, busPrefs.operatingOnly])
+    mapActionsRef.current?.applyBusFilter(
+      busPrefs.disabledRoutes,
+      busPrefs.hideAll,
+      busPrefs.operatingOnly,
+      busPrefs.favoriteRoutes,
+    )
+  }, [busPrefs.disabledRoutes, busPrefs.hideAll, busPrefs.operatingOnly, busPrefs.favoriteRoutes])
 
   useEffect(() => {
     mapActionsRef.current?.applyAthensTransitFilter(athensTransitPrefs.favorites)
@@ -569,6 +645,32 @@ export function MapPage() {
   useEffect(() => {
     mapActionsRef.current?.setAthensTransitActive(visible.athensTransit)
   }, [visible.athensTransit])
+
+  // Tapping a route in the bus sheet always previews it (favorited or not, running or not),
+  // overriding the normal favorites-based visibility — mirrors how directionsBusFocus already
+  // overrides it for a shown trip. Clears once the sheet closes or the user backs out to the
+  // route list. Entering a route's detail view also fits the map to its full loop.
+  useEffect(() => {
+    const focusedRoute = busPrefs.panelOpen ? selectedBusRoute : null
+    mapActionsRef.current?.setBusSheetFocus(focusedRoute)
+    if (focusedRoute) mapActionsRef.current?.focusRouteBounds(focusedRoute)
+  }, [selectedBusRoute, busPrefs.panelOpen])
+
+  // Same idea for Athens Transit, on its own separate layer/visibility system — re-runs once
+  // athensRoutes finishes loading too, since the very first selection can fire before that
+  // lazy fetch resolves (focusAthensRoute itself no-ops the bounds-fit until then).
+  useEffect(() => {
+    const focusedRoute = busPrefs.panelOpen ? selectedAthensRoute : null
+    mapActionsRef.current?.focusAthensRoute(focusedRoute)
+  }, [selectedAthensRoute, busPrefs.panelOpen, athensRoutes])
+
+  useEffect(() => {
+    if (focusedStopId) {
+      mapActionsRef.current?.focusStop(focusedStopId)
+    } else {
+      mapActionsRef.current?.setStopFocus(null)
+    }
+  }, [focusedStopId])
 
   useEffect(() => {
     mapActionsRef.current?.applyAcademicMarkers(classEntriesQuery.data ?? [], selectedAcademicBuildings)
@@ -605,6 +707,72 @@ export function MapPage() {
   // For the walk+bus row's own badge/label in the results list — independent of which option
   // is currently selected/drawn, since both rows render together before you pick one.
   const walkBusLeg = tripPlan?.walkBus?.legs.find((leg): leg is Extract<TripLeg, { kind: 'bus' }> => leg.kind === 'bus')
+
+  // The bus sheet's merged list — one row per UGA route, plus every Athens Transit route that
+  // actually reaches campus (campusRelevantAthensRouteIds — everything else is left out
+  // entirely, not just sorted lower, since a route through the opposite side of Athens isn't
+  // useful here). UGA's "always shows" priority is expressed by never needing to pass that
+  // relevance filter in the first place — the sort itself is a single mixed ranking across both
+  // systems (confirmed with the user), by distance to currentUserLocation (live GPS, not the
+  // map's pan center) ascending, alphabetical as the tiebreak (and the fallback before a GPS fix
+  // exists) — whichever route is actually closest right now, UGA or Athens, sorts first.
+  type BusSheetRow = {
+    key: string
+    system: 'uga' | 'athens'
+    code: string
+    label: string
+    // Identity used for selecting/favoriting — route.name for UGA, but the combined
+    // "shortName · longName" string for Athens (matching athensRouteLabel in the map-mount
+    // effect, since that's what athensRouteMarkers/athensTransitPrefs.favorites are keyed by).
+    routeId: string
+    color: string
+    operating: boolean
+    distanceMeters: number | null
+  }
+  const busSheetRows: BusSheetRow[] = [
+    ...busRoutes.map((route) => ({
+      key: `uga:${route.name}`,
+      system: 'uga' as const,
+      code: route.code,
+      label: route.name,
+      routeId: route.name,
+      color: route.color,
+      operating: runningRoutes.has(route.name),
+      distanceMeters: currentUserLocation
+        ? nearestDistanceToRouteMeters(
+            currentUserLocation,
+            routes.find((candidate) => candidate.name === route.name)?.segments ?? [],
+          )
+        : null,
+    })),
+    ...athensRoutes.filter((route) => campusRelevantAthensRouteIds.has(route.id)).map((route) => ({
+      key: `athens:${route.id}`,
+      system: 'athens' as const,
+      code: route.shortName,
+      label: route.longName,
+      routeId: `${route.shortName} · ${route.longName}`,
+      color: route.color,
+      // Athens doesn't expose a "which routes are running right now" signal the way UGA's
+      // currentRunningRoutes does, so every Athens row is treated as potentially operating —
+      // no "Not currently running" subtitle for that system.
+      operating: true,
+      distanceMeters: currentUserLocation ? nearestDistanceToRouteMeters(currentUserLocation, route.segments) : null,
+    })),
+  ].sort((a, b) => {
+    if (a.distanceMeters != null && b.distanceMeters != null) return a.distanceMeters - b.distanceMeters
+    if (a.distanceMeters != null) return -1
+    if (b.distanceMeters != null) return 1
+    return a.label.localeCompare(b.label)
+  })
+
+  const selectedRouteData = selectedBusRoute ? (routes.find((route) => route.name === selectedBusRoute) ?? null) : null
+  const selectedRouteBuses = selectedBusRoute ? liveBuses.filter((bus) => bus.route === selectedBusRoute) : []
+  const selectedAthensRouteData = selectedAthensRoute
+    ? (athensRoutes.find((route) => `${route.shortName} · ${route.longName}` === selectedAthensRoute) ?? null)
+    : null
+  const selectedAthensRouteBuses = selectedAthensRouteData
+    ? athensLiveBuses.filter((bus) => bus.routeId === selectedAthensRouteData.id)
+    : []
 
   // Advances to the next leg once GPS gets close enough to the current leg's endpoint —
   // walking legs end at a stop or the destination, bus legs end at the alighting stop.
@@ -939,7 +1107,7 @@ export function MapPage() {
     const diningMarkers: { name: string; marker: L.Marker }[] = []
     const gymMarkers: { name: string; marker: L.Marker }[] = []
     const routeEntries: { name: string; polylines: L.Polyline[] }[] = []
-    const stopMarkers: { routeNames: string[]; marker: L.Marker; color: string }[] = []
+    const stopMarkers: { id: string; routeNames: string[]; marker: L.Marker; color: string }[] = []
     const athensRouteMarkers: { name: string; marker: L.Layer }[] = []
     map.on('zoom', () => {
       const scale = iconScaleForZoom(map.getZoom())
@@ -1048,10 +1216,95 @@ export function MapPage() {
     // and this closure variable lets loadAthensTransit re-apply that same current selection to
     // routes that don't exist yet at the time of that call (data loads lazily, after mount).
     let currentAthensSelected: string[] = []
+    // Set by the bus sheet (mirrors UGA's busSheetFocus) while an Athens route's detail view
+    // is open — overrides the normal favorites-checklist selection down to just that one route
+    // (by its athensRouteLabel), the same way tapping any UGA route always previews it too.
+    let athensSheetFocus: string | null = null
+    const athensBusRouteLabelById = new Map<string, string>()
+    // Athens stops aren't tracked immediately-added like before — see athensStopMarkers below.
 
     function applyAthensTransitFilter(selected: string[]) {
       currentAthensSelected = selected
-      applyBuildingFilter(athensRouteMarkers, athensRoutesLayer, selected)
+      const effectiveSelected = athensSheetFocus ? [athensSheetFocus] : selected
+      // Deliberately not applyBuildingFilter (whose "empty selected = show all" convention
+      // fits library/dining/gym's small, curated lists) — Athens Transit is opt-in like the
+      // bus sheet's UGA favorites: an empty list means nothing shows, not everything.
+      athensRouteMarkers.forEach(({ name, marker }) => {
+        const shouldShow = effectiveSelected.includes(name)
+        if (shouldShow) {
+          if (!athensRoutesLayer.hasLayer(marker)) marker.addTo(athensRoutesLayer)
+        } else {
+          athensRoutesLayer.removeLayer(marker)
+        }
+      })
+      refreshAthensStopVisibility()
+      refreshAthensBusVisibility()
+    }
+
+    function refreshAthensBusVisibility() {
+      athensBusMarkers.forEach((marker, id) => {
+        const routeLabel = athensBusRouteLabelById.get(id)
+        // With a route focused, only its own buses show. Otherwise fall through to the
+        // opt-in favorites list (currentAthensSelected) — not "show every bus", which would
+        // undo the whole point of hiding everything until a route is favorited or opened.
+        const shouldShow = athensSheetFocus
+          ? routeLabel === athensSheetFocus
+          : routeLabel != null && currentAthensSelected.includes(routeLabel)
+        if (shouldShow) {
+          if (!athensLiveBusLayer.hasLayer(marker)) marker.addTo(athensLiveBusLayer)
+        } else {
+          athensLiveBusLayer.removeLayer(marker)
+        }
+      })
+    }
+
+    // Real per-route stop membership from GTFS stop_times.txt/trips.txt (see AthensRoute.stopIds
+    // and scripts/fetch-athens-transit-data.mjs) — replaces an earlier proximity-to-the-route's-
+    // line approximation, which could both miss real stops (routes that loop back near their own
+    // line elsewhere) and wrongly include stops that just happen to sit close to a route they
+    // don't actually serve (routes bundled tightly downtown). With no route(s) in view (focused
+    // or favorited), stops are hidden entirely: showing all 509 of them across every route with
+    // no way to tell which belongs to what is just noise, not information.
+    function refreshAthensStopVisibility() {
+      const visibleRoutes = athensSheetFocus
+        ? athensRoutesData.filter((route) => athensRouteLabel(route) === athensSheetFocus)
+        : athensRoutesData.filter((route) => currentAthensSelected.includes(athensRouteLabel(route)))
+      const visibleStopIds = new Set(visibleRoutes.flatMap((route) => route.stopIds))
+      athensStopMarkers.forEach(({ id, marker }) => {
+        const shouldShow = visibleStopIds.has(id)
+        if (shouldShow) {
+          if (!athensStopsLayer.hasLayer(marker)) marker.addTo(athensStopsLayer)
+        } else {
+          athensStopsLayer.removeLayer(marker)
+        }
+      })
+    }
+
+    function setAthensSheetFocus(routeLabel: string | null) {
+      athensSheetFocus = routeLabel
+      // applyAthensTransitFilter also refreshes stop/bus visibility, so this one call re-syncs
+      // all three (routes, stops, live buses) to the new focus.
+      applyAthensTransitFilter(currentAthensSelected)
+    }
+
+    // Exposed to the bus sheet: focuses the map on one Athens route (activating/loading the
+    // layer first if this is the first time anything Athens-related has been touched) or clears
+    // back to the normal favorites-checklist view when passed null.
+    function focusAthensRoute(routeLabel: string | null) {
+      setAthensSheetFocus(routeLabel)
+      if (!routeLabel) return
+      setAthensTransitActive(true)
+      const route = athensRoutesData.find((candidate) => athensRouteLabel(candidate) === routeLabel)
+      if (!route) return // Not loaded yet — the React effect re-calls this once athensRoutes populates.
+      const bounds: L.LatLngExpression[] = []
+      route.segments.forEach((segment) => bounds.push(...segment.map(([lat, lng]) => [lat, lng] as [number, number])))
+      if (bounds.length === 0) return
+      const basePadding = 24
+      const busSheetHeight = busSheetRef.current?.getBoundingClientRect().height ?? 0
+      map.fitBounds(L.latLngBounds(bounds), {
+        paddingTopLeft: [basePadding, basePadding],
+        paddingBottomRight: [basePadding, busSheetHeight + basePadding],
+      })
     }
 
     function athensRouteLabel(route: AthensRoute) {
@@ -1065,6 +1318,9 @@ export function MapPage() {
     let athensLoaded = false
     let athensRoutesData: AthensRoute[] = []
     const athensBusMarkers = new Map<string, L.Marker>()
+    // Not added to athensStopsLayer at creation — refreshAthensStopVisibility decides which
+    // (if any) actually show, based on the currently focused route.
+    const athensStopMarkers: { id: string; marker: L.CircleMarker }[] = []
     let athensPollHandle: ReturnType<typeof setInterval> | null = null
     let lastAthensPollAt: number | null = null
 
@@ -1084,16 +1340,15 @@ export function MapPage() {
           })
         })
         stops.forEach((stop) => {
-          L.circleMarker([stop.latitude, stop.longitude], {
+          const marker = L.circleMarker([stop.latitude, stop.longitude], {
             radius: 3,
             color: category.athensTransit,
             fillColor: category.athensTransit,
             fillOpacity: 0.8,
             weight: 1,
             bubblingMouseEvents: false,
-          })
-            .bindPopup(stop.name)
-            .addTo(athensStopsLayer)
+          }).bindPopup(stop.name)
+          athensStopMarkers.push({ id: stop.id, marker })
         })
 
         setAthensRouteNames(routes.map(athensRouteLabel))
@@ -1117,22 +1372,22 @@ export function MapPage() {
         buses.forEach((bus) => {
           seenIds.add(bus.id)
           const route = athensRoutesData.find((candidate) => candidate.id === bus.routeId)
+          const routeLabel = route ? athensRouteLabel(route) : 'Athens Transit'
           const color = route?.color ?? category.athensTransit
-          const popupLabel = route ? athensRouteLabel(route) : 'Athens Transit'
+          athensBusRouteLabelById.set(bus.id, routeLabel)
           const target = L.latLng(bus.latitude, bus.longitude)
           const existing = athensBusMarkers.get(bus.id)
 
           if (existing) {
             existing.setIcon(busHeadingIcon(color, bus.bearing))
-            existing.setPopupContent(popupLabel)
+            existing.setPopupContent(routeLabel)
             if (shouldAnimate) {
               animateMarkerTo(existing, target, BUS_ANIMATION_MS, () => cancelled)
             } else {
               existing.setLatLng(target)
             }
           } else {
-            const marker = L.marker(target, { icon: busHeadingIcon(color, bus.bearing) }).bindPopup(popupLabel)
-            marker.addTo(athensLiveBusLayer)
+            const marker = L.marker(target, { icon: busHeadingIcon(color, bus.bearing) }).bindPopup(routeLabel)
             athensBusMarkers.set(bus.id, marker)
           }
         })
@@ -1141,8 +1396,12 @@ export function MapPage() {
           if (!seenIds.has(id)) {
             athensLiveBusLayer.removeLayer(marker)
             athensBusMarkers.delete(id)
+            athensBusRouteLabelById.delete(id)
           }
         })
+
+        refreshAthensBusVisibility()
+        setAthensLiveBuses(buses)
       } catch {
         // Transient failure — keep the last known bus positions on screen.
       }
@@ -1300,6 +1559,7 @@ export function MapPage() {
     let currentDisabledRoutes: string[] = busPrefs.disabledRoutes
     let currentHideAll: boolean = busPrefs.hideAll
     let currentOperatingOnly: boolean = busPrefs.operatingOnly
+    let currentFavoriteRoutes: string[] = busPrefs.favoriteRoutes
     const currentRunningRoutes = new Set<string>()
     const busRouteById = new Map<string, string>()
     // Read by each stop popup's getArrivals (see MapStopPopup) to compute a live ETA —
@@ -1312,17 +1572,33 @@ export function MapPage() {
     // specific route name for a walk+bus option (only the ridden route — its line, stops, and
     // live buses — stays visible; every other route is hidden outright, not dimmed, so they
     // don't read as "you could also catch this one here"). Null outside of directions mode,
-    // where the user's own layer prefs (currentHideAll/currentDisabledRoutes/currentOperatingOnly)
-    // apply.
+    // where the user's own layer prefs (currentHideAll/currentDisabledRoutes/currentOperatingOnly/
+    // currentFavoriteRoutes) apply.
     let directionsBusFocus: 'hide-all' | { routeName: string } | null = null
+    // Set by the bus sheet while a route's detail view is open — shows only that route
+    // regardless of favorites/disabled/operatingOnly, so tapping any route in the list always
+    // previews it immediately.
+    let busSheetFocus: string | null = null
+    // Set by tapping a stop row inside a route's detail view (see focusStop below) — shows
+    // every route that actually serves that stop, not just the one currently selected.
+    let stopFocus: string[] | null = null
 
     function refreshBusVisibility() {
+      // Opt-in, not opt-out: a route is part of the default visible set only once it's
+      // favorited (so a fresh install shows nothing until the user favorites or opens a route)
+      // — currentDisabledRoutes/currentHideAll/currentOperatingOnly still layer on top exactly
+      // as before, from the existing settings modal.
       const prefsShowRoute = (name: string) =>
-        !currentHideAll && !currentDisabledRoutes.includes(name) && (!currentOperatingOnly || currentRunningRoutes.has(name))
+        !currentHideAll &&
+        currentFavoriteRoutes.includes(name) &&
+        !currentDisabledRoutes.includes(name) &&
+        (!currentOperatingOnly || currentRunningRoutes.has(name))
 
       const routeVisible = (name: string) => {
         if (directionsBusFocus === 'hide-all') return false
         if (directionsBusFocus) return name === directionsBusFocus.routeName
+        if (busSheetFocus) return name === busSheetFocus
+        if (stopFocus) return stopFocus.includes(name)
         return prefsShowRoute(name)
       }
       // A stop is shown if any route that actually serves it (per PassioRoute.stops
@@ -1332,6 +1608,8 @@ export function MapPage() {
       const stopVisible = (routeNames: string[]) => {
         if (directionsBusFocus === 'hide-all') return false
         if (directionsBusFocus) return routeNames.includes(directionsBusFocus.routeName)
+        if (busSheetFocus) return routeNames.includes(busSheetFocus)
+        if (stopFocus) return routeNames.some((name) => stopFocus!.includes(name))
         return routeNames.some((name) => prefsShowRoute(name))
       }
       const focusedRoute = directionsBusFocus && directionsBusFocus !== 'hide-all' ? directionsBusFocus.routeName : null
@@ -1378,16 +1656,56 @@ export function MapPage() {
       })
     }
 
-    function applyBusFilter(disabledRoutes: string[], hideAll: boolean, operatingOnly: boolean) {
+    function applyBusFilter(disabledRoutes: string[], hideAll: boolean, operatingOnly: boolean, favoriteRoutes: string[]) {
       currentDisabledRoutes = disabledRoutes
       currentHideAll = hideAll
       currentOperatingOnly = operatingOnly
+      currentFavoriteRoutes = favoriteRoutes
       refreshBusVisibility()
     }
 
     function setDirectionsBusFocus(focus: 'hide-all' | { routeName: string } | null) {
       directionsBusFocus = focus
       refreshBusVisibility()
+    }
+
+    function setBusSheetFocus(routeName: string | null) {
+      busSheetFocus = routeName
+      refreshBusVisibility()
+    }
+
+    function setStopFocus(routeNames: string[] | null) {
+      stopFocus = routeNames
+      refreshBusVisibility()
+    }
+
+    // Fits the map to a route's full real trace (not just its stops) so its whole loop is
+    // visible when the bus sheet's detail view opens for it — same asymmetric-padding idea as
+    // drawTripPlan's fitBounds, but padded for the bus sheet's own docked height instead.
+    function focusRouteBounds(routeName: string) {
+      const entry = routeEntries.find((route) => route.name === routeName)
+      if (!entry) return
+      const bounds: L.LatLngExpression[] = []
+      entry.polylines.forEach((polyline) => bounds.push(...(polyline.getLatLngs() as L.LatLng[])))
+      if (bounds.length === 0) return
+
+      const basePadding = 24
+      const busSheetHeight = busSheetRef.current?.getBoundingClientRect().height ?? 0
+      map.fitBounds(L.latLngBounds(bounds), {
+        paddingTopLeft: [basePadding, basePadding],
+        paddingBottomRight: [basePadding, busSheetHeight + basePadding],
+      })
+    }
+
+    // Tapping a stop row inside a route's detail view: flies to that stop, opens its existing
+    // MapStopPopup (already lists every route serving it with a live ETA — no need to rebuild
+    // that here), and shows every one of those routes together on the map.
+    function focusStop(stopId: string) {
+      const entry = stopMarkers.find((candidate) => candidate.id === stopId)
+      if (!entry) return
+      setStopFocus(entry.routeNames)
+      map.flyTo(entry.marker.getLatLng(), FOCUS_ZOOM, { duration: FOCUS_FLY_DURATION_S })
+      entry.marker.openPopup()
     }
 
     let originMarker: L.Marker | null = null
@@ -1471,14 +1789,14 @@ export function MapPage() {
       })
 
       if (bounds.length > 0) {
-        // Asymmetric padding, not a flat [48, 48] — the top bar and (when results are shown)
-        // bottom sheet cover real screen space, so fitBounds needs to know their actual
-        // rendered heights or it'll happily center part of the route right underneath them.
+        // Asymmetric padding, not a flat [48, 48] — the bottom sheet (fields, and once
+        // results/nav HUD show, those too) covers real screen space, so fitBounds needs to
+        // know its actual rendered height or it'll happily center part of the route right
+        // underneath it. Nothing docks to the top anymore, so that side just gets base padding.
         const basePadding = 24
-        const topBarHeight = topBarRef.current?.getBoundingClientRect().height ?? 0
         const bottomSheetHeight = bottomSheetRef.current?.getBoundingClientRect().height ?? 0
         map.fitBounds(L.latLngBounds(bounds), {
-          paddingTopLeft: [basePadding, topBarHeight + basePadding],
+          paddingTopLeft: [basePadding, basePadding],
           paddingBottomRight: [basePadding, bottomSheetHeight + basePadding],
         })
       }
@@ -1559,8 +1877,13 @@ export function MapPage() {
       applyGymFilter,
       applyAcademicMarkers,
       applyBusFilter,
+      setBusSheetFocus,
+      focusRouteBounds,
+      focusStop,
+      setStopFocus,
       applyAthensTransitFilter,
       setAthensTransitActive,
+      focusAthensRoute,
       setMyDorm: (buildingName) => {
         updateMapPreference({ myDormBuilding: buildingName }).then((pref) => {
           refreshDormHighlight(pref.myDormBuilding)
@@ -1741,10 +2064,10 @@ export function MapPage() {
             <MapStopPopup stopName={stop.name} getArrivals={() => computeStopArrivals(stop, routes, latestBuses)} />,
           )
           const routeNames = routes.filter((route) => route.stops.some((rs) => rs.id === stop.id)).map((route) => route.name)
-          stopMarkers.push({ routeNames, marker, color: stop.color })
+          stopMarkers.push({ id: stop.id, routeNames, marker, color: stop.color })
         })
 
-        applyBusFilter(currentDisabledRoutes, currentHideAll, currentOperatingOnly)
+        applyBusFilter(currentDisabledRoutes, currentHideAll, currentOperatingOnly, currentFavoriteRoutes)
         setBusRoutes(routes.map((route) => ({ name: route.name, code: route.code, color: route.color })))
         setRoutes(routes)
       })
@@ -1800,7 +2123,8 @@ export function MapPage() {
         })
 
         setRunningRoutes(new Set(currentRunningRoutes))
-        applyBusFilter(currentDisabledRoutes, currentHideAll, currentOperatingOnly)
+        setLiveBuses(buses)
+        applyBusFilter(currentDisabledRoutes, currentHideAll, currentOperatingOnly, currentFavoriteRoutes)
       } catch {
         // Transient failure — keep the last known bus positions on screen.
       }
@@ -1864,9 +2188,12 @@ export function MapPage() {
       : selectedAcademicBuildings.length === 0
         ? t('map.showAll')
         : t('map.selectedCount', { count: selectedAcademicBuildings.length })
+  // Opt-in like the bus sheet's UGA favorites, not "empty = show all" like the other
+  // drawer checklists (library/dining/gym) — Athens Transit is a whole separate city system
+  // (18 routes, 500+ stops), so nothing shows until a route is favorited or opened.
   const athensTransitSubtitle =
     athensTransitPrefs.favorites.length === 0
-      ? t('map.showAll')
+      ? t('map.showNone')
       : t('map.selectedCount', { count: athensTransitPrefs.favorites.length })
 
   const drawerRows: { key: LayerKey; icon: IconDefinition; color: string; label: string; subtitle: string }[] = [
@@ -1942,6 +2269,13 @@ export function MapPage() {
     const label = t('map.directions.originGpsLabel')
     setDestinationPoint({ ...currentUserLocation, label, source: 'gps' })
     setDestinationInputValue(label)
+  }
+
+  function closeBusSheet() {
+    busPrefs.setPanelOpen(false)
+    setSelectedBusRoute(null)
+    setSelectedAthensRoute(null)
+    setFocusedStopId(null)
   }
 
   function closeDirectionsPanel() {
@@ -2084,6 +2418,14 @@ export function MapPage() {
           </S.PickToastCancel>
         </S.PickToast>
       )}
+      {(pickingFor === 'origin' || pickingFor === 'destination') && (
+        <S.PickToast>
+          {t('map.directions.pickHint')}
+          <S.PickToastCancel type="button" onClick={() => setPickingFor(null)}>
+            {t('map.directions.cancelPick')}
+          </S.PickToastCancel>
+        </S.PickToast>
+      )}
       {!directionsPanelOpen && (
         <>
           <S.LayersButtonSlot>
@@ -2101,7 +2443,10 @@ export function MapPage() {
               size="lg"
               aria-pressed={directionsPanelOpen}
               aria-label={t('map.directions.button')}
-              onClick={() => setDirectionsPanelOpen(true)}
+              onClick={() => {
+                closeBusSheet()
+                setDirectionsPanelOpen(true)
+              }}
             >
               <FontAwesomeIcon icon={faRoute} />
             </IconButton>
@@ -2120,108 +2465,93 @@ export function MapPage() {
         </S.LayersButtonSlot>
       )}
 
-      {directionsPanelOpen && !navigating && (
-        <S.DirectionsTopBar ref={topBarRef}>
-          <S.DirectionsFieldsWrap>
-            <S.DirectionsFieldsColumn>
-              <S.DirectionsFieldRow>
-                <S.DirectionsFieldDot $color={category.directionsOrigin} />
-                <Input
-                  list="dawghub-all-building-names"
-                  placeholder={t('map.directions.fromPlaceholder')}
-                  aria-label={t('map.directions.fromLabel')}
-                  value={originInputValue}
-                  onChange={(event) => handleOriginInputChange(event.target.value)}
-                />
-                <S.DirectionsIconButton
-                  type="button"
-                  aria-label={t('map.directions.useMyLocation')}
-                  title={t('map.directions.useMyLocation')}
-                  onClick={useMyLocationForOrigin}
-                >
-                  <FontAwesomeIcon icon={faLocationCrosshairs} />
-                </S.DirectionsIconButton>
-                <S.DirectionsIconButton
-                  type="button"
-                  aria-label={t('map.directions.pickOnMap')}
-                  title={t('map.directions.pickOnMap')}
-                  onClick={() => setPickingFor('origin')}
-                >
-                  <FontAwesomeIcon icon={faMapPin} />
-                </S.DirectionsIconButton>
-              </S.DirectionsFieldRow>
-
-              <S.DirectionsFieldRow>
-                <S.DirectionsFieldDot $color={category.directionsDestination} $shape="square" />
-                <Input
-                  list="dawghub-all-building-names"
-                  placeholder={t('map.directions.toPlaceholder')}
-                  aria-label={t('map.directions.toLabel')}
-                  value={destinationInputValue}
-                  onChange={(event) => handleDestinationInputChange(event.target.value)}
-                />
-                <S.DirectionsIconButton
-                  type="button"
-                  aria-label={t('map.directions.useMyLocation')}
-                  title={t('map.directions.useMyLocation')}
-                  onClick={useMyLocationForDestination}
-                >
-                  <FontAwesomeIcon icon={faLocationCrosshairs} />
-                </S.DirectionsIconButton>
-                <S.DirectionsIconButton
-                  type="button"
-                  aria-label={t('map.directions.pickOnMap')}
-                  title={t('map.directions.pickOnMap')}
-                  onClick={() => setPickingFor('destination')}
-                >
-                  <FontAwesomeIcon icon={faMapPin} />
-                </S.DirectionsIconButton>
-              </S.DirectionsFieldRow>
-            </S.DirectionsFieldsColumn>
-
-            <S.DirectionsActionsColumn>
-              <S.DirectionsSwapButton type="button" aria-label={t('map.directions.swap')} onClick={handleSwapPoints}>
-                <FontAwesomeIcon icon={faArrowsUpDown} />
-              </S.DirectionsSwapButton>
-              <S.DirectionsCloseButton
-                type="button"
-                aria-label={t('map.directions.title')}
-                onClick={closeDirectionsPanel}
-              >
-                <FontAwesomeIcon icon={faXmark} />
-              </S.DirectionsCloseButton>
-            </S.DirectionsActionsColumn>
-          </S.DirectionsFieldsWrap>
-
-          <datalist id="dawghub-all-building-names">
-            {allBuildingNames.map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
-
-          <S.DirectionsSearchButton
-            type="button"
-            disabled={isPlanningTrip || (!originPoint && !originInputValue.trim()) || (!destinationPoint && !destinationInputValue.trim())}
-            onClick={handleGetDirections}
-          >
-            <FontAwesomeIcon icon={faMagnifyingGlass} />
-            {isPlanningTrip ? t('map.directions.planning') : t('map.directions.getDirections')}
-          </S.DirectionsSearchButton>
-
-          {pickingFor && (
-            <S.DirectionsPickToast>
-              {t('map.directions.pickHint')}
-              <S.DirectionsPickToastCancel type="button" onClick={() => setPickingFor(null)}>
-                {t('map.directions.cancelPick')}
-              </S.DirectionsPickToastCancel>
-            </S.DirectionsPickToast>
-          )}
-        </S.DirectionsTopBar>
-      )}
-
-      {directionsPanelOpen && (tripError || tripPlan) && (
+      {directionsPanelOpen && (
         <S.DirectionsBottomSheet ref={bottomSheetRef}>
           <S.BottomSheetHandle />
+
+          {!navigating && (
+            <>
+              <S.DirectionsFieldsWrap>
+                <S.DirectionsFieldsColumn>
+                  <S.DirectionsFieldRow>
+                    <S.DirectionsFieldDot $color={category.directionsOrigin} />
+                    <BuildingAutocomplete
+                      value={originInputValue}
+                      onChange={handleOriginInputChange}
+                      buildingNames={allBuildingNames}
+                      placeholder={t('map.directions.fromPlaceholder')}
+                      ariaLabel={t('map.directions.fromLabel')}
+                    />
+                    <S.DirectionsIconButton
+                      type="button"
+                      aria-label={t('map.directions.useMyLocation')}
+                      title={t('map.directions.useMyLocation')}
+                      onClick={useMyLocationForOrigin}
+                    >
+                      <FontAwesomeIcon icon={faLocationCrosshairs} />
+                    </S.DirectionsIconButton>
+                    <S.DirectionsIconButton
+                      type="button"
+                      aria-label={t('map.directions.pickOnMap')}
+                      title={t('map.directions.pickOnMap')}
+                      onClick={() => setPickingFor('origin')}
+                    >
+                      <FontAwesomeIcon icon={faMapPin} />
+                    </S.DirectionsIconButton>
+                  </S.DirectionsFieldRow>
+
+                  <S.DirectionsFieldRow>
+                    <S.DirectionsFieldDot $color={category.directionsDestination} $shape="square" />
+                    <BuildingAutocomplete
+                      value={destinationInputValue}
+                      onChange={handleDestinationInputChange}
+                      buildingNames={allBuildingNames}
+                      placeholder={t('map.directions.toPlaceholder')}
+                      ariaLabel={t('map.directions.toLabel')}
+                    />
+                    <S.DirectionsIconButton
+                      type="button"
+                      aria-label={t('map.directions.useMyLocation')}
+                      title={t('map.directions.useMyLocation')}
+                      onClick={useMyLocationForDestination}
+                    >
+                      <FontAwesomeIcon icon={faLocationCrosshairs} />
+                    </S.DirectionsIconButton>
+                    <S.DirectionsIconButton
+                      type="button"
+                      aria-label={t('map.directions.pickOnMap')}
+                      title={t('map.directions.pickOnMap')}
+                      onClick={() => setPickingFor('destination')}
+                    >
+                      <FontAwesomeIcon icon={faMapPin} />
+                    </S.DirectionsIconButton>
+                  </S.DirectionsFieldRow>
+                </S.DirectionsFieldsColumn>
+
+                <S.DirectionsActionsColumn>
+                  <S.DirectionsSwapButton type="button" aria-label={t('map.directions.swap')} onClick={handleSwapPoints}>
+                    <FontAwesomeIcon icon={faArrowsUpDown} />
+                  </S.DirectionsSwapButton>
+                  <S.DirectionsCloseButton
+                    type="button"
+                    aria-label={t('map.directions.title')}
+                    onClick={closeDirectionsPanel}
+                  >
+                    <FontAwesomeIcon icon={faXmark} />
+                  </S.DirectionsCloseButton>
+                </S.DirectionsActionsColumn>
+              </S.DirectionsFieldsWrap>
+
+              <S.DirectionsSearchButton
+                type="button"
+                disabled={isPlanningTrip || (!originPoint && !originInputValue.trim()) || (!destinationPoint && !destinationInputValue.trim())}
+                onClick={handleGetDirections}
+              >
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+                {isPlanningTrip ? t('map.directions.planning') : t('map.directions.getDirections')}
+              </S.DirectionsSearchButton>
+            </>
+          )}
 
           {tripError && <S.TripEmptyState>{tripError}</S.TripEmptyState>}
 
@@ -2336,7 +2666,14 @@ export function MapPage() {
           size="lg"
           aria-pressed={busPrefs.panelOpen}
           aria-label={t('map.legend.bus')}
-          onClick={() => busPrefs.setPanelOpen(!busPrefs.panelOpen)}
+          onClick={() => {
+            if (busPrefs.panelOpen) {
+              closeBusSheet()
+            } else {
+              setDirectionsPanelOpen(false)
+              busPrefs.setPanelOpen(true)
+            }
+          }}
         >
           <FontAwesomeIcon icon={faBus} />
         </IconButton>
@@ -2362,48 +2699,150 @@ export function MapPage() {
         )}
       </S.BusButtonRow>}
 
-      {!directionsPanelOpen &&
-        busPrefs.panelOpen &&
-        (busRoutes.length === 0 ? (
-          <S.BusPanel>
-            <S.ChecklistEmpty>{t('map.noRoutesYet')}</S.ChecklistEmpty>
-          </S.BusPanel>
-        ) : (
-          <S.BusPanel>
-            <S.BusRouteGrid>
-              {[...busRoutes]
-                .sort((a, b) => {
-                  const aOperating = runningRoutes.has(a.name)
-                  const bOperating = runningRoutes.has(b.name)
-                  if (aOperating !== bOperating) return aOperating ? -1 : 1
-                  return a.name.localeCompare(b.name)
-                })
-                .map((route) => {
-                  const operating = runningRoutes.has(route.name)
-                  const enabled = !busPrefs.disabledRoutes.includes(route.name)
-                  const label = operating ? route.name : `${route.name} (${t('map.bus.notOperating')})`
-                  return (
-                    <S.BusRouteBadge
-                      key={route.name}
-                      type="button"
-                      $background={route.color}
-                      $enabled={enabled}
-                      $operating={operating}
-                      aria-label={label}
-                      aria-pressed={enabled}
-                      title={label}
-                      onClick={() => busPrefs.toggleRoute(route.name)}
-                    >
-                      {route.code}
-                    </S.BusRouteBadge>
-                  )
-                })}
-            </S.BusRouteGrid>
-            <S.BusSettingsButton type="button" aria-label={t('map.bus.settings')} onClick={() => setBusSettingsOpen(true)}>
-              <FontAwesomeIcon icon={faGear} />
-            </S.BusSettingsButton>
-          </S.BusPanel>
-        ))}
+      {!directionsPanelOpen && busPrefs.panelOpen && (
+        <S.BusSheet ref={busSheetRef}>
+          <S.BottomSheetHandle />
+          {selectedRouteData ? (
+            <>
+              <S.BusSheetDetailHeader>
+                <IconButton
+                  aria-label={t('map.bus.back')}
+                  onClick={() => {
+                    setSelectedBusRoute(null)
+                    setFocusedStopId(null)
+                  }}
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} />
+                </IconButton>
+                <S.LayerChipIcon $background={selectedRouteData.color}>{selectedRouteData.code}</S.LayerChipIcon>
+                <S.BusSheetDetailTitle>{selectedRouteData.name}</S.BusSheetDetailTitle>
+                <S.BusFavoriteButton
+                  type="button"
+                  $active={busPrefs.favoriteRoutes.includes(selectedRouteData.name)}
+                  aria-pressed={busPrefs.favoriteRoutes.includes(selectedRouteData.name)}
+                  aria-label={t('map.bus.favorite')}
+                  onClick={() => busPrefs.toggleFavorite(selectedRouteData.name)}
+                >
+                  <FontAwesomeIcon icon={faStar} />
+                </S.BusFavoriteButton>
+                <IconButton aria-label={t('map.legend.bus')} onClick={closeBusSheet}>
+                  <FontAwesomeIcon icon={faXmark} />
+                </IconButton>
+              </S.BusSheetDetailHeader>
+
+              <S.BusSheetStatusLine>
+                {selectedRouteBuses.length > 0
+                  ? t('map.bus.busesActive', { count: selectedRouteBuses.length })
+                  : t('map.bus.notOperating')}
+              </S.BusSheetStatusLine>
+
+              <BusRouteStopTimeline route={selectedRouteData} buses={liveBuses} onSelectStop={setFocusedStopId} />
+
+              {selectedRouteBuses.length > 0 && (
+                <S.TripOptionApproxNote>{t('map.directions.busEtaApprox')}</S.TripOptionApproxNote>
+              )}
+            </>
+          ) : selectedAthensRouteData ? (
+            <>
+              <S.BusSheetDetailHeader>
+                <IconButton aria-label={t('map.bus.back')} onClick={() => setSelectedAthensRoute(null)}>
+                  <FontAwesomeIcon icon={faChevronLeft} />
+                </IconButton>
+                <S.LayerChipIcon $background={selectedAthensRouteData.color}>{selectedAthensRouteData.shortName}</S.LayerChipIcon>
+                <S.BusSheetDetailTitle>{selectedAthensRouteData.longName}</S.BusSheetDetailTitle>
+                <S.BusFavoriteButton
+                  type="button"
+                  $active={athensTransitPrefs.isFavorite(selectedAthensRoute!)}
+                  aria-pressed={athensTransitPrefs.isFavorite(selectedAthensRoute!)}
+                  aria-label={t('map.bus.favorite')}
+                  onClick={() => athensTransitPrefs.toggleFavorite(selectedAthensRoute!)}
+                >
+                  <FontAwesomeIcon icon={faStar} />
+                </S.BusFavoriteButton>
+                <IconButton aria-label={t('map.legend.bus')} onClick={closeBusSheet}>
+                  <FontAwesomeIcon icon={faXmark} />
+                </IconButton>
+              </S.BusSheetDetailHeader>
+
+              <S.BusSheetStatusLine>
+                {selectedAthensRouteBuses.length > 0
+                  ? t('map.bus.busesActive', { count: selectedAthensRouteBuses.length })
+                  : t('map.bus.notOperating')}
+              </S.BusSheetStatusLine>
+            </>
+          ) : (
+            <>
+              <S.DrawerHeader>
+                <S.DrawerTitle>{t('map.legend.bus')}</S.DrawerTitle>
+                <IconButton aria-label={t('map.legend.bus')} onClick={closeBusSheet}>
+                  <FontAwesomeIcon icon={faXmark} />
+                </IconButton>
+              </S.DrawerHeader>
+              {busSheetRows.length === 0 ? (
+                <S.ChecklistEmpty>{t('map.noRoutesYet')}</S.ChecklistEmpty>
+              ) : (
+                <S.DrawerList>
+                  {busSheetRows.map((row) => {
+                    const favorited =
+                      row.system === 'uga' ? busPrefs.favoriteRoutes.includes(row.routeId) : athensTransitPrefs.isFavorite(row.routeId)
+                    const systemLabel = row.system === 'uga' ? t('map.legend.bus') : t('map.legend.athensTransit')
+                    const label = row.operating ? `${systemLabel} · ${row.label}` : `${systemLabel} · ${row.label} (${t('map.bus.notOperating')})`
+                    return (
+                      <S.BusSheetRouteRow key={row.key}>
+                        <S.BusSheetRouteRowButton
+                          type="button"
+                          aria-label={label}
+                          onClick={() => {
+                            if (row.system === 'uga') {
+                              setSelectedBusRoute(row.routeId)
+                              setSelectedAthensRoute(null)
+                            } else {
+                              setSelectedAthensRoute(row.routeId)
+                              setSelectedBusRoute(null)
+                              // Reuses the drawer's own activation path (not a direct setVisible)
+                              // so the Athens layer group actually gets attached to the map, not
+                              // just flagged "on" in state — toggleLayer does both.
+                              if (!visible.athensTransit) toggleLayer('athensTransit')
+                            }
+                            setFocusedStopId(null)
+                          }}
+                        >
+                          <S.LayerChipIcon $background={row.color}>{row.code}</S.LayerChipIcon>
+                          <S.DrawerRowText>
+                            <S.DrawerRowLabel $active={row.operating}>{row.label}</S.DrawerRowLabel>
+                            <S.DrawerRowSubtitle>
+                              {row.operating ? systemLabel : `${systemLabel} · ${t('map.bus.notOperating')}`}
+                            </S.DrawerRowSubtitle>
+                          </S.DrawerRowText>
+                          <S.DrawerRowChevron>
+                            <FontAwesomeIcon icon={faChevronRight} />
+                          </S.DrawerRowChevron>
+                        </S.BusSheetRouteRowButton>
+                        <S.BusFavoriteButton
+                          type="button"
+                          $active={favorited}
+                          aria-pressed={favorited}
+                          aria-label={t('map.bus.favorite')}
+                          onClick={() => {
+                            if (row.system === 'uga') busPrefs.toggleFavorite(row.routeId)
+                            else athensTransitPrefs.toggleFavorite(row.routeId)
+                          }}
+                        >
+                          <FontAwesomeIcon icon={faStar} />
+                        </S.BusFavoriteButton>
+                      </S.BusSheetRouteRow>
+                    )
+                  })}
+                </S.DrawerList>
+              )}
+              <S.BusSheetSettingsRow type="button" aria-label={t('map.bus.settings')} onClick={() => setBusSettingsOpen(true)}>
+                <FontAwesomeIcon icon={faGear} />
+                {t('map.bus.settings')}
+              </S.BusSheetSettingsRow>
+            </>
+          )}
+        </S.BusSheet>
+      )}
 
       {busSettingsOpen && (
         <Modal onClose={() => setBusSettingsOpen(false)}>
