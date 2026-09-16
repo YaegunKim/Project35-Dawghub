@@ -31,6 +31,7 @@ export const S = {
     }
   `,
   BoardTile: styled(CardLink)<{ $color: string }>`
+    min-width: 0;
     aspect-ratio: 1;
     display: flex;
     flex-direction: column;
@@ -94,6 +95,7 @@ export const S = {
     }
   `,
   TileSubtitle: styled.span`
+    min-width: 0;
     max-width: 100%;
     font-size: 11px;
     color: ${surface.textMuted};
