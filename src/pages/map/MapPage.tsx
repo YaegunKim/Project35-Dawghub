@@ -2699,6 +2699,40 @@ export function MapPage() {
         )}
       </S.BusButtonRow>}
 
+      {!directionsPanelOpen && busRoutes.length > 0 && (
+        <S.BusPanel>
+          <S.BusRouteGrid>
+            {[...busRoutes]
+              .sort((a, b) => {
+                const aOperating = runningRoutes.has(a.name)
+                const bOperating = runningRoutes.has(b.name)
+                if (aOperating !== bOperating) return aOperating ? -1 : 1
+                return a.name.localeCompare(b.name)
+              })
+              .map((route) => {
+                const operating = runningRoutes.has(route.name)
+                const enabled = !busPrefs.disabledRoutes.includes(route.name)
+                const label = operating ? route.name : `${route.name} (${t('map.bus.notOperating')})`
+                return (
+                  <S.BusRouteBadge
+                    key={route.name}
+                    type="button"
+                    $background={route.color}
+                    $enabled={enabled}
+                    $operating={operating}
+                    aria-label={label}
+                    aria-pressed={enabled}
+                    title={label}
+                    onClick={() => busPrefs.toggleRoute(route.name)}
+                  >
+                    {route.code}
+                  </S.BusRouteBadge>
+                )
+              })}
+          </S.BusRouteGrid>
+        </S.BusPanel>
+      )}
+
       {!directionsPanelOpen && busPrefs.panelOpen && (
         <S.BusSheet ref={busSheetRef}>
           <S.BottomSheetHandle />

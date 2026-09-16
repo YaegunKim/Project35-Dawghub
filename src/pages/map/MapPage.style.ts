@@ -89,11 +89,61 @@ export const S = {
     align-items: center;
     gap: ${spacing.sm};
   `,
-  // Docked to the bottom edge — same shape as DirectionsBottomSheet (see MapPage.md: nothing
-  // in this app floats a full-width bar over the map, so an always-open corner list was
-  // replaced with "small button + a sheet that only appears once opened"). Pulled up from a
-  // closed default (no routes drawn until opened or favorited — see mapLayerPrefs.ts) rather
-  // than the old vertical badge strip that showed every route at once.
+  // Always-on per-route quick toggle, independent of the BusButtonRow/BusSheet open state —
+  // kept alongside the sheet below rather than replaced by it, so a route can be flipped
+  // on/off on the map without opening the fuller sheet first.
+  BusPanel: styled.div`
+    position: absolute;
+    top: calc(${spacing.base} + 44px + ${spacing.sm});
+    left: ${spacing.base};
+    z-index: ${zIndex.overlay};
+    width: 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: ${spacing.sm};
+    animation: ${dropIn} ${motion.duration.base} ${motion.easing.standard};
+  `,
+  BusRouteGrid: styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: ${spacing.xs};
+  `,
+  BusRouteBadge: styled.button<{ $background: string; $enabled: boolean; $operating: boolean }>`
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    color: ${brand.white};
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    background-color: ${({ $background }) => $background};
+    background-image: ${({ $operating }) =>
+      $operating
+        ? 'none'
+        : 'repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.65) 0, rgba(255, 255, 255, 0.65) 1px, transparent 1px, transparent 5px)'};
+    opacity: ${({ $enabled }) => ($enabled ? 1 : 0.35)};
+    cursor: pointer;
+    transition:
+      opacity ${motion.duration.fast} ${motion.easing.standard},
+      transform ${motion.duration.fast} ${motion.easing.standard};
+
+    &:active {
+      transform: scale(0.92);
+    }
+  `,
+  // Docked to the bottom edge — same shape as DirectionsBottomSheet. Complements BusPanel
+  // above: BusPanel is the always-on per-route on/off toggle, this sheet is the richer
+  // "browse a route's stops/timeline, favorite it, see Athens Transit routes too" view opened
+  // from the BusButtonRow bus icon. Pulled up from a closed default (no sheet content drawn
+  // until opened — see mapLayerPrefs.ts).
   BusSheet: styled.div`
     position: absolute;
     left: 0;
