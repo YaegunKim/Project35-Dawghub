@@ -7,18 +7,23 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 
 // maplibre-gl's own bundled code loads its render worker via
 // `new Worker(new URL('maplibre-gl-worker.mjs', import.meta.url))`, resolved relative to
-// wherever its chunk ends up being served from. Vite's worker-detection rewrites that
-// reference to /assets/maplibre-gl-worker.mjs at build time but — since maplibre-gl is
-// excluded from dep pre-bundling (see optimizeDeps.exclude below) and only pulled in via
-// manualChunks — never actually emits the file into dist/, so every production build 404s
-// on it (masked as a "text/html" MIME error by Amplify's SPA fallback) and the map never
+// wherever its chunk ends up being served from — and that worker file itself statically
+// imports a second file, `maplibre-gl-shared.mjs`, the same way (relative to its own URL).
+// Vite's worker-detection rewrites the first reference to /assets/maplibre-gl-worker.mjs at
+// build time but — since maplibre-gl is excluded from dep pre-bundling (see
+// optimizeDeps.exclude below) and only pulled in via manualChunks — never actually emits
+// either file into dist/, so every production build 404s on them (masked as a "text/html"
+// MIME error by Amplify's SPA fallback for the worker itself; a plain 404 for the shared
+// file, since nothing else references it for the fallback rule to catch) and the map never
 // loads. Dev mode never hits this, since Vite resolves worker imports straight from
-// node_modules at request time. Copy the file in ourselves as the fix.
+// node_modules at request time. Copy both files in ourselves as the fix.
 function copyMaplibreWorkerPlugin(): Plugin {
   return {
     name: 'copy-maplibre-worker',
     closeBundle() {
-      copyFileSync('node_modules/maplibre-gl/dist/maplibre-gl-worker.mjs', 'dist/assets/maplibre-gl-worker.mjs')
+      for (const file of ['maplibre-gl-worker.mjs', 'maplibre-gl-shared.mjs']) {
+        copyFileSync(`node_modules/maplibre-gl/dist/${file}`, `dist/assets/${file}`)
+      }
     },
   }
 }
