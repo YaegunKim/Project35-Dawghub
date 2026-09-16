@@ -7,14 +7,40 @@ import { getWalkingRouteFn } from './get-walking-route/resource'
 import { getFootballScheduleFn } from './get-football-schedule/resource'
 import { findUserByEmailFn } from './find-user-by-email/resource'
 import { getFriendScheduleFn } from './get-friend-schedule/resource'
+import { getCourseCatalogEntryFn } from './get-course-catalog-entry/resource'
+import { getThreadAnonLabelsFn } from './get-thread-anon-labels/resource'
 
 const schema = a.schema({
+  // Board-specific fields below are all optional and only populated by the board that
+  // uses them (see ai/SPEC.md) — General/Housing/Classes/Events share this one model
+  // rather than one-per-board, since they're all fundamentally a title+body+comments
+  // discussion post with a few extra structured attributes layered on top. Buy & Sell
+  // is the exception (see MarketplaceListing below) — a listing's identity (price,
+  // photos, sold-status) and query pattern (filter by status/category, hide sold) is
+  // different in kind from a discussion feed, so it isn't just "Post with more fields."
   Post: a
     .model({
       board: a.enum(['GENERAL', 'HOUSING', 'CLASSES', 'BUY_SELL', 'EVENTS']),
       title: a.string().required(),
       body: a.string().required(),
       comments: a.hasMany('Comment', 'postId'),
+      // General: NOTICE | FREE_TALK | QNA | TIMETABLE. Housing: DORM_REVIEW | SUBLEASE | ROOMMATE_SEARCH.
+      category: a.string(),
+      // Classes only — validated client-side against searchUgaClasses results at post-creation time.
+      courseCode: a.string(),
+      // Housing DORM_REVIEW/SUBLEASE/ROOMMATE_SEARCH only — autocompleted from fetchUgaBuildings().
+      dormBuilding: a.string(),
+      // Housing SUBLEASE/ROOMMATE_SEARCH only.
+      moveInDate: a.date(),
+      moveOutDate: a.date(),
+      monthlyRent: a.float(),
+      // Events only.
+      eventDate: a.date(),
+      eventStartTime: a.string(),
+      eventEndTime: a.string(),
+      eventLocation: a.string(),
+      externalLink: a.url(),
+      tags: a.string().array(),
     })
     .authorization((allow) => [allow.owner(), allow.authenticated().to(['read'])]),
 
@@ -23,6 +49,36 @@ const schema = a.schema({
       postId: a.id().required(),
       post: a.belongsTo('Post', 'postId'),
       body: a.string().required(),
+    })
+    .authorization((allow) => [allow.owner(), allow.authenticated().to(['read'])]),
+
+  // A like on a Post — one row per (post, liker). The client sets `id` deterministically
+  // to `${postId}_${ownerIdentityHint}` at creation time (see src/lib/postLikes.ts) purely
+  // so "like" is naturally idempotent (create-if-absent, delete-to-unlike) without needing
+  // a separate composite-key secondary index just to check "did I already like this."
+  // likeCount is computed client-side from a list() query rather than a maintained
+  // aggregate field — General's like button is a lightweight, non-realtime signal, not a
+  // high-traffic counter that needs a streams-triggered aggregate.
+  PostLike: a
+    .model({
+      postId: a.id().required(),
+    })
+    .authorization((allow) => [allow.owner(), allow.authenticated().to(['read'])]),
+
+  MarketplaceListing: a
+    .model({
+      title: a.string().required(),
+      description: a.string().required(),
+      price: a.float().required(),
+      category: a.enum(['TEXTBOOKS', 'FURNITURE', 'ELECTRONICS', 'CLOTHING', 'TICKETS', 'OTHER']),
+      condition: a.enum(['NEW', 'LIKE_NEW', 'GOOD', 'FAIR']),
+      status: a.enum(['ACTIVE', 'RESERVED', 'SOLD']),
+      // S3 object keys (Amplify Storage, amplify/storage/resource.ts), not full URLs —
+      // resolved to a displayable URL client-side via getUrl().
+      photoKeys: a.string().array(),
+      // Denormalized at creation time, same pattern as Friendship.senderEmail/recipientEmail —
+      // lets "Contact seller" reveal an email without a second privileged lookup.
+      sellerEmail: a.string().required(),
     })
     .authorization((allow) => [allow.owner(), allow.authenticated().to(['read'])]),
 
@@ -232,6 +288,52 @@ const schema = a.schema({
     .returns(a.ref('FriendClassEntry').array())
     .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(getFriendScheduleFn)),
+
+  CourseCatalogEntry: a.customType({
+    found: a.boolean(),
+    courseCode: a.string(),
+    creditHours: a.string(),
+    description: a.string(),
+    prerequisites: a.string(),
+  }),
+
+  // Proxies bulletin.uga.edu's course catalog (credit hours / description / prerequisites)
+  // from the server — same "unofficial, undocumented, can break silently" category as
+  // searchUgaClasses' reg.uga.edu CSV and getProfessorRating's RMP call above. See
+  // ai/TRD.md §4.4 and get-course-catalog-entry/handler.ts.
+  getCourseCatalogEntry: a
+    .query()
+    .arguments({ courseCode: a.string().required() })
+    .returns(a.ref('CourseCatalogEntry'))
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(getCourseCatalogEntryFn)),
+
+  ThreadAnonLabel: a.customType({
+    commentId: a.string(),
+    // A plain ordinal (1, 2, 3, ...), not a pre-formatted string — the client renders
+    // it through i18n (e.g. "익명1" / "Anonymous 1") so the label stays translatable.
+    anonNumber: a.integer(),
+  }),
+
+  ThreadAnonLabelsResult: a.customType({
+    labels: a.ref('ThreadAnonLabel').array(),
+  }),
+
+  // Computes Everytime-style per-thread anonymous labels ("익명1", "익명2", ...) for every
+  // distinct commenter on a post, in order of first appearance. Deliberately NOT stored on
+  // Comment itself and NOT derivable client-side: a client only ever sees its own `owner`
+  // value on rows it can read, never enough to distinguish "commenter A twice" from
+  // "commenter A then B" across other users' rows. Instead this Lambda gets a scoped direct
+  // DynamoDB read grant on the Comment table (see backend.ts, same pattern as
+  // get-friend-schedule) and computes labels fresh on every call — cheap at this app's
+  // per-thread comment volume, and avoids ever writing/exposing a raw owner identity string
+  // to the client. See ai/TRD.md §4.5.
+  getThreadAnonLabels: a
+    .query()
+    .arguments({ postId: a.string().required() })
+    .returns(a.ref('ThreadAnonLabelsResult'))
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(getThreadAnonLabelsFn)),
 
   // Raw (bus, stop) proximity samples written every minute by log-bus-arrivals — one row
   // per poll a bus is within range of a stop, including repeats while it lingers. Building

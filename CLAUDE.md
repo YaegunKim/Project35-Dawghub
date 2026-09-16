@@ -133,6 +133,16 @@ pwa-assets.config.ts          # PWA icon generation config (@vite-pwa/assets-gen
 
 ---
 
+## Product & technical planning docs
+
+Forward-looking planning for the Community boards (General/Housing/Classes/Buy & Sell/Events) — what to build next and why, as opposed to the per-page docs below which describe what's already shipped:
+
+| Doc | Contents |
+|---|---|
+| `ai/PRD.md` | Product requirements — vision, personas, per-board user stories/acceptance criteria, explicit out-of-scope calls (no StarRez login embedding, no Handshake API, no GTKSA scraping) |
+| `ai/TRD.md` | Technical requirements — integration decision framework, per-source feasibility matrix, new data model/Lambda/Storage additions |
+| `ai/SPEC.md` | Build-ready functional spec per board (UI, i18n keys, edge cases) |
+
 ## Per-page docs
 
 The data sources and known quirks of a specific page are in `ai/pages/<Tab>/<Page>.md`. To fix one page, you only need to read that one doc.

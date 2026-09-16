@@ -27,6 +27,8 @@ const ACTIVE_COLOR: Record<SegmentedControlVariant, string> = {
 export const S = {
   Group: styled.div`
     display: inline-flex;
+    flex-wrap: wrap;
+    max-width: 100%;
     padding: 2px;
     background: var(--bg-elevated);
     border-radius: ${radius.pill};
