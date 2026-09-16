@@ -10,6 +10,7 @@ export const MAP_ATHENS_TRANSIT_FAVORITES_KEY = 'dawghub:map:athensTransit'
 
 type BusLayerPrefs = {
   disabledRoutes: string[]
+  favoriteRoutes: string[]
   panelOpen: boolean
   hideAll: boolean
   operatingOnly: boolean
@@ -18,6 +19,7 @@ type BusLayerPrefs = {
 const BUS_PREFS_KEY = 'dawghub:map:bus'
 const DEFAULT_BUS_PREFS: BusLayerPrefs = {
   disabledRoutes: [],
+  favoriteRoutes: [],
   panelOpen: false,
   hideAll: false,
   operatingOnly: false,
@@ -30,6 +32,7 @@ function readBusPrefs(): BusLayerPrefs {
     const parsed = JSON.parse(raw) as Partial<BusLayerPrefs>
     return {
       disabledRoutes: Array.isArray(parsed.disabledRoutes) ? parsed.disabledRoutes : [],
+      favoriteRoutes: Array.isArray(parsed.favoriteRoutes) ? parsed.favoriteRoutes : [],
       panelOpen: typeof parsed.panelOpen === 'boolean' ? parsed.panelOpen : false,
       hideAll: typeof parsed.hideAll === 'boolean' ? parsed.hideAll : false,
       operatingOnly: typeof parsed.operatingOnly === 'boolean' ? parsed.operatingOnly : false,
@@ -71,12 +74,23 @@ export function useBusLayerPrefs() {
     setPrefs((prev) => ({ ...prev, disabledRoutes }))
   }, [])
 
+  const toggleFavorite = useCallback((routeName: string) => {
+    setPrefs((prev) => ({
+      ...prev,
+      favoriteRoutes: prev.favoriteRoutes.includes(routeName)
+        ? prev.favoriteRoutes.filter((route) => route !== routeName)
+        : [...prev.favoriteRoutes, routeName],
+    }))
+  }, [])
+
   return {
     disabledRoutes: prefs.disabledRoutes,
+    favoriteRoutes: prefs.favoriteRoutes,
     panelOpen: prefs.panelOpen,
     hideAll: prefs.hideAll,
     operatingOnly: prefs.operatingOnly,
     toggleRoute,
+    toggleFavorite,
     setPanelOpen,
     setHideAll,
     setOperatingOnly,
