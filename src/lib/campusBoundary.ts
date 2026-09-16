@@ -1,3 +1,5 @@
+import { haversineDistanceMeters } from './geo'
+
 export type UgaCampusBoundary = {
   id: string
   name: string
@@ -48,3 +50,59 @@ export const UGA_CAMPUS_BOUNDARIES: UgaCampusBoundary[] = [
   { id: 'skidaway', name: 'UGA Skidaway Institute of Oceanography', rings: SKIDAWAY },
   { id: 'sapelo-marine-institute', name: 'UGA Marine Institute (Sapelo Island)', rings: SAPELO_MARINE_INSTITUTE },
 ]
+
+// Athens's two campuses (Main + Health Sciences) — the only ones relevant to "is this point on
+// UGA's Athens campus", the question Athens Transit route filtering needs (see
+// athensTransit.ts's campusRelevantAthensRouteIds). The rest of UGA_CAMPUS_BOUNDARIES are other
+// states'-worth away and never come up for a city bus system that only serves Athens.
+const ATHENS_AREA_BOUNDARIES = [
+  UGA_CAMPUS_BOUNDARIES.find((boundary) => boundary.id === 'athens-main')!,
+  UGA_CAMPUS_BOUNDARIES.find((boundary) => boundary.id === 'athens-health-sciences')!,
+]
+
+// Standard even-odd ray-casting test. `ring` is a closed polygon as [lat, lng] pairs (matching
+// this file's own coordinate order throughout) — works for any simple ring regardless of
+// winding direction, which is why the outer boundary and its holes below can each be tested
+// the same way.
+function isPointInRing(lat: number, lng: number, ring: [number, number][]): boolean {
+  let inside = false
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [latI, lngI] = ring[i]
+    const [latJ, lngJ] = ring[j]
+    const crosses = latI > lat !== latJ > lat && lng < ((lngJ - lngI) * (lat - latI)) / (latJ - latI) + lngI
+    if (crosses) inside = !inside
+  }
+  return inside
+}
+
+function isPointInBoundary(lat: number, lng: number, boundary: UgaCampusBoundary): boolean {
+  const [outer, ...holes] = boundary.rings
+  if (!isPointInRing(lat, lng, outer)) return false
+  return !holes.some((hole) => isPointInRing(lat, lng, hole))
+}
+
+// True membership test (not an approximated radius) — is this point actually inside UGA's
+// Athens Main or Health Sciences campus footprint, per the real surveyed OpenStreetMap boundary
+// above.
+export function isPointOnUgaAthensCampus(lat: number, lng: number): boolean {
+  return ATHENS_AREA_BOUNDARIES.some((boundary) => isPointInBoundary(lat, lng, boundary))
+}
+
+// How far a point is from the nearest vertex of either Athens-area campus boundary — a cheap
+// approximation of "distance to the campus edge" (true point-to-segment distance would be more
+// precise, but the boundary's vertices are only a few meters apart along Athens Main's dense
+// stretches, matching the same nearest-vertex approximation nearestDistanceToRouteMeters already
+// uses for bus route lines elsewhere in the app). Used for the "is this near campus, even if not
+// literally on it" apartment-complex check in athensTransit.ts.
+export function nearestUgaAthensCampusBoundaryMeters(lat: number, lng: number): number {
+  let best = Infinity
+  ATHENS_AREA_BOUNDARIES.forEach((boundary) => {
+    boundary.rings.forEach((ring) => {
+      ring.forEach(([ringLat, ringLng]) => {
+        const distance = haversineDistanceMeters({ lat, lng }, { lat: ringLat, lng: ringLng })
+        if (distance < best) best = distance
+      })
+    })
+  })
+  return best
+}
