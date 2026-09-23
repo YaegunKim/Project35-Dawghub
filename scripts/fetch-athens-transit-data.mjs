@@ -122,6 +122,7 @@ try {
   const rawTrips = readGtfs('trips.txt')
   const rawShapes = readGtfs('shapes.txt')
   const rawStops = readGtfs('stops.txt')
+  const rawStopTimes = readGtfs('stop_times.txt')
 
   const shapePointsById = new Map()
   rawShapes.forEach((row) => {
@@ -134,11 +135,36 @@ try {
   })
 
   const shapeIdsByRoute = new Map()
+  const routeIdByTripId = new Map()
   rawTrips.forEach((row) => {
+    routeIdByTripId.set(row.trip_id, row.route_id)
     if (!row.shape_id) return
     const set = shapeIdsByRoute.get(row.route_id) ?? new Set()
     set.add(row.shape_id)
     shapeIdsByRoute.set(row.route_id, set)
+  })
+
+  // stop_times.txt is the file that actually ties a stop to a route (via its trip) — routes.txt
+  // and stops.txt on their own have no relationship at all. This was previously never parsed,
+  // so the app had no way to know which of the 509 city-wide stops belonged to which route (it
+  // fell back to guessing by proximity to the route's line). Grouped per trip, sorted by
+  // stop_sequence, then unioned per route (first-seen order) — a route usually has an outbound
+  // and inbound trip, and a stop on either direction still counts as "served by this route".
+  const stopIdsByTrip = new Map()
+  rawStopTimes.forEach((row) => {
+    const list = stopIdsByTrip.get(row.trip_id) ?? []
+    list.push({ seq: Number.parseInt(row.stop_sequence, 10), stopId: row.stop_id })
+    stopIdsByTrip.set(row.trip_id, list)
+  })
+
+  const stopIdsByRoute = new Map()
+  stopIdsByTrip.forEach((entries, tripId) => {
+    const routeId = routeIdByTripId.get(tripId)
+    if (!routeId) return
+    const ordered = entries.sort((a, b) => a.seq - b.seq).map((entry) => entry.stopId)
+    const set = stopIdsByRoute.get(routeId) ?? new Set()
+    ordered.forEach((stopId) => set.add(stopId))
+    stopIdsByRoute.set(routeId, set)
   })
 
   const routes = rawRoutes.map((route) => {
@@ -153,6 +179,7 @@ try {
       longName: route.route_long_name,
       color: `#${route.route_color || '333333'}`,
       segments,
+      stopIds: Array.from(stopIdsByRoute.get(route.route_id) ?? []),
     }
   })
 

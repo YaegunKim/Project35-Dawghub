@@ -171,7 +171,7 @@ export type StopArrival = {
   etaSeconds: number | null
 }
 
-function nearestPolylineIndex(point: [number, number], flatPoints: [number, number][]): number {
+export function nearestPolylineIndex(point: [number, number], flatPoints: [number, number][]): number {
   let bestIndex = 0
   let bestDistance = Infinity
   flatPoints.forEach(([lat, lng], index) => {
@@ -190,7 +190,7 @@ function nearestPolylineIndex(point: [number, number], flatPoints: [number, numb
 // straight line from the bus to the stop) avoids the wrong-direction mistake called out in
 // PassioRoute.stops' own comment — a bus that looks close as the crow flies can actually be
 // on the far side of the loop, close to finishing an entire lap before it gets there.
-function distanceAlongLoopMeters(flatPoints: [number, number][], fromIndex: number, toIndex: number): number {
+export function distanceAlongLoopMeters(flatPoints: [number, number][], fromIndex: number, toIndex: number): number {
   const indexes: number[] = []
   for (let i = fromIndex; i !== toIndex; i = (i + 1) % flatPoints.length) indexes.push(i)
   indexes.push(toIndex)
@@ -223,6 +223,54 @@ export function computeStopArrivals(stop: PassioStop, routes: PassioRoute[], bus
         })
       return { route, etaSeconds: etaOptions.length > 0 ? Math.min(...etaOptions) : null }
     })
+}
+
+export type BusRouteLocation = {
+  // The bus is between route.stops[legIndex] and route.stops[(legIndex + 1) % stops.length]
+  // (wrapping past the last stop back to the first, since routes are closed loops).
+  legIndex: number
+  // 0 = right at the leg's starting stop, 1 = right at its ending stop.
+  progress: number
+}
+
+// Where a live bus currently sits between two consecutive stops on its route — for drawing it
+// at its real interpolated position in a stop-by-stop timeline (not snapped to whichever stop
+// is nearer). Reuses nearestPolylineIndex/distanceAlongLoopMeters (also used by
+// computeStopArrivals) so there's one "walk the trace forward, handle the loop wrap"
+// implementation instead of a second one just for this.
+export function locateBusOnRoute(route: PassioRoute, bus: PassioBus): BusRouteLocation | null {
+  if (route.stops.length < 2) return null
+  const flatPoints = route.segments.flat()
+  if (flatPoints.length < 2) return null
+
+  const busIndex = nearestPolylineIndex([bus.latitude, bus.longitude], flatPoints)
+
+  // Exactly one leg has the bus's forward distance from its starting stop fall within that
+  // leg's own length — every other leg either requires wrapping most of the way around the
+  // loop to "catch up" to the bus (a large distance that safely exceeds a single leg's length),
+  // since distances only ever walk forward, never backward. Falls back to leg 0 (bus effectively
+  // treated as sitting right at the first stop) if floating point/data noise leaves none
+  // strictly satisfying that — better than throwing over a rare rounding edge case.
+  let bestLegIndex = 0
+  for (let legIndex = 0; legIndex < route.stops.length; legIndex++) {
+    const fromStop = route.stops[legIndex]
+    const toStop = route.stops[(legIndex + 1) % route.stops.length]
+    const legLength = distanceAlongLoopMeters(flatPoints, fromStop.polylineIndex, toStop.polylineIndex)
+    if (legLength === 0) continue
+    const distanceFromStart = distanceAlongLoopMeters(flatPoints, fromStop.polylineIndex, busIndex)
+    if (distanceFromStart <= legLength) {
+      bestLegIndex = legIndex
+      break
+    }
+  }
+
+  const fromStop = route.stops[bestLegIndex]
+  const toStop = route.stops[(bestLegIndex + 1) % route.stops.length]
+  const legLength = distanceAlongLoopMeters(flatPoints, fromStop.polylineIndex, toStop.polylineIndex)
+  const distanceFromStart = distanceAlongLoopMeters(flatPoints, fromStop.polylineIndex, busIndex)
+  const progress = legLength === 0 ? 0 : Math.min(1, Math.max(0, distanceFromStart / legLength))
+
+  return { legIndex: bestLegIndex, progress }
 }
 
 export async function fetchUgaRoutesAndStops(): Promise<{
