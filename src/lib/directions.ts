@@ -344,8 +344,19 @@ export async function planTrip(
   // GraphQL call from inside those tests.
   fetchStats: typeof fetchRouteScheduleStats = fetchRouteScheduleStats,
 ): Promise<TripPlan> {
-  const originCandidates = candidatesByRoute(origin, routes)
-  const destCandidates = candidatesByRoute(destination, routes)
+  // Passio has no "is this route in service today" field — some routes only ever run for
+  // specific events (e.g. "Weekender Gameday Detour", "Stadium Loop"), and outside of those
+  // they still have full stop/geometry data, indistinguishable from a normal route by
+  // structure alone. A route with zero live buses right now, while *other* routes clearly do
+  // have live buses, is the actual real-time signal that it isn't currently operating — so it
+  // gets dropped before candidate generation even starts, rather than being ranked and then
+  // silently degrading to a historical/flat wait estimate for a bus that will never come.
+  // Skipped entirely when `buses` itself is empty (no live data to judge by at all — a fetch
+  // hiccup shouldn't make every route look shut down).
+  const operatingRoutes = buses.length > 0 ? routes.filter((route) => buses.some((bus) => bus.route === route.name)) : routes
+
+  const originCandidates = candidatesByRoute(origin, operatingRoutes)
+  const destCandidates = candidatesByRoute(destination, operatingRoutes)
 
   const allCandidates = [...directCandidates(originCandidates, destCandidates), ...transferCandidates(originCandidates, destCandidates)]
 

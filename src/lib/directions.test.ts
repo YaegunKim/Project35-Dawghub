@@ -176,6 +176,28 @@ describe('planTrip', () => {
     expect(plan.walkBus).toBeNull()
   })
 
+  it('excludes a route with no live bus when other routes clearly do have one (e.g. a gameday-only route on a normal day)', async () => {
+    const originStop = stop('A', 0.001, 0)
+    const destStop = stop('B', 0.019, 1)
+    // GAMEDAY has perfectly good geometry (it only actually runs on game days, but Passio
+    // still serves its full stop/route data year-round) — it must not be offered just because
+    // it's a plausible candidate on paper.
+    const gamedayRoute = makeRoute('GAMEDAY', originStop, destStop)
+
+    const fetchWalking = vi.fn(async (from: LatLng, to: LatLng) => {
+      if (from.lng === origin.lng && to.lng === destination.lng) return walkingRoute(1600, 1200)
+      return walkingRoute(100, 60)
+    })
+
+    // A live bus exists, just not on GAMEDAY — this is what should read as "GAMEDAY isn't
+    // running right now," as opposed to buses being empty (no live data at all).
+    const unrelatedBus: PassioBus = { id: 'bus-1', route: 'SOME-OTHER-ROUTE', color: '#000', latitude: 0, longitude: 0.01, course: 0 }
+
+    const plan = await planTrip(origin, destination, [gamedayRoute], [unrelatedBus], fetchWalking, fetchStats)
+
+    expect(plan.walkBus).toBeNull()
+  })
+
   it('ranks candidates by estimated total time, not raw distance, before spending any ORS calls', async () => {
     // Closest stops to origin/destination of any candidate here — would win if ranking used
     // raw distance — but its RouteScheduleStat says the ride itself takes forever.
