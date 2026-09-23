@@ -477,6 +477,8 @@ export function MapPage() {
   // ref is stable across renders, so the mount-only map effect can close over it and still see
   // its current rendered height.
   const bottomSheetRef = useRef<HTMLDivElement>(null)
+  // Same idea, for the Directions origin/destination top bar's own docked height.
+  const topBarRef = useRef<HTMLDivElement>(null)
   // Same idea, for the bus sheet's own docked height — read when a route/stop is focused so
   // the fitted/flown-to bounds aren't centered under the sheet.
   const busSheetRef = useRef<HTMLDivElement>(null)
@@ -1802,8 +1804,16 @@ export function MapPage() {
         } else {
           const latlngs = leg.coordinates.map((point) => [point.lat, point.lng] as [number, number])
           if (latlngs.length < 2) return
+          // A dark halo underneath, wider than the colored line itself, so the ridden segment
+          // reads as unmistakably "the thing to follow" against a busy basemap regardless of
+          // the route's own color (a light yellow/green route line has very little contrast
+          // against light basemap terrain without one) — the same technique Google Maps' own
+          // transit line rendering uses.
           tripPolylines.push(
-            L.polyline(latlngs, { color: leg.routeColor, weight: 5, opacity: 0.9 }).addTo(directionsLayer),
+            L.polyline(latlngs, { color: '#000', weight: 10, opacity: 0.35, lineCap: 'round' }).addTo(directionsLayer),
+          )
+          tripPolylines.push(
+            L.polyline(latlngs, { color: leg.routeColor, weight: 7, opacity: 1, lineCap: 'round' }).addTo(directionsLayer),
           )
           // The line's color alone doesn't say which route it is — drop the route's own
           // letter/code at the midpoint of the ridden segment so it's identifiable without
@@ -1819,14 +1829,15 @@ export function MapPage() {
       })
 
       if (bounds.length > 0) {
-        // Asymmetric padding, not a flat [48, 48] — the bottom sheet (fields, and once
-        // results/nav HUD show, those too) covers real screen space, so fitBounds needs to
-        // know its actual rendered height or it'll happily center part of the route right
-        // underneath it. Nothing docks to the top anymore, so that side just gets base padding.
+        // Asymmetric padding, not a flat [48, 48] — the top bar (origin/destination fields)
+        // and bottom sheet (results/nav HUD) each cover real screen space, so fitBounds needs
+        // to know their actual rendered heights or it'll happily center part of the route
+        // right underneath one of them.
         const basePadding = 24
+        const topBarHeight = topBarRef.current?.getBoundingClientRect().height ?? 0
         const bottomSheetHeight = bottomSheetRef.current?.getBoundingClientRect().height ?? 0
         map.fitBounds(L.latLngBounds(bounds), {
-          paddingTopLeft: [basePadding, basePadding],
+          paddingTopLeft: [basePadding, topBarHeight + basePadding],
           paddingBottomRight: [basePadding, bottomSheetHeight + basePadding],
         })
       }
@@ -2502,93 +2513,93 @@ export function MapPage() {
         </S.LayersButtonSlot>
       )}
 
-      {directionsPanelOpen && (
+      {directionsPanelOpen && !navigating && (
+        <S.DirectionsTopBar ref={topBarRef}>
+          <S.DirectionsFieldsWrap>
+            <S.DirectionsFieldsColumn>
+              <S.DirectionsFieldRow>
+                <S.DirectionsFieldDot $color={category.directionsOrigin} />
+                <BuildingAutocomplete
+                  value={originInputValue}
+                  onChange={handleOriginInputChange}
+                  buildingNames={allBuildingNames}
+                  placeholder={t('map.directions.fromPlaceholder')}
+                  ariaLabel={t('map.directions.fromLabel')}
+                />
+                <S.DirectionsIconButton
+                  type="button"
+                  aria-label={t('map.directions.useMyLocation')}
+                  title={t('map.directions.useMyLocation')}
+                  onClick={useMyLocationForOrigin}
+                >
+                  <FontAwesomeIcon icon={faLocationCrosshairs} />
+                </S.DirectionsIconButton>
+                <S.DirectionsIconButton
+                  type="button"
+                  aria-label={t('map.directions.pickOnMap')}
+                  title={t('map.directions.pickOnMap')}
+                  onClick={() => setPickingFor('origin')}
+                >
+                  <FontAwesomeIcon icon={faMapPin} />
+                </S.DirectionsIconButton>
+              </S.DirectionsFieldRow>
+
+              <S.DirectionsFieldRow>
+                <S.DirectionsFieldDot $color={category.directionsDestination} $shape="square" />
+                <BuildingAutocomplete
+                  value={destinationInputValue}
+                  onChange={handleDestinationInputChange}
+                  buildingNames={allBuildingNames}
+                  placeholder={t('map.directions.toPlaceholder')}
+                  ariaLabel={t('map.directions.toLabel')}
+                />
+                <S.DirectionsIconButton
+                  type="button"
+                  aria-label={t('map.directions.useMyLocation')}
+                  title={t('map.directions.useMyLocation')}
+                  onClick={useMyLocationForDestination}
+                >
+                  <FontAwesomeIcon icon={faLocationCrosshairs} />
+                </S.DirectionsIconButton>
+                <S.DirectionsIconButton
+                  type="button"
+                  aria-label={t('map.directions.pickOnMap')}
+                  title={t('map.directions.pickOnMap')}
+                  onClick={() => setPickingFor('destination')}
+                >
+                  <FontAwesomeIcon icon={faMapPin} />
+                </S.DirectionsIconButton>
+              </S.DirectionsFieldRow>
+            </S.DirectionsFieldsColumn>
+
+            <S.DirectionsActionsColumn>
+              <S.DirectionsSwapButton type="button" aria-label={t('map.directions.swap')} onClick={handleSwapPoints}>
+                <FontAwesomeIcon icon={faArrowsUpDown} />
+              </S.DirectionsSwapButton>
+              <S.DirectionsCloseButton
+                type="button"
+                aria-label={t('map.directions.title')}
+                onClick={closeDirectionsPanel}
+              >
+                <FontAwesomeIcon icon={faXmark} />
+              </S.DirectionsCloseButton>
+            </S.DirectionsActionsColumn>
+          </S.DirectionsFieldsWrap>
+
+          <S.DirectionsSearchButton
+            type="button"
+            disabled={isPlanningTrip || (!originPoint && !originInputValue.trim()) || (!destinationPoint && !destinationInputValue.trim())}
+            onClick={handleGetDirections}
+          >
+            <FontAwesomeIcon icon={faMagnifyingGlass} />
+            {isPlanningTrip ? t('map.directions.planning') : t('map.directions.getDirections')}
+          </S.DirectionsSearchButton>
+        </S.DirectionsTopBar>
+      )}
+
+      {directionsPanelOpen && (tripError || tripPlan) && (
         <S.DirectionsBottomSheet ref={bottomSheetRef}>
           <S.BottomSheetHandle />
-
-          {!navigating && (
-            <>
-              <S.DirectionsFieldsWrap>
-                <S.DirectionsFieldsColumn>
-                  <S.DirectionsFieldRow>
-                    <S.DirectionsFieldDot $color={category.directionsOrigin} />
-                    <BuildingAutocomplete
-                      value={originInputValue}
-                      onChange={handleOriginInputChange}
-                      buildingNames={allBuildingNames}
-                      placeholder={t('map.directions.fromPlaceholder')}
-                      ariaLabel={t('map.directions.fromLabel')}
-                    />
-                    <S.DirectionsIconButton
-                      type="button"
-                      aria-label={t('map.directions.useMyLocation')}
-                      title={t('map.directions.useMyLocation')}
-                      onClick={useMyLocationForOrigin}
-                    >
-                      <FontAwesomeIcon icon={faLocationCrosshairs} />
-                    </S.DirectionsIconButton>
-                    <S.DirectionsIconButton
-                      type="button"
-                      aria-label={t('map.directions.pickOnMap')}
-                      title={t('map.directions.pickOnMap')}
-                      onClick={() => setPickingFor('origin')}
-                    >
-                      <FontAwesomeIcon icon={faMapPin} />
-                    </S.DirectionsIconButton>
-                  </S.DirectionsFieldRow>
-
-                  <S.DirectionsFieldRow>
-                    <S.DirectionsFieldDot $color={category.directionsDestination} $shape="square" />
-                    <BuildingAutocomplete
-                      value={destinationInputValue}
-                      onChange={handleDestinationInputChange}
-                      buildingNames={allBuildingNames}
-                      placeholder={t('map.directions.toPlaceholder')}
-                      ariaLabel={t('map.directions.toLabel')}
-                    />
-                    <S.DirectionsIconButton
-                      type="button"
-                      aria-label={t('map.directions.useMyLocation')}
-                      title={t('map.directions.useMyLocation')}
-                      onClick={useMyLocationForDestination}
-                    >
-                      <FontAwesomeIcon icon={faLocationCrosshairs} />
-                    </S.DirectionsIconButton>
-                    <S.DirectionsIconButton
-                      type="button"
-                      aria-label={t('map.directions.pickOnMap')}
-                      title={t('map.directions.pickOnMap')}
-                      onClick={() => setPickingFor('destination')}
-                    >
-                      <FontAwesomeIcon icon={faMapPin} />
-                    </S.DirectionsIconButton>
-                  </S.DirectionsFieldRow>
-                </S.DirectionsFieldsColumn>
-
-                <S.DirectionsActionsColumn>
-                  <S.DirectionsSwapButton type="button" aria-label={t('map.directions.swap')} onClick={handleSwapPoints}>
-                    <FontAwesomeIcon icon={faArrowsUpDown} />
-                  </S.DirectionsSwapButton>
-                  <S.DirectionsCloseButton
-                    type="button"
-                    aria-label={t('map.directions.title')}
-                    onClick={closeDirectionsPanel}
-                  >
-                    <FontAwesomeIcon icon={faXmark} />
-                  </S.DirectionsCloseButton>
-                </S.DirectionsActionsColumn>
-              </S.DirectionsFieldsWrap>
-
-              <S.DirectionsSearchButton
-                type="button"
-                disabled={isPlanningTrip || (!originPoint && !originInputValue.trim()) || (!destinationPoint && !destinationInputValue.trim())}
-                onClick={handleGetDirections}
-              >
-                <FontAwesomeIcon icon={faMagnifyingGlass} />
-                {isPlanningTrip ? t('map.directions.planning') : t('map.directions.getDirections')}
-              </S.DirectionsSearchButton>
-            </>
-          )}
 
           {tripError && <S.TripEmptyState>{tripError}</S.TripEmptyState>}
 

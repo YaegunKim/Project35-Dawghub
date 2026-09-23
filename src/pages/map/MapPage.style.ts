@@ -456,12 +456,28 @@ export const S = {
     right: ${spacing.base};
     z-index: ${zIndex.overlay};
   `,
-  // Docked to the bottom edge, like the bus sheet — carries both the origin/destination
-  // input fields (shown as soon as Directions opens) and, once a search runs, the results
-  // list/nav HUD beneath them, all in one scrollable sheet instead of a separate top bar +
-  // bottom sheet pair. Bottom-docked rather than top like Google/Naver Maps' own directions
-  // panels, matching every other panel in this app (bus sheet, layer drawer) instead of
-  // being the one exception pinned to the top.
+  // Pinned to the top, like Google/Naver Maps' own directions panels — the origin/destination
+  // fields are what a rider looks for first and re-checks most often (swap, retype a stop),
+  // so they stay anchored in the same spot regardless of how tall the results below get.
+  DirectionsTopBar: styled.div`
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: ${zIndex.overlay + 50};
+    display: flex;
+    flex-direction: column;
+    gap: ${spacing.sm};
+    padding: ${spacing.sm} ${spacing.base};
+    padding-top: max(${spacing.sm}, env(safe-area-inset-top));
+    border-bottom-left-radius: ${radius.lg};
+    border-bottom-right-radius: ${radius.lg};
+    background: var(--bg);
+    box-shadow: ${shadow.md};
+    animation: ${dropIn} ${motion.duration.base} ${motion.easing.standard};
+  `,
+  // Docked to the bottom edge, like the bus sheet — the search results list and nav HUD, once
+  // a search actually runs (the fields themselves live in DirectionsTopBar above).
   DirectionsBottomSheet: styled.div`
     position: absolute;
     left: 0;

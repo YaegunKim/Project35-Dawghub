@@ -177,6 +177,16 @@ function candidatesByRoute(point: LatLng, routes: PassioRoute[]): Map<PassioRout
   return map
 }
 
+// A hop shorter than this isn't a real bus ride — it's "board, then immediately arrive,"
+// which still costs a full wait+boarding but saves ~nothing over just walking that same short
+// gap. Confirmed against real UGA/Passio data: origin and destination often each have their
+// own nearest stop within CANDIDATE_STOP_RADIUS_METERS that happen to be the *same* physical
+// stop (or two stops the route visits back-to-back), and without this filter candidates built
+// from that degenerate 0-30m hop dominate the raw-distance ranking below — a real, useful
+// route several hundred meters long loses to a fake "ride" that goes nowhere, purely because
+// summing in a ~0m leg makes the total look shorter.
+const MIN_HOP_DISTANCE_METERS = 150
+
 // For each route, try every (origin candidate × destination candidate) pair — not just
 // nearest-to-nearest — and keep whichever pair gives the shortest walk+ride distance for
 // that route. This is pure local geometry (no network calls), so evaluating a handful of
@@ -192,6 +202,7 @@ function directCandidates(originCandidates: Map<PassioRoute, ReturnType<typeof c
       destStops.forEach((dc) => {
         if (dc.stopIndex === oc.stopIndex) return
         const geometry = busLegGeometry(route, oc.stop, dc.stop)
+        if (geometry.distanceMeters < MIN_HOP_DISTANCE_METERS) return
         const rawDistanceMeters = oc.distance + geometry.distanceMeters + dc.distance
         if (!best || rawDistanceMeters < best.rawDistanceMeters) {
           best = {
@@ -236,6 +247,10 @@ function transferCandidates(
             const transferStopOnB = stopsOnB.get(transferStopOnA.id)!
             const geometryA = busLegGeometry(routeA, oc.stop, transferStopOnA)
             const geometryB = busLegGeometry(routeB, transferStopOnB, dc.stop)
+            // Both hops have to be real rides — a "transfer" where either leg goes nowhere is
+            // really just riding one route with a pointless extra boarding tacked on. See
+            // MIN_HOP_DISTANCE_METERS.
+            if (geometryA.distanceMeters < MIN_HOP_DISTANCE_METERS || geometryB.distanceMeters < MIN_HOP_DISTANCE_METERS) return
             const rawDistanceMeters = oc.distance + geometryA.distanceMeters + geometryB.distanceMeters + dc.distance
             if (!best || rawDistanceMeters < best.rawDistanceMeters) {
               best = {

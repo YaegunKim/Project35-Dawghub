@@ -156,6 +156,26 @@ describe('planTrip', () => {
     expect(busLegs[1].fromStop.id).toBe('T')
   })
 
+  it('rejects a "transfer" whose hops go nowhere, instead of offering a fake bus ride', async () => {
+    // S is within walking radius of *both* origin and destination and shared by both routes —
+    // reproduces a real bug found against live UGA data: the origin-side candidate on routeA
+    // and the transfer stop are the same physical stop (0m hop), and likewise on the
+    // destination side for routeB. Before MIN_HOP_DISTANCE_METERS, this "transfer" won by raw
+    // distance (a 0m ride summed to a tiny total) over every real, useful route, effectively
+    // hiding them.
+    const sharedStop = stopAt('S', 0, 0.01) // ~1113m from both origin and destination
+    const farA = stopAt('farA', 0, 0.5)
+    const farB = stopAt('farB', 0, -0.5)
+    const routeA = makeMultiStopRoute('X', [sharedStop, farA])
+    const routeB = makeMultiStopRoute('Y', [sharedStop, farB])
+
+    const fetchWalking = vi.fn(async () => walkingRoute(1113, 824))
+
+    const plan = await planTrip(origin, destination, [routeA, routeB], [], fetchWalking, fetchStats)
+
+    expect(plan.walkBus).toBeNull()
+  })
+
   it('ranks candidates by estimated total time, not raw distance, before spending any ORS calls', async () => {
     // Closest stops to origin/destination of any candidate here — would win if ranking used
     // raw distance — but its RouteScheduleStat says the ride itself takes forever.
