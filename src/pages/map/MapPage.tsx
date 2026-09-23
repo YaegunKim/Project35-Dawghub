@@ -40,6 +40,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Button } from '../../design-system/Button/Button'
 import { IconButton } from '../../design-system/IconButton/IconButton'
 import { Input } from '../../design-system/Input/Input'
+import { BuildingAutocomplete } from './BuildingAutocomplete'
 import { Modal } from '../../design-system/Modal/Modal'
 import { useFavorites } from '../../lib/useFavorites'
 import {
@@ -559,6 +560,11 @@ export function MapPage() {
     startDirectionsTo: (point: { lat: number; lng: number; label: string }) => void
     focusOnPoint: (point: { lat: number; lng: number }) => void
     applyFootballMarker: (games: FootballGame[]) => void
+    // Live bus positions, for handleGetDirections to pass into planTrip (near-term wait
+    // accuracy on a trip's first boarding leg) — latestBuses itself is a plain closure
+    // variable inside the map-mount effect (see pollBuses), not reachable from outside it
+    // otherwise, same reason setMyDorm/startDirectionsTo/etc. are exposed this way too.
+    getLatestBuses: () => PassioBus[]
   } | null>(null)
 
   useEffect(() => {
@@ -618,8 +624,9 @@ export function MapPage() {
   const activeLeg = activeOption && activeLegIndex < activeOption.legs.length ? activeOption.legs[activeLegIndex] : null
   const arrived = navigating && activeOption != null && activeLegIndex >= activeOption.legs.length
   // For the walk+bus row's own badge/label in the results list — independent of which option
-  // is currently selected/drawn, since both rows render together before you pick one.
-  const walkBusLeg = tripPlan?.walkBus?.legs.find((leg): leg is Extract<TripLeg, { kind: 'bus' }> => leg.kind === 'bus')
+  // is currently selected/drawn, since both rows render together before you pick one. One
+  // entry for a direct trip, two (back to back, same transfer stop) for a one-transfer trip.
+  const walkBusLegs = tripPlan?.walkBus?.legs.filter((leg): leg is Extract<TripLeg, { kind: 'bus' }> => leg.kind === 'bus') ?? []
 
   // Advances to the next leg once GPS gets close enough to the current leg's endpoint —
   // walking legs end at a stop or the destination, bus legs end at the alighting stop.
@@ -1323,13 +1330,14 @@ export function MapPage() {
     let latestBuses: PassioBus[] = []
 
     // Overrides the normal layer-prefs visibility while a trip is on screen: 'hide-all' for a
-    // walk-only option (no bus should be visible at all — nothing to disambiguate), or a
-    // specific route name for a walk+bus option (only the ridden route — its line, stops, and
-    // live buses — stays visible; every other route is hidden outright, not dimmed, so they
+    // walk-only option (no bus should be visible at all — nothing to disambiguate), or the
+    // ridden route name(s) for a walk+bus option (a direct trip focuses one route, a one-
+    // transfer trip focuses both — see planTrip/TripLeg — only those route(s)' lines, stops,
+    // and live buses stay visible; every other route is hidden outright, not dimmed, so they
     // don't read as "you could also catch this one here"). Null outside of directions mode,
     // where the user's own layer prefs (currentHideAll/currentDisabledRoutes/currentOperatingOnly)
     // apply.
-    let directionsBusFocus: 'hide-all' | { routeName: string } | null = null
+    let directionsBusFocus: 'hide-all' | { routeNames: string[] } | null = null
 
     function refreshBusVisibility() {
       const prefsShowRoute = (name: string) =>
@@ -1337,7 +1345,7 @@ export function MapPage() {
 
       const routeVisible = (name: string) => {
         if (directionsBusFocus === 'hide-all') return false
-        if (directionsBusFocus) return name === directionsBusFocus.routeName
+        if (directionsBusFocus) return directionsBusFocus.routeNames.includes(name)
         return prefsShowRoute(name)
       }
       // A stop is shown if any route that actually serves it (per PassioRoute.stops
@@ -1346,10 +1354,14 @@ export function MapPage() {
       // like the routes themselves, just OR'd across every route touching that stop.
       const stopVisible = (routeNames: string[]) => {
         if (directionsBusFocus === 'hide-all') return false
-        if (directionsBusFocus) return routeNames.includes(directionsBusFocus.routeName)
+        // Captured into a const before the closure below — TS can't narrow a mutable outer
+        // `let` inside a nested callback, since it can't prove directionsBusFocus wasn't
+        // reassigned by the time that callback runs.
+        const focus = directionsBusFocus
+        if (focus) return routeNames.some((name) => focus.routeNames.includes(name))
         return routeNames.some((name) => prefsShowRoute(name))
       }
-      const focusedRoute = directionsBusFocus && directionsBusFocus !== 'hide-all' ? directionsBusFocus.routeName : null
+      const focusedRoutes = directionsBusFocus && directionsBusFocus !== 'hide-all' ? directionsBusFocus.routeNames : null
 
       routeEntries.forEach(({ name, polylines }) => {
         const shouldShow = routeVisible(name)
@@ -1358,7 +1370,7 @@ export function MapPage() {
         // above routesLayer), so only the part of that route NOT part of this trip reads as
         // dashed, and the ridden segment reads solid. Not "other routes are dashed" — other
         // routes aren't shown at all (shouldShow above already hides them entirely).
-        const dashedForTrip = focusedRoute !== null && name === focusedRoute
+        const dashedForTrip = focusedRoutes !== null && focusedRoutes.includes(name)
         polylines.forEach((polyline) => {
           if (shouldShow) {
             if (!routesLayer.hasLayer(polyline)) polyline.addTo(routesLayer)
@@ -1400,7 +1412,7 @@ export function MapPage() {
       refreshBusVisibility()
     }
 
-    function setDirectionsBusFocus(focus: 'hide-all' | { routeName: string } | null) {
+    function setDirectionsBusFocus(focus: 'hide-all' | { routeNames: string[] } | null) {
       directionsBusFocus = focus
       refreshBusVisibility()
     }
@@ -1440,11 +1452,14 @@ export function MapPage() {
       tripMarkers = []
 
       const option = plan && selected === 'walk-bus' && plan.walkBus ? plan.walkBus : plan?.walkOnly
-      const busLeg = option?.legs.find((leg): leg is Extract<TripLeg, { kind: 'bus' }> => leg.kind === 'bus')
+      const busLegs = option?.legs.filter((leg): leg is Extract<TripLeg, { kind: 'bus' }> => leg.kind === 'bus') ?? []
       // No plan yet → back to the user's own layer prefs. A plan with no bus leg (walk-only
       // selected, or no bus option exists at all) → hide every bus route/stop/live bus, since
-      // none of them are part of this trip. A bus leg → focus down to just that route.
-      setDirectionsBusFocus(!plan || !option ? null : busLeg ? { routeName: busLeg.routeName } : 'hide-all')
+      // none of them are part of this trip. Bus leg(s) → focus down to just the ridden route(s)
+      // (one for a direct trip, two for a one-transfer trip — see TripLeg/planTrip).
+      setDirectionsBusFocus(
+        !plan || !option ? null : busLegs.length > 0 ? { routeNames: [...new Set(busLegs.map((leg) => leg.routeName))] } : 'hide-all',
+      )
 
       if (!plan || !option) return
       // A route about to cover the map is more useful than whatever popup happens to still be
@@ -1590,6 +1605,7 @@ export function MapPage() {
       startDirectionsTo,
       focusOnPoint,
       applyFootballMarker,
+      getLatestBuses: () => latestBuses,
     }
 
     applyFootballMarker([])
@@ -2016,7 +2032,7 @@ export function MapPage() {
       }
       setOriginPoint(origin)
       setDestinationPoint(destination)
-      const plan = await planTrip(origin, destination, routes)
+      const plan = await planTrip(origin, destination, routes, mapActionsRef.current?.getLatestBuses() ?? [])
       setTripPlan(plan)
       setSelectedOptionKind('walk-only')
     } catch {
@@ -2047,7 +2063,13 @@ export function MapPage() {
   function legInstruction(legs: TripLeg[], index: number): string {
     const leg = legs[index]
     if (leg.kind === 'bus') {
-      return t('map.directions.navBoardBus', { route: leg.routeName, stop: leg.toStop.name })
+      // A one-transfer trip has no walking leg between its two bus legs (same physical stop —
+      // see TripLeg/planTrip), so the previous leg being 'bus' too is exactly "this is the
+      // second boarding," worth announcing differently from the initial one.
+      const previousLeg = legs[index - 1]
+      return previousLeg?.kind === 'bus'
+        ? t('map.directions.navTransferBus', { route: leg.routeName, stop: leg.toStop.name })
+        : t('map.directions.navBoardBus', { route: leg.routeName, stop: leg.toStop.name })
     }
     const nextLeg = legs[index + 1]
     if (nextLeg && nextLeg.kind === 'bus') {
@@ -2141,12 +2163,12 @@ export function MapPage() {
             <S.DirectionsFieldsColumn>
               <S.DirectionsFieldRow>
                 <S.DirectionsFieldDot $color={category.directionsOrigin} />
-                <Input
-                  list="dawghub-all-building-names"
-                  placeholder={t('map.directions.fromPlaceholder')}
-                  aria-label={t('map.directions.fromLabel')}
+                <BuildingAutocomplete
                   value={originInputValue}
-                  onChange={(event) => handleOriginInputChange(event.target.value)}
+                  onChange={handleOriginInputChange}
+                  buildingNames={allBuildingNames}
+                  placeholder={t('map.directions.fromPlaceholder')}
+                  ariaLabel={t('map.directions.fromLabel')}
                 />
                 <S.DirectionsIconButton
                   type="button"
@@ -2168,12 +2190,12 @@ export function MapPage() {
 
               <S.DirectionsFieldRow>
                 <S.DirectionsFieldDot $color={category.directionsDestination} $shape="square" />
-                <Input
-                  list="dawghub-all-building-names"
-                  placeholder={t('map.directions.toPlaceholder')}
-                  aria-label={t('map.directions.toLabel')}
+                <BuildingAutocomplete
                   value={destinationInputValue}
-                  onChange={(event) => handleDestinationInputChange(event.target.value)}
+                  onChange={handleDestinationInputChange}
+                  buildingNames={allBuildingNames}
+                  placeholder={t('map.directions.toPlaceholder')}
+                  ariaLabel={t('map.directions.toLabel')}
                 />
                 <S.DirectionsIconButton
                   type="button"
@@ -2207,12 +2229,6 @@ export function MapPage() {
               </S.DirectionsCloseButton>
             </S.DirectionsActionsColumn>
           </S.DirectionsFieldsWrap>
-
-          <datalist id="dawghub-all-building-names">
-            {allBuildingNames.map((name) => (
-              <option key={name} value={name} />
-            ))}
-          </datalist>
 
           <S.DirectionsSearchButton
             type="button"
@@ -2265,15 +2281,30 @@ export function MapPage() {
               {tripPlan.walkBus ? (
                 <S.TripOptionRow $selected={selectedOptionKind === 'walk-bus'}>
                   <S.TripOptionRowContent type="button" onClick={() => setSelectedOptionKind('walk-bus')}>
-                    <S.TripOptionIconBadge $color={walkBusLeg?.routeColor ?? category.directionsWalk}>
-                      {walkBusLeg ? walkBusLeg.routeCode : <FontAwesomeIcon icon={faBus} />}
-                    </S.TripOptionIconBadge>
+                    <S.TripOptionIconBadgeGroup>
+                      {walkBusLegs.length > 0 ? (
+                        walkBusLegs.map((leg, index) => (
+                          <S.TripOptionIconBadge key={`${leg.routeName}-${index}`} $color={leg.routeColor}>
+                            {leg.routeCode}
+                          </S.TripOptionIconBadge>
+                        ))
+                      ) : (
+                        <S.TripOptionIconBadge $color={category.directionsWalk}>
+                          <FontAwesomeIcon icon={faBus} />
+                        </S.TripOptionIconBadge>
+                      )}
+                    </S.TripOptionIconBadgeGroup>
                     <S.TripOptionText>
                       <S.TripOptionDuration>{formatDuration(tripPlan.walkBus.totalDurationSeconds)}</S.TripOptionDuration>
                       <S.TripOptionMeta>
-                        {walkBusLeg
-                          ? t('map.directions.walkAndBusRoute', { route: walkBusLeg.routeName })
-                          : t('map.directions.walkAndBus')}{' '}
+                        {walkBusLegs.length === 2
+                          ? t('map.directions.walkAndBusTransferRoute', {
+                              routeA: walkBusLegs[0].routeName,
+                              routeB: walkBusLegs[1].routeName,
+                            })
+                          : walkBusLegs.length === 1
+                            ? t('map.directions.walkAndBusRoute', { route: walkBusLegs[0].routeName })
+                            : t('map.directions.walkAndBus')}{' '}
                         · {formatDistance(tripPlan.walkBus.totalDistanceMeters)}
                       </S.TripOptionMeta>
                       <S.TripOptionApproxNote>{t('map.directions.busEtaApprox')}</S.TripOptionApproxNote>
@@ -2612,8 +2643,8 @@ export function MapPage() {
                 onChange={(event) => setDormInputValue(event.target.value)}
               />
               <datalist id="dawghub-housing-names">
-                {housingBuildingNames.map((name) => (
-                  <option key={name} value={name} />
+                {housingBuildingNames.map((name, index) => (
+                  <option key={`${name}-${index}`} value={name} />
                 ))}
               </datalist>
               <Button

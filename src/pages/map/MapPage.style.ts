@@ -489,11 +489,6 @@ export const S = {
     display: flex;
     align-items: center;
     gap: ${spacing.xs};
-
-    > input {
-      flex: 1;
-      min-width: 0;
-    }
   `,
   DirectionsIconButton: styled.button`
     display: inline-flex;
@@ -619,6 +614,14 @@ export const S = {
     text-align: left;
     font: inherit;
     cursor: pointer;
+  `,
+  // Holds one badge for a direct trip, or two (one per ridden route) for a one-transfer trip —
+  // a plain row is enough since TripOptionIconBadge is already a fixed 36px circle.
+  TripOptionIconBadgeGroup: styled.span`
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   `,
   // Reuses the same colored-circle badge language as LayerChipIcon elsewhere on this page —
   // walk gets the fixed teal directionsWalk color, bus gets that specific route's own color

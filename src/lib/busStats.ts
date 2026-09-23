@@ -80,12 +80,15 @@ const DATE_FORMATTER = new Intl.DateTimeFormat('en-CA', {
 
 const WEEKDAY_SHORT_TO_INDEX: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }
 
-function athensDayOfWeek(iso: string): number {
+// Exported for busScheduleStats.ts, which needs the same "what weekday/minute is it right now
+// in Athens, regardless of the viewer's own timezone" logic to compare against RouteScheduleStat's
+// weekday/hour rows.
+export function athensDayOfWeek(iso: string): number {
   const short = WEEKDAY_FORMATTER.format(new Date(iso))
   return WEEKDAY_SHORT_TO_INDEX[short]
 }
 
-function athensMinuteOfDay(iso: string): number {
+export function athensMinuteOfDay(iso: string): number {
   const [hour, minute] = TIME_FORMATTER.format(new Date(iso)).split(':').map(Number)
   return hour * 60 + minute
 }

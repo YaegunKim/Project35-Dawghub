@@ -12,6 +12,13 @@ export const S = {
     position: relative;
     flex: 1;
     min-width: 0;
+
+    // The shared Input component has no width of its own (inputs are inline-block by
+    // default) — without this it stays browser-default-sized instead of filling whatever
+    // width Wrap itself was just given (flex: 1 in a row, or 100% in a block form field).
+    > input {
+      width: 100%;
+    }
   `,
   List: styled.ul`
     position: absolute;

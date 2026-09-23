@@ -283,7 +283,11 @@
       "arrivalEtaMinutes": "약 {{count}}분",
       "back": "노선 목록으로",
       "favorite": "이 노선 즐겨찾기",
-      "busesActive": "버스 {{count}}대 운행 중"
+      "busesActive": "버스 {{count}}대 운행 중",
+      "beforeFirstBus": "첫차 약 {{time}}",
+      "afterLastBusKnown": "오늘 운행 종료 · 다음 {{weekday}} 약 {{time}}",
+      "afterLastBusUnknown": "오늘 운행 종료",
+      "headwayEstimate": "실시간 위치 확인 안 됨 · 보통 약 {{minutes}}분 간격"
     },
     "directions": {
       "button": "경로찾기",
@@ -303,6 +307,7 @@
       "walkOnly": "도보만",
       "walkAndBus": "도보 + 버스",
       "walkAndBusRoute": "도보 + {{route}}",
+      "walkAndBusTransferRoute": "도보 + {{routeA}} → {{routeB}}",
       "noBusOption": "두 지점을 잇는 버스 노선이 없어요.",
       "busEtaApprox": "버스 구간 시간은 추정치예요",
       "originGpsLabel": "내 현재 위치",
@@ -313,6 +318,7 @@
       "arrived": "도착했어요",
       "navWalkToStop": "{{stop}}까지 도보",
       "navBoardBus": "{{route}} 탑승 → {{stop}}까지",
+      "navTransferBus": "{{route}}(으)로 환승 → {{stop}}까지",
       "navWalkToDestination": "{{destination}}까지 도보",
       "navTotalRemaining": "총 {{duration}}",
       "recenter": "내 위치로 다시 맞추기"

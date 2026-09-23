@@ -4,6 +4,7 @@ import { auth } from './auth/resource'
 import { data } from './data/resource'
 import { storage } from './storage/resource'
 import { logBusArrivalsFn } from './data/log-bus-arrivals/resource'
+import { computeBusScheduleStatsFn } from './data/compute-bus-schedule-stats/resource'
 import { getFriendScheduleFn } from './data/get-friend-schedule/resource'
 import { findUserByEmailFn } from './data/find-user-by-email/resource'
 import { getThreadAnonLabelsFn } from './data/get-thread-anon-labels/resource'
@@ -13,6 +14,7 @@ const backend = defineBackend({
   data,
   storage,
   logBusArrivalsFn,
+  computeBusScheduleStatsFn,
   getFriendScheduleFn,
   findUserByEmailFn,
   getThreadAnonLabelsFn,
@@ -26,6 +28,18 @@ const backend = defineBackend({
 const logBusArrivalsLambda = backend.logBusArrivalsFn.resources.lambda as LambdaFunction
 logBusArrivalsLambda.addEnvironment('GRAPHQL_ENDPOINT', backend.data.graphqlUrl)
 logBusArrivalsLambda.addEnvironment('GRAPHQL_API_KEY', backend.data.apiKey ?? '')
+
+// compute-bus-schedule-stats writes RouteScheduleStat the same apiKey way as above (it also
+// reads a row back first to decide create vs. update — see its handler.ts), but reads
+// BusStopArrival directly off DynamoDB instead of through GraphQL/apiKey: a full-table scan
+// with a date-range filter has no equivalent as a generated AppSync query, the same reason
+// get-friend-schedule/get-thread-anon-labels below go straight to DynamoDB for their reads.
+const computeBusScheduleStatsLambda = backend.computeBusScheduleStatsFn.resources.lambda as LambdaFunction
+computeBusScheduleStatsLambda.addEnvironment('GRAPHQL_ENDPOINT', backend.data.graphqlUrl)
+computeBusScheduleStatsLambda.addEnvironment('GRAPHQL_API_KEY', backend.data.apiKey ?? '')
+const busStopArrivalTable = backend.data.resources.tables['BusStopArrival']
+busStopArrivalTable.grantReadData(computeBusScheduleStatsLambda)
+computeBusScheduleStatsLambda.addEnvironment('BUS_STOP_ARRIVAL_TABLE_NAME', busStopArrivalTable.tableName)
 
 // get-friend-schedule needs to read ClassEntry (a friend's schedule) and Friendship
 // rows for a user other than the caller, which ClassEntry's allow.owner()-only auth

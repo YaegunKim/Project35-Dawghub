@@ -71,7 +71,10 @@ export function BuildingAutocomplete({ value, onChange, buildingNames, placehold
         <S.List role="listbox">
           {matches.map((name, index) => (
             <S.Option
-              key={name}
+              // Index, not just name — ugaBuildingsData.json has genuine same-name buildings
+              // at different locations (e.g. more than one building literally named
+              // "Greenhouse 1" on the agricultural side of campus), so name alone isn't unique.
+              key={`${name}-${index}`}
               role="option"
               aria-selected={index === highlightedIndex}
               $highlighted={index === highlightedIndex}

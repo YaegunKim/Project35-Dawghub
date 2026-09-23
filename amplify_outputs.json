@@ -86,6 +86,91 @@
                 ]
               }
             },
+            "category": {
+              "name": "category",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "courseCode": {
+              "name": "courseCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "dormBuilding": {
+              "name": "dormBuilding",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "moveInDate": {
+              "name": "moveInDate",
+              "isArray": false,
+              "type": "AWSDate",
+              "isRequired": false,
+              "attributes": []
+            },
+            "moveOutDate": {
+              "name": "moveOutDate",
+              "isArray": false,
+              "type": "AWSDate",
+              "isRequired": false,
+              "attributes": []
+            },
+            "monthlyRent": {
+              "name": "monthlyRent",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "eventDate": {
+              "name": "eventDate",
+              "isArray": false,
+              "type": "AWSDate",
+              "isRequired": false,
+              "attributes": []
+            },
+            "eventStartTime": {
+              "name": "eventStartTime",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "eventEndTime": {
+              "name": "eventEndTime",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "eventLocation": {
+              "name": "eventLocation",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "externalLink": {
+              "name": "externalLink",
+              "isArray": false,
+              "type": "AWSURL",
+              "isRequired": false,
+              "attributes": []
+            },
+            "tags": {
+              "name": "tags",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
             "createdAt": {
               "name": "createdAt",
               "isArray": false,
@@ -200,6 +285,208 @@
           },
           "syncable": true,
           "pluralName": "Comments",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "provider": "userPools",
+                    "ownerField": "owner",
+                    "allow": "owner",
+                    "identityClaim": "cognito:username",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  },
+                  {
+                    "allow": "private",
+                    "operations": [
+                      "read"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
+        "PostLike": {
+          "name": "PostLike",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "postId": {
+              "name": "postId",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "PostLikes",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "provider": "userPools",
+                    "ownerField": "owner",
+                    "allow": "owner",
+                    "identityClaim": "cognito:username",
+                    "operations": [
+                      "create",
+                      "update",
+                      "delete",
+                      "read"
+                    ]
+                  },
+                  {
+                    "allow": "private",
+                    "operations": [
+                      "read"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
+        },
+        "MarketplaceListing": {
+          "name": "MarketplaceListing",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "title": {
+              "name": "title",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "description": {
+              "name": "description",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "price": {
+              "name": "price",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": true,
+              "attributes": []
+            },
+            "category": {
+              "name": "category",
+              "isArray": false,
+              "type": {
+                "enum": "MarketplaceListingCategory"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "condition": {
+              "name": "condition",
+              "isArray": false,
+              "type": {
+                "enum": "MarketplaceListingCondition"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "status": {
+              "name": "status",
+              "isArray": false,
+              "type": {
+                "enum": "MarketplaceListingStatus"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "photoKeys": {
+              "name": "photoKeys",
+              "isArray": true,
+              "type": "String",
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            },
+            "sellerEmail": {
+              "name": "sellerEmail",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "MarketplaceListings",
           "attributes": [
             {
               "type": "model",
@@ -643,6 +930,141 @@
             "primaryKeyFieldName": "id",
             "sortKeyFieldNames": []
           }
+        },
+        "RouteScheduleStat": {
+          "name": "RouteScheduleStat",
+          "fields": {
+            "id": {
+              "name": "id",
+              "isArray": false,
+              "type": "ID",
+              "isRequired": true,
+              "attributes": []
+            },
+            "routeName": {
+              "name": "routeName",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true,
+              "attributes": []
+            },
+            "kind": {
+              "name": "kind",
+              "isArray": false,
+              "type": {
+                "enum": "RouteScheduleStatKind"
+              },
+              "isRequired": false,
+              "attributes": []
+            },
+            "weekday": {
+              "name": "weekday",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "hour": {
+              "name": "hour",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "firstDepartureMinute": {
+              "name": "firstDepartureMinute",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "lastArrivalMinute": {
+              "name": "lastArrivalMinute",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "cycleCount": {
+              "name": "cycleCount",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            },
+            "medianHeadwayMinutes": {
+              "name": "medianHeadwayMinutes",
+              "isArray": false,
+              "type": "Float",
+              "isRequired": false,
+              "attributes": []
+            },
+            "segmentStatsJson": {
+              "name": "segmentStatsJson",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "computedAt": {
+              "name": "computedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": true,
+              "attributes": []
+            },
+            "createdAt": {
+              "name": "createdAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            },
+            "updatedAt": {
+              "name": "updatedAt",
+              "isArray": false,
+              "type": "AWSDateTime",
+              "isRequired": false,
+              "attributes": [],
+              "isReadOnly": true
+            }
+          },
+          "syncable": true,
+          "pluralName": "RouteScheduleStats",
+          "attributes": [
+            {
+              "type": "model",
+              "properties": {}
+            },
+            {
+              "type": "auth",
+              "properties": {
+                "rules": [
+                  {
+                    "allow": "public",
+                    "provider": "apiKey",
+                    "operations": [
+                      "create",
+                      "update",
+                      "read"
+                    ]
+                  },
+                  {
+                    "allow": "private",
+                    "operations": [
+                      "read"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "primaryKeyInfo": {
+            "isCustomPrimaryKey": false,
+            "primaryKeyFieldName": "id",
+            "sortKeyFieldNames": []
+          }
         }
       },
       "enums": {
@@ -656,6 +1078,34 @@
             "EVENTS"
           ]
         },
+        "MarketplaceListingCategory": {
+          "name": "MarketplaceListingCategory",
+          "values": [
+            "TEXTBOOKS",
+            "FURNITURE",
+            "ELECTRONICS",
+            "CLOTHING",
+            "TICKETS",
+            "OTHER"
+          ]
+        },
+        "MarketplaceListingCondition": {
+          "name": "MarketplaceListingCondition",
+          "values": [
+            "NEW",
+            "LIKE_NEW",
+            "GOOD",
+            "FAIR"
+          ]
+        },
+        "MarketplaceListingStatus": {
+          "name": "MarketplaceListingStatus",
+          "values": [
+            "ACTIVE",
+            "RESERVED",
+            "SOLD"
+          ]
+        },
         "FriendshipStatus": {
           "name": "FriendshipStatus",
           "values": [
@@ -663,6 +1113,13 @@
             "ACCEPTED",
             "DECLINED",
             "BLOCKED"
+          ]
+        },
+        "RouteScheduleStatKind": {
+          "name": "RouteScheduleStatKind",
+          "values": [
+            "WEEKDAY",
+            "HOUR"
           ]
         }
       },
@@ -1174,6 +1631,80 @@
               "attributes": []
             }
           }
+        },
+        "CourseCatalogEntry": {
+          "name": "CourseCatalogEntry",
+          "fields": {
+            "found": {
+              "name": "found",
+              "isArray": false,
+              "type": "Boolean",
+              "isRequired": false,
+              "attributes": []
+            },
+            "courseCode": {
+              "name": "courseCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "creditHours": {
+              "name": "creditHours",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "description": {
+              "name": "description",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "prerequisites": {
+              "name": "prerequisites",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            }
+          }
+        },
+        "ThreadAnonLabel": {
+          "name": "ThreadAnonLabel",
+          "fields": {
+            "commentId": {
+              "name": "commentId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": false,
+              "attributes": []
+            },
+            "anonNumber": {
+              "name": "anonNumber",
+              "isArray": false,
+              "type": "Int",
+              "isRequired": false,
+              "attributes": []
+            }
+          }
+        },
+        "ThreadAnonLabelsResult": {
+          "name": "ThreadAnonLabelsResult",
+          "fields": {
+            "labels": {
+              "name": "labels",
+              "isArray": true,
+              "type": {
+                "nonModel": "ThreadAnonLabel"
+              },
+              "isRequired": false,
+              "attributes": [],
+              "isArrayNullable": true
+            }
+          }
         }
       },
       "queries": {
@@ -1361,9 +1892,68 @@
               "isRequired": true
             }
           }
+        },
+        "getCourseCatalogEntry": {
+          "name": "getCourseCatalogEntry",
+          "isArray": false,
+          "type": {
+            "nonModel": "CourseCatalogEntry"
+          },
+          "isRequired": false,
+          "arguments": {
+            "courseCode": {
+              "name": "courseCode",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
+        },
+        "getThreadAnonLabels": {
+          "name": "getThreadAnonLabels",
+          "isArray": false,
+          "type": {
+            "nonModel": "ThreadAnonLabelsResult"
+          },
+          "isRequired": false,
+          "arguments": {
+            "postId": {
+              "name": "postId",
+              "isArray": false,
+              "type": "String",
+              "isRequired": true
+            }
+          }
         }
       }
     }
+  },
+  "storage": {
+    "aws_region": "us-east-1",
+    "bucket_name": "amplify-project35dawghub--dawghubstoragebucket5179-ntf0k4wrn6yk",
+    "buckets": [
+      {
+        "name": "dawghubStorage",
+        "bucket_name": "amplify-project35dawghub--dawghubstoragebucket5179-ntf0k4wrn6yk",
+        "aws_region": "us-east-1",
+        "paths": {
+          "marketplace-photos/${cognito-identity.amazonaws.com:sub}/*": {
+            "entityidentity": [
+              "get",
+              "list",
+              "write",
+              "delete"
+            ]
+          },
+          "marketplace-photos/*": {
+            "authenticated": [
+              "get",
+              "list"
+            ]
+          }
+        }
+      }
+    ]
   },
   "version": "1.5"
 }

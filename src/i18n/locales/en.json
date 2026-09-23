@@ -283,7 +283,11 @@
       "arrivalEtaMinutes": "~{{count}} min",
       "back": "Back to routes",
       "favorite": "Favorite this route",
-      "busesActive": "{{count}} buses active"
+      "busesActive": "{{count}} buses active",
+      "beforeFirstBus": "First bus ~{{time}}",
+      "afterLastBusKnown": "Ended today · next {{weekday}} ~{{time}}",
+      "afterLastBusUnknown": "Service ended for today",
+      "headwayEstimate": "No live signal · usually every ~{{minutes}} min"
     },
     "directions": {
       "button": "Directions",
@@ -303,6 +307,7 @@
       "walkOnly": "Walk only",
       "walkAndBus": "Walk + Bus",
       "walkAndBusRoute": "Walk + {{route}}",
+      "walkAndBusTransferRoute": "Walk + {{routeA}} → {{routeB}}",
       "noBusOption": "No bus route connects these two points.",
       "busEtaApprox": "Bus timing is an estimate",
       "originGpsLabel": "My current location",
@@ -313,6 +318,7 @@
       "arrived": "You've arrived",
       "navWalkToStop": "Walk to {{stop}}",
       "navBoardBus": "Take {{route}} to {{stop}}",
+      "navTransferBus": "Transfer to {{route}}, ride to {{stop}}",
       "navWalkToDestination": "Walk to {{destination}}",
       "navTotalRemaining": "{{duration}} total",
       "recenter": "Re-center on my location"

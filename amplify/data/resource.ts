@@ -355,6 +355,47 @@ const schema = a.schema({
       longitude: a.float(),
     })
     .authorization((allow) => [allow.publicApiKey().to(['create']), allow.authenticated().to(['read'])]),
+
+  // Precomputed rollups of BusStopArrival, refreshed once a day by compute-bus-schedule-stats
+  // (see that function's own handler.ts for how each stat is derived). Reading the raw log
+  // directly from the map/directions UI would mean pulling weeks of rows client-side on every
+  // popup open — this table is the "answer" instead, small enough (routeCount × ~31 rows) to
+  // read in full for one route. Two row shapes share the table, told apart by `kind`:
+  // - 'WEEKDAY' (id `${routeName}#weekday#${0-6}`): firstDepartureMinute/lastArrivalMinute/
+  //   cycleCount for that weekday — service hours genuinely differ by weekday at UGA (compare
+  //   the *Night and Weekender-suffixed route codes in passio.ts), so this can't be pooled
+  //   across weekdays.
+  // - 'HOUR' (id `${routeName}#hour#${0-23}`): medianHeadwayMinutes/segmentStatsJson pooled
+  //   across every logged weekday at that hour — with only a few weeks of history, splitting
+  //   by weekday AND hour would leave nearly every cell under busStats.ts's MIN_SAMPLES;
+  //   time-of-day (traffic, between-class boarding volume) is the dominant driver of segment
+  //   pace, so pooling across weekdays trades a little weekday-specific accuracy for a sample
+  //   size that's actually usable this early.
+  RouteScheduleStat: a
+    .model({
+      routeName: a.string().required(),
+      kind: a.enum(['WEEKDAY', 'HOUR']),
+      weekday: a.integer(),
+      hour: a.integer(),
+      firstDepartureMinute: a.float(),
+      lastArrivalMinute: a.float(),
+      cycleCount: a.integer(),
+      medianHeadwayMinutes: a.float(),
+      // JSON-encoded SegmentHourStat[] (see busScheduleStats.ts) — a.model has no "array of
+      // embedded object" field type, only refs to other models, which would be overkill for
+      // a handful of {fromStopId,toStopId,medianDurationSeconds,sampleCount} entries per row.
+      segmentStatsJson: a.string(),
+      computedAt: a.datetime().required(),
+    })
+    // Not sensitive (it's a public bus schedule rollup), so the write-side apiKey is also
+    // allowed to read — mainly so this table can be spot-checked directly (e.g. curl with the
+    // apiKey) without needing a signed-in Cognito session. compute-bus-schedule-stats itself
+    // upserts by trying `update` first and falling back to `create` only when that 404s
+    // (id doesn't exist yet) — see its handler.ts — rather than reading each row first.
+    .authorization((allow) => [
+      allow.publicApiKey().to(['create', 'update', 'read']),
+      allow.authenticated().to(['read']),
+    ]),
 })
 
 export type Schema = ClientSchema<typeof schema>
