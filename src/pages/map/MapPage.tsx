@@ -52,6 +52,7 @@ import {
   useBusLayerPrefs,
 } from '../../lib/mapLayerPrefs'
 import { computeStopArrivals, fetchUgaBuses, fetchUgaRoutesAndStops, type PassioBus, type PassioRoute } from '../../lib/passio'
+import { formatClockTime } from '../../lib/busStats'
 import {
   campusRelevantAthensRouteIds as computeCampusRelevantAthensRouteIds,
   fetchAthensBuses,
@@ -460,7 +461,7 @@ function LayerChecklistModal({
 }
 
 export function MapPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navRouteLocation = useLocation()
   const navRouteNavigate = useNavigate()
   // Captured once at mount — the Dining tab's "See Location"/"Get Directions" buttons navigate
@@ -2400,6 +2401,12 @@ export function MapPage() {
   function formatDuration(seconds: number): string {
     return t('map.directions.minutes', { count: Math.max(1, Math.round(seconds / 60)) })
   }
+  // A trip option's totalDurationSeconds is already "from right now," so the absolute arrival
+  // time is just the rider's own device clock plus that duration — no Athens-timezone handling
+  // needed (see formatClockTime's own comment on why).
+  function formatArriveAt(totalDurationSeconds: number): string {
+    return t('map.directions.arriveAt', { time: formatClockTime(new Date(Date.now() + totalDurationSeconds * 1000), i18n.language) })
+  }
 
   // The step text shown in the navigation HUD for whichever leg is currently active. A walk
   // leg's target differs depending on what follows it — the upcoming stop if a bus leg is
@@ -2613,7 +2620,8 @@ export function MapPage() {
                   <S.TripOptionText>
                     <S.TripOptionDuration>{formatDuration(tripPlan.walkOnly.totalDurationSeconds)}</S.TripOptionDuration>
                     <S.TripOptionMeta>
-                      {t('map.directions.walkOnly')} · {formatDistance(tripPlan.walkOnly.totalDistanceMeters)}
+                      {t('map.directions.walkOnly')} · {formatDistance(tripPlan.walkOnly.totalDistanceMeters)} ·{' '}
+                      {formatArriveAt(tripPlan.walkOnly.totalDurationSeconds)}
                     </S.TripOptionMeta>
                   </S.TripOptionText>
                 </S.TripOptionRowContent>
@@ -2652,7 +2660,7 @@ export function MapPage() {
                           : walkBusLegs.length === 1
                             ? t('map.directions.walkAndBusRoute', { route: walkBusLegs[0].routeName })
                             : t('map.directions.walkAndBus')}{' '}
-                        · {formatDistance(tripPlan.walkBus.totalDistanceMeters)}
+                        · {formatDistance(tripPlan.walkBus.totalDistanceMeters)} · {formatArriveAt(tripPlan.walkBus.totalDurationSeconds)}
                       </S.TripOptionMeta>
                       <S.TripOptionApproxNote>{t('map.directions.busEtaApprox')}</S.TripOptionApproxNote>
                     </S.TripOptionText>
@@ -2705,7 +2713,8 @@ export function MapPage() {
               {navRemaining && (
                 <S.NavHudMeta>
                   {formatDistance(navRemaining.distanceMeters)} ·{' '}
-                  {t('map.directions.navTotalRemaining', { duration: formatDuration(navRemaining.durationSeconds) })}
+                  {t('map.directions.navTotalRemaining', { duration: formatDuration(navRemaining.durationSeconds) })} ·{' '}
+                  {formatArriveAt(navRemaining.durationSeconds)}
                 </S.NavHudMeta>
               )}
 

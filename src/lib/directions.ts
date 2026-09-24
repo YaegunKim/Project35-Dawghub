@@ -1,7 +1,7 @@
 import { client } from './amplifyClient'
 import { haversineDistanceMeters, type LatLng } from './geo'
-import { computeStopArrivals, type PassioBus, type PassioRoute, type RouteStop } from './passio'
-import { estimateBusLegDurationSeconds, estimateWaitSeconds, fetchRouteScheduleStats, type RouteScheduleStats } from './busScheduleStats'
+import { type PassioBus, type PassioRoute, type RouteStop } from './passio'
+import { estimateBusLegDurationSeconds, estimateLiveWaitSeconds, estimateWaitSeconds, fetchRouteScheduleStats, type RouteScheduleStats } from './busScheduleStats'
 
 export type { LatLng }
 
@@ -291,27 +291,20 @@ function estimateCandidateSeconds(candidate: Candidate, statsByRoute: Map<string
   return seconds
 }
 
-// Wait time for a hop's own boarding stop: a live bus actually on its way there (computeStopArrivals'
-// real GPS-position ETA, same source the map's stop popups use) is more accurate than any
-// historical average, so it wins when available. Falls back to the historical headway-based
-// estimate otherwise — including always, for a transfer's *second* hop, since there's no way
-// to know which specific vehicle will be at the transfer stop by the time the rider gets there.
+// Wait time for a hop's own boarding stop: a live bus actually on its way there
+// (estimateLiveWaitSeconds — busScheduleStats.ts, walks the bus's real current position forward
+// leg by leg using historical per-segment pace) is more accurate than any flat historical
+// average, so it wins when available. Falls back to the historical headway-based estimate
+// otherwise — including always, for a transfer's *second* hop, since there's no way to know
+// which specific vehicle will be at the transfer stop by the time the rider gets there.
 function hopWaitSeconds(
   hop: BusHop,
   buses: PassioBus[],
   stats: RouteScheduleStats | null,
   nowIso: string,
 ): number {
-  if (buses.length > 0) {
-    const arrivals = computeStopArrivals(
-      { id: hop.fromStop.id, name: hop.fromStop.name, color: hop.route.color, latitude: hop.fromStop.latitude, longitude: hop.fromStop.longitude },
-      [hop.route],
-      buses,
-    )
-    const liveEtaSeconds = arrivals[0]?.etaSeconds
-    if (liveEtaSeconds != null) return liveEtaSeconds
-  }
-  return estimateWaitSeconds(stats, nowIso, BUS_WAIT_ESTIMATE_SECONDS)
+  const liveWaitSeconds = estimateLiveWaitSeconds(hop.route, buses, hop.fromStop, stats, nowIso)
+  return liveWaitSeconds ?? estimateWaitSeconds(stats, nowIso, BUS_WAIT_ESTIMATE_SECONDS)
 }
 
 function sumOption(kind: TripOption['kind'], legs: TripLeg[]): TripOption {

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { StopArrival } from '../../../lib/passio'
 import { fetchRouteScheduleStats, getServiceState, type RouteScheduleStats } from '../../../lib/busScheduleStats'
-import { formatMinuteOfDay } from '../../../lib/busStats'
+import { formatClockTime, formatMinuteOfDay } from '../../../lib/busStats'
 import { WEEKDAY_I18N_KEYS } from '../../../lib/dining'
 import { S } from './MapStopPopup.style'
 
@@ -46,7 +46,7 @@ function fallbackEtaLabel(
 }
 
 export function MapStopPopup({ stopName, getArrivals }: MapStopPopupProps) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [arrivals, setArrivals] = useState(getArrivals)
   const [nowIso, setNowIso] = useState(() => new Date().toISOString())
 
@@ -111,7 +111,10 @@ export function MapStopPopup({ stopName, getArrivals }: MapStopPopupProps) {
                 <S.Eta $running={etaSeconds != null}>
                   {etaSeconds == null
                     ? fallbackEtaLabel(t, statsByRoute.get(route.name) ?? null, nowIso)
-                    : t('map.bus.arrivalEtaMinutes', { count: Math.max(1, Math.round(etaSeconds / 60)) })}
+                    : t('map.bus.arrivalEtaWithClock', {
+                        count: Math.max(1, Math.round(etaSeconds / 60)),
+                        time: formatClockTime(new Date(Date.now() + etaSeconds * 1000), i18n.language),
+                      })}
                 </S.Eta>
               </S.RouteRow>
             ))}

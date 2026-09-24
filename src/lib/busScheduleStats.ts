@@ -8,7 +8,7 @@
 // the last one, or a temporary hole in Passio's own reporting.
 import { client } from './amplifyClient'
 import { athensDayOfWeek, athensMinuteOfDay } from './busStats'
-import { AVERAGE_BUS_SPEED_METERS_PER_SECOND } from './passio'
+import { AVERAGE_BUS_SPEED_METERS_PER_SECOND, distanceAlongLoopMeters, locateBusOnRoute, type PassioBus, type PassioRoute } from './passio'
 
 export type SegmentHourStat = {
   fromStopId: string
@@ -189,6 +189,62 @@ export function estimateBusLegDurationSeconds(
 
   const totalSegments = coveredSegments + missingSegments
   return coveredSeconds + (missingSegments / totalSegments) * fallbackTotalSeconds
+}
+
+// A live bus's wait, tracked all the way to the boarding stop rather than as one flat
+// distance/speed guess (see AVERAGE_BUS_SPEED_METERS_PER_SECOND) — locateBusOnRoute (passio.ts)
+// already knows which stop-to-stop leg a bus is currently on and how far through it, so "how
+// long until it reaches fromStop" is that leg's own remaining share plus every full leg after
+// it, each timed with the same per-hour historical medians estimateBusLegDurationSeconds
+// already sums for a plain historical estimate. This only anchors *where* that summation starts
+// to the bus's real current position instead of always starting fresh from fromStop — so the
+// live signal keeps informing the estimate for the whole rest of the bus's approach, not just
+// an initial crow-flies distance. Returns null when no live bus on this route can be located
+// (no buses on it at all, or a degenerate route locateBusOnRoute itself can't place one on).
+export function estimateLiveWaitSeconds(
+  route: PassioRoute,
+  buses: PassioBus[],
+  fromStop: { id: string },
+  stats: RouteScheduleStats | null,
+  nowIso: string,
+): number | null {
+  const routeBuses = buses.filter((bus) => bus.route === route.name)
+  if (routeBuses.length === 0) return null
+
+  const fromIndex = route.stops.findIndex((stop) => stop.id === fromStop.id)
+  if (fromIndex === -1) return null
+
+  const flatPoints = route.segments.flat()
+  let best: number | null = null
+
+  routeBuses.forEach((bus) => {
+    const location = locateBusOnRoute(route, bus)
+    if (!location) return
+
+    const nextStopIndex = (location.legIndex + 1) % route.stops.length
+    const legFromStop = route.stops[location.legIndex]
+    const legToStop = route.stops[nextStopIndex]
+    const legDistanceMeters = distanceAlongLoopMeters(flatPoints, legFromStop.polylineIndex, legToStop.polylineIndex)
+    const legDurationSeconds = estimateBusLegDurationSeconds(stats, route.stops, legFromStop.id, legToStop.id, nowIso, legDistanceMeters)
+    const remainingInLegSeconds = legDurationSeconds * (1 - location.progress)
+
+    const waitSeconds =
+      nextStopIndex === fromIndex
+        ? remainingInLegSeconds
+        : remainingInLegSeconds +
+          estimateBusLegDurationSeconds(
+            stats,
+            route.stops,
+            legToStop.id,
+            fromStop.id,
+            nowIso,
+            distanceAlongLoopMeters(flatPoints, legToStop.polylineIndex, route.stops[fromIndex].polylineIndex),
+          )
+
+    if (best == null || waitSeconds < best) best = waitSeconds
+  })
+
+  return best
 }
 
 // E[wait] for a rider arriving at a random moment is half the headway, the standard estimate

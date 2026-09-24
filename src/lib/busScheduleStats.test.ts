@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { estimateBusLegDurationSeconds, estimateWaitSeconds, getServiceState, type RouteScheduleStats } from './busScheduleStats'
-import { AVERAGE_BUS_SPEED_METERS_PER_SECOND } from './passio'
+import { estimateBusLegDurationSeconds, estimateLiveWaitSeconds, estimateWaitSeconds, getServiceState, type RouteScheduleStats } from './busScheduleStats'
+import { AVERAGE_BUS_SPEED_METERS_PER_SECOND, type PassioBus, type PassioRoute } from './passio'
 
 // 2026-09-02T02:00:00.000Z is Wednesday 22:00 in America/New_York (UTC-4, EDT) — same reference
 // point style busStats.test.ts uses, so a fixed instant always maps to a known Athens-local
@@ -127,6 +127,69 @@ describe('estimateBusLegDurationSeconds', () => {
     }
     const seconds = estimateBusLegDurationSeconds(loopStats, routeStops.slice(0, 3), 'C', 'A', WED_1000, 400)
     expect(seconds).toBe(75)
+  })
+})
+
+describe('estimateLiveWaitSeconds', () => {
+  // Nine points, evenly spaced 0.25° of longitude apart along the equator (lat 0, so degrees
+  // of longitude convert to meters with no latitude distortion) — two 4-sub-segment legs,
+  // A(idx0)->B(idx4)->C(idx8), giving locateBusOnRoute exact grid points to snap to instead of
+  // only the stops themselves.
+  const points: [number, number][] = Array.from({ length: 9 }, (_, i) => [0, i * 0.25])
+  const route: PassioRoute = {
+    id: 'route-1',
+    name: 'ROUTE',
+    color: '#000',
+    code: 'R',
+    segments: [points],
+    stops: [
+      { id: 'A', name: 'A', latitude: 0, longitude: 0, polylineIndex: 0 },
+      { id: 'B', name: 'B', latitude: 0, longitude: 1, polylineIndex: 4 },
+      { id: 'C', name: 'C', latitude: 0, longitude: 2, polylineIndex: 8 },
+    ],
+  }
+  const stats: RouteScheduleStats = {
+    routeName: 'ROUTE',
+    weekday: emptyWeekday(),
+    hour: [
+      {
+        hour: 10,
+        medianHeadwayMinutes: null,
+        segments: [
+          { fromStopId: 'A', fromStopName: 'A', toStopId: 'B', toStopName: 'B', medianDurationSeconds: 100, sampleCount: 5 },
+          { fromStopId: 'B', fromStopName: 'B', toStopId: 'C', toStopName: 'C', medianDurationSeconds: 200, sampleCount: 5 },
+          { fromStopId: 'C', fromStopName: 'C', toStopId: 'A', toStopName: 'A', medianDurationSeconds: 300, sampleCount: 5 },
+        ],
+      },
+    ],
+  }
+  function busAt(longitude: number): PassioBus {
+    return { id: 'bus-1', route: 'ROUTE', color: '#000', latitude: 0, longitude, course: 0 }
+  }
+
+  it("scales the current leg's historical duration by how much of it the bus has already covered", () => {
+    // Bus sits exactly halfway between A and B — half of A->B's historical 100s should remain.
+    const seconds = estimateLiveWaitSeconds(route, [busAt(0.5)], { id: 'B' }, stats, WED_1000)
+    expect(seconds).toBeCloseTo(50, 0)
+  })
+
+  it("adds every full leg after the bus's current one when the boarding stop is further along", () => {
+    // Bus is 3/4 through B->C (200s historical => 50s left), then a full C->A leg (300s) to
+    // finish the lap and reach A.
+    const seconds = estimateLiveWaitSeconds(route, [busAt(1.75)], { id: 'A' }, stats, WED_1000)
+    expect(seconds).toBeCloseTo(350, 0)
+  })
+
+  it('returns null when no live bus is on this route', () => {
+    const unrelatedBus: PassioBus = { id: 'bus-2', route: 'OTHER', color: '#000', latitude: 0, longitude: 0.5, course: 0 }
+    expect(estimateLiveWaitSeconds(route, [unrelatedBus], { id: 'B' }, stats, WED_1000)).toBeNull()
+  })
+
+  it('picks the soonest of several live buses on the same route', () => {
+    const nearBus = busAt(0.75) // 3/4 through A->B — little left
+    const farBus = busAt(0.25) // 1/4 through A->B — most of the leg still ahead
+    const seconds = estimateLiveWaitSeconds(route, [farBus, nearBus], { id: 'B' }, stats, WED_1000)
+    expect(seconds).toBeCloseTo(25, 0) // 100 * (1 - 3/4)
   })
 })
 

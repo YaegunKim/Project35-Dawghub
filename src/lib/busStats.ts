@@ -120,6 +120,15 @@ export function formatMinuteOfDay(minute: number): string {
   return `${hour}:${String(m).padStart(2, '0')}${h24 < 12 ? 'am' : 'pm'}`
 }
 
+// The rider's own device clock — unlike athensMinuteOfDay above (which exists so a developer's
+// build machine in a different timezone still buckets correctly against Athens-local historical
+// data), an absolute ETA is only ever shown to someone actually using the app, physically on
+// campus in Athens on their own phone — so the plain local wall clock, in whichever language
+// they've set, is what they expect to see, not a forced Athens/English rendering.
+export function formatClockTime(date: Date, locale: string): string {
+  return date.toLocaleTimeString(locale, { hour: 'numeric', minute: '2-digit' })
+}
+
 export function computeStopWeekdayStats(rows: ArrivalRow[], stopOrder: RouteStop[]): StopWeekdayStats[] {
   const minutesByStopAndDay = new Map<string, number[][]>()
 
